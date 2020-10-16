@@ -1,6 +1,10 @@
 package client
 
-import "github.com/eclipse/paho.mqtt.golang/packets"
+import (
+	"errors"
+
+	"github.com/eclipse/paho.mqtt.golang/packets"
+)
 
 // 0x00 - Success - Maximum QoS 0
 // 0x01 - Success - Maximum QoS 1
@@ -19,19 +23,22 @@ const (
 )
 
 // SendSuback will send an SUBACK-Package
-func (evt *Event) SendSuback(ReturnCodes []byte) (accepted bool) {
+func (evt *Event) SendSuback(ReturnCodes []byte) (err error) {
 
 	// convert
 	subscr, ok := evt.Packet.(*packets.SubscribePacket)
 	if ok == false {
+		err = errors.New("Package is not packets.SubscribePacket")
 		return
 	}
 
-	subAck := packets.NewControlPacket(packets.Suback).(*packets.SubackPacket)
-	subAck.MessageID = subscr.MessageID
-	subAck.ReturnCodes = ReturnCodes
+	// construct the package
+	suback := packets.NewControlPacket(packets.Suback).(*packets.SubackPacket)
+	suback.MessageID = subscr.MessageID
+	suback.ReturnCodes = ReturnCodes
 
-	subAck.Write(evt.Client.connection)
+	// send it
+	err = suback.Write(evt.Client.connection)
 
 	return
 }

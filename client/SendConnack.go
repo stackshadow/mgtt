@@ -19,11 +19,14 @@ const (
 )
 
 // SendConnack will send an CONACK-Package to the client
-func (client *MgttClient) SendConnack(ReturnCode byte) (accepted bool) {
+func (client *MgttClient) SendConnack(ReturnCode byte) (err error) {
 
+	// construct the package
 	conAck := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
 	conAck.ReturnCode = ReturnCode
-	conAck.Write(client.connection)
+
+	// send it
+	err = conAck.Write(client.connection)
 
 	return
 }

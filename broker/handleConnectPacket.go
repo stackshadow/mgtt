@@ -10,40 +10,41 @@ import (
 )
 
 func (broker *Broker) handleConnectPacket(event *client.Event) (err error) {
+
+	// check package
 	packet, ok := event.Packet.(*packets.ConnectPacket)
 	if ok == false {
-		log.Error().Str("clientid", event.Client.ID()).Msg("Expected ConnectPacket")
-		return
+		err = errors.New("Package is not packets.ConnectPacket")
 	}
 
 	// set the client id
 	event.Client.IDSet(packet.ClientIdentifier)
 
-	log.Debug().
-		Str("clientid", event.Client.ID()).
-		Msg("RCV ConnectPacket")
-
 	// MQTT-3.1.0-2
 	// Check if the client is already connected
-	if _, exists := broker.clients[event.Client.ID()]; exists == true {
-		err = errors.New("Protocol violation")
-		return
+	if err == nil { // prevent multiple return
+		if _, exists := broker.clients[event.Client.ID()]; exists == true {
+			err = errors.New("Protocol violation")
+		}
 	}
 
 	// PLUGINS: call CallOnAcceptNewClient - check if we accept the client
-	accepted := plugin.CallOnAcceptNewClient(event.Client.ID(), packet.Username, string(packet.Password))
-	if accepted == false {
-		log.Error().Str("clientid", event.Client.ID()).Msg("Client not accepted by plugin")
-		event.Client.SendConnack(client.ConnackUnauthorized)
-		return
+	if err == nil { // prevent multiple return
+		accepted := plugin.CallOnAcceptNewClient(event.Client.ID(), packet.Username, string(packet.Password))
+		if accepted == false {
+			err = event.Client.SendConnack(client.ConnackUnauthorized)
+			err = errors.New("Client not accepted by plugin")
+		}
 	}
 
 	// add client to the list
-	log.Info().Str("clientid", event.Client.ID()).Msg("Add new client to client-list")
-	broker.clients[event.Client.ID()] = event.Client
+	if err == nil { // prevent multiple return
+		log.Info().Str("clientid", event.Client.ID()).Msg("Add new client to client-list")
+		broker.clients[event.Client.ID()] = event.Client
 
-	// send CONACK
-	event.Client.SendConnack(client.ConnackAccepted)
+		// send CONACK
+		err = event.Client.SendConnack(client.ConnackAccepted)
+	}
 
 	return
 }

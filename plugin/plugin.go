@@ -9,7 +9,9 @@ type V1 struct {
 	// if this function return false, the client will not added to the known-client-list and get disconnected with return code "not authorized"
 	OnAcceptNewClient func(clientID string, username string, password string) bool
 
-	OnSubscriptionRequest func(clientID string, subscriptions string) bool
+	// OnSubscriptionRequest gets called, when an client request an subscription
+	// return false if plugin request an abort of an subscription
+	OnSubscriptionRequest func(clientID string, subscription string) bool
 }
 
 var pluginList map[string]*V1 = make(map[string]*V1)
