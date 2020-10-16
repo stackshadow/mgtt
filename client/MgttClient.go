@@ -3,8 +3,6 @@ package client
 import (
 	"io"
 	"net"
-
-	"github.com/google/uuid"
 )
 
 // MgttClient represents a mqtt-client
@@ -15,17 +13,20 @@ type MgttClient struct {
 	subscriptionTopics []string
 }
 
-// New create a new MgttClient with an new UUID
+// New create a new MgttClient with id of "unknown"
 func New(connection net.Conn) (newClient *MgttClient) {
-	// set a new UUID for the client
-	newUUID := uuid.New()
 
 	newClient = &MgttClient{
-		id:         newUUID.String(),
+		id:         "unknown",
 		connection: connection,
 	}
 
 	return
+}
+
+// IDSet set the clientID
+func (c *MgttClient) IDSet(id string) {
+	c.id = id
 }
 
 // ID return the id of an MgttClient

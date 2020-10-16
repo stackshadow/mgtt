@@ -34,6 +34,9 @@ func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (err error) {
 	for _, subscriptionTopic := range c.subscriptionTopics {
 		subscriptionTopicArray := strings.Split(subscriptionTopic, "/")
 
+		// [MQTT-3.3.2-3]
+		// The Topic Name in a PUBLISH Packet sent by a Server to a subscribing Client
+		// MUST match the Subscription’s Topic Filter
 		if match(subscriptionTopicArray, topicArray) == true {
 			log.Info().
 				Str("clientid", c.ID()).
