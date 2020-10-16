@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// StoreRetainedTopic will save payload to the "retainedTopics"-Bucket to topic
-func (store *Store) StoreRetainedTopic(packet *packets.PublishPacket) (err error) {
+// StorePacket will store an published-packet in a bucket
+func (store *Store) StorePacket(bucket string, packet *packets.PublishPacket) (err error) {
 
 	// topic
 	topic := packet.TopicName
@@ -21,7 +21,7 @@ func (store *Store) StoreRetainedTopic(packet *packets.PublishPacket) (err error
 
 	// save it to the db
 	err = store.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("retainedTopics"))
+		b := tx.Bucket([]byte(bucket))
 		err = b.Put([]byte(topic), payload)
 		return err
 	})

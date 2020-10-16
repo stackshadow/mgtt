@@ -37,7 +37,7 @@ func (broker *Broker) handleSubscribePacket(event *client.Event) (err error) {
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client
 	if err == nil { // prevent multiple return
-		broker.retainedMessages.IterateRetainedTopics(func(retainedPacket *packets.PublishPacket) {
+		broker.retainedMessages.IteratePackets("retained", func(retainedPacket *packets.PublishPacket) {
 			for _, client := range broker.clients {
 
 				// [MQTT-3.3.1-8]

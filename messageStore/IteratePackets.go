@@ -7,12 +7,12 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
-// IterateRetainedTopics will call the iterate-function for every retained topic
-func (store *Store) IterateRetainedTopics(iterate func(packet *packets.PublishPacket)) (err error) {
+// IteratePackets will iterate published-packet in a bucket
+func (store *Store) IteratePackets(bucket string, iterate func(packet *packets.PublishPacket)) (err error) {
 
 	store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
-		b := tx.Bucket([]byte("retainedTopics"))
+		b := tx.Bucket([]byte(bucket))
 
 		c := b.Cursor()
 
