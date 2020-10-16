@@ -2,6 +2,7 @@ package broker
 
 import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/rs/zerolog/log"
 )
 
 // Communicate will handle incoming messages
@@ -10,20 +11,32 @@ import (
 func (broker *Broker) Communicate() {
 	for {
 		event := <-broker.clientEvents
+
+		log.Debug().
+			Uint16("mid", event.Packet.Details().MessageID).
+			Uint8("Qos", event.Packet.Details().Qos).
+			Str("packet", event.Packet.String()).
+			Msg("Received packet")
+
+		var err error = nil
 		switch event.Packet.(type) {
 
 		case *packets.ConnectPacket:
-			broker.handleConnectPacket(event)
+			err = broker.handleConnectPacket(event)
 
 		case *packets.SubscribePacket:
-			broker.handleSubscribePacket(event)
+			err = broker.handleSubscribePacket(event)
 
 		case *packets.PingreqPacket:
-			broker.handlePingreqPacket(event)
+			err = broker.handlePingreqPacket(event)
 
 		case *packets.PublishPacket:
-			broker.handlePublishPacket(event)
+			err = broker.handlePublishPacket(event)
 
+		}
+
+		if err != nil {
+			log.Error().Err(err).Send()
 		}
 
 	}

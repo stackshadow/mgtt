@@ -1,39 +1,51 @@
 package broker
 
 import (
+	"errors"
+
 	"github.com/eclipse/paho.mqtt.golang/packets"
-	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
 )
 
 func (broker *Broker) handlePublishPacket(event *client.Event) (err error) {
+
+	// check package
 	packet, ok := event.Packet.(*packets.PublishPacket)
 	if ok == false {
-		log.Error().Str("clientid", event.Client.ID()).Msg("Expected SubscribePacket")
+		err = errors.New("Package is not packets.PublishPacket")
 		return
 	}
 
-	// retain message ?
-	if packet.Retain == true {
+	// Handle QoS-1 - Acknowledged delivery
+	if packet.Qos == client.SubackQoS1 {
+		// we ignore the returned err by purpose
+		event.SendPuback()
+	}
 
-		// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
-		// [MQTT-3.3.1-11]  A zero byte retained message MUST NOT be stored as a retained message on the Server.
-		if len(packet.Payload) == 0 {
-			broker.retainedMessages.DeleteRetainedIfExist(packet.TopicName)
-		} else {
+	if err == nil { // prevent multiple return
+		// retain message ?
+		if packet.Retain == true {
 
-			// [MQTT-3.3.1-5]
-			broker.retainedMessages.StoreRetainedTopic(packet)
+			// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
+			// [MQTT-3.3.1-11] A zero byte retained message MUST NOT be stored as a retained message on the Server.
+			if len(packet.Payload) == 0 {
+				err = broker.retainedMessages.DeleteRetainedIfExist(packet.TopicName)
+			} else {
+
+				// [MQTT-3.3.1-5]
+				err = broker.retainedMessages.StoreRetainedTopic(packet)
+			}
 		}
 	}
 
 	// [MQTT-3.3.1-9]
 	// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a
 	// Client because it matches an established subscription
-
-	packet.Retain = false
-	for _, client := range broker.clients {
-		client.Publish(packet)
+	if err == nil { // prevent multiple return
+		packet.Retain = false
+		for _, client := range broker.clients {
+			err = client.Publish(packet)
+		}
 	}
 
 	return

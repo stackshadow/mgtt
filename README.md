@@ -18,7 +18,7 @@ This project aim's NOT to be feature-complete MQTT-Broker. It's should just be a
 - [ ] Local subsribe with callback
 - [ ] Unsubscribe
 - [x] QoS 0 messages
-- [ ] QoS 1 messages
+- [x] QoS 1 messages
 - [ ] QoS 2 messages
 - [x] Retained messages stored on [boltdb](https://github.com/boltdb/bolt) on disk
 - [ ] Will messages
