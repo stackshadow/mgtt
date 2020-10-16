@@ -33,6 +33,8 @@ func (broker *Broker) Communicate() {
 		case *packets.PublishPacket:
 			err = broker.handlePublishPacket(event)
 
+		case *packets.PubackPacket:
+			err = broker.handlePubacPacket(event)
 		}
 
 		if err != nil {

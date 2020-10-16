@@ -15,11 +15,6 @@ func Open() (store *Store, err error) {
 
 	store.db, err = bolt.Open("messages.db", 0600, nil)
 
-	store.db.Update(func(tx *bolt.Tx) error {
-		_, err = tx.CreateBucketIfNotExists([]byte("retainedTopics"))
-		return err
-	})
-
 	return
 }
 

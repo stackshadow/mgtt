@@ -2,7 +2,9 @@ package broker
 
 import (
 	"net"
+	"time"
 
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
 	messagestore "gitlab.com/mgtt/messageStore"
@@ -23,6 +25,7 @@ func Serve(config Config) (broker *Broker, err error) {
 		return
 	}
 
+	// incoming clients
 	go func() {
 		var serverListener net.Listener
 		serverListener, err = net.Listen("tcp", config.URL)
@@ -52,6 +55,31 @@ func Serve(config Config) (broker *Broker, err error) {
 					delete(broker.clients, newClient.ID())
 				}()
 			}
+		}
+	}()
+
+	// retrys
+	go func() {
+
+		for {
+
+			// wait a bit
+			time.Sleep(time.Minute * 1)
+
+			// check if we need to resend messages that are not replyed with PUBACK
+			log.Debug().Msg("Check if we packets we should resend")
+			broker.retainedMessages.IteratePackets("resend", func(retainedPacket *packets.PublishPacket) {
+				for _, client := range broker.clients {
+
+					// [MQTT-3.3.1-8]
+					// When sending a PUBLISH Packet to a Client the Server MUST set the RETAIN flag to 1
+					// if a message is sent as a result of a new subscription being made by a Client.
+					retainedPacket.Retain = true
+
+					client.Publish(retainedPacket)
+				}
+			})
+
 		}
 	}()
 

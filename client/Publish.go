@@ -26,7 +26,7 @@ func match(route []string, topic []string) bool {
 	return false
 }
 
-func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (err error) {
+func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (published bool, err error) {
 
 	topic := pubpacket.TopicName
 	topicArray := strings.Split(topic, "/")
@@ -45,6 +45,7 @@ func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (err error) {
 				Msg("Publish message to client")
 
 			err = pubpacket.Write(c.connection)
+			published = true
 			return
 		}
 

@@ -10,9 +10,12 @@ import (
 // IteratePackets will iterate published-packet in a bucket
 func (store *Store) IteratePackets(bucket string, iterate func(packet *packets.PublishPacket)) (err error) {
 
-	store.db.View(func(tx *bolt.Tx) error {
+	err = store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
 		b := tx.Bucket([]byte(bucket))
+		if b == nil {
+			return nil
+		}
 
 		c := b.Cursor()
 
