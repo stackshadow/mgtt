@@ -9,11 +9,11 @@ type Store struct {
 }
 
 // Open will open the DB and create needed buckets
-func Open() (store *Store, err error) {
+func Open(dbPath string) (store *Store, err error) {
 
 	store = &Store{}
 
-	store.db, err = bolt.Open("messages.db", 0600, nil)
+	store.db, err = bolt.Open(dbPath, 0600, nil)
 
 	return
 }

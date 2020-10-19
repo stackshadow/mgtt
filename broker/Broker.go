@@ -12,6 +12,8 @@ type Broker struct {
 	// clientEvents are raw incoming events qos=0 qos=1 qos=2
 	clientEvents chan *client.Event
 
+	// lastID of our messages
+	lastID uint16
 	// pending events are messages with qos=1 qos=2
 	pendingEvents map[uint16]*client.Event
 

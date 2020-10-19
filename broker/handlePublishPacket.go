@@ -2,7 +2,6 @@ package broker
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
@@ -27,11 +26,18 @@ func (broker *Broker) handlePublishPacket(event *client.Event) (err error) {
 			if len(packet.Payload) == 0 {
 				err = broker.retainedMessages.DeletePacketWithTopic("retained", packet.TopicName)
 			} else {
-
 				// [MQTT-3.3.1-5]
-				err = broker.retainedMessages.StorePacket("retained", packet.TopicName, packet)
+				err = broker.retainedMessages.StorePacketWithTopic("retained", packet.TopicName, packet)
 			}
 		}
+	}
+
+	// Handle QoS-1/2 - Reserve ID
+	if packet.Qos == client.SubackQoS1 || packet.Qos == client.SubackQoS2 {
+		// we need a new ID
+		broker.lastID++
+		broker.lastID, err = broker.retainedMessages.StorePacketWithID("resend", broker.lastID, nil)
+		packet.MessageID = broker.lastID
 	}
 
 	// Publish to all clients
@@ -39,16 +45,18 @@ func (broker *Broker) handlePublishPacket(event *client.Event) (err error) {
 	// [MQTT-3.3.1-9]
 	// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a
 	// Client because it matches an established subscription
-	var messagedelivered bool
+	var published bool
+	var messagedelivered bool = true
 	if err == nil { // prevent multiple return
 		packet.Retain = false
+
 		for _, client := range broker.clients {
-			var published bool
 			published, err = client.Publish(packet)
 			messagedelivered = messagedelivered || published
 		}
 	}
 
+	// no message delivered
 	if messagedelivered == false {
 		log.Info().
 			Str("topic", packet.TopicName).
@@ -61,7 +69,9 @@ func (broker *Broker) handlePublishPacket(event *client.Event) (err error) {
 
 		// store packet
 		if messagedelivered == true {
-			err = broker.retainedMessages.StorePacket("resend", fmt.Sprintf("%d", packet.MessageID), packet)
+			broker.lastID, err = broker.retainedMessages.StorePacketWithID("resend", packet.MessageID, packet)
+		} else {
+			broker.retainedMessages.DeletePacketWithID("resend", packet.MessageID)
 		}
 
 		if packet.Qos == client.SubackQoS1 {

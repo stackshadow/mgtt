@@ -14,13 +14,13 @@ import (
 func Serve(config Config) (broker *Broker, err error) {
 
 	broker = &Broker{
-		clients:       make(map[string]*client.MgttClient),
-		clientEvents:  make(chan *client.Event, 10),
-		pendingEvents: make(map[uint16]*client.Event),
+		clients:         make(map[string]*client.MgttClient),
+		clientEvents:    make(chan *client.Event, 10),
+		brokerMessageID: make(map[uint16]uint16),
 	}
 
 	// retainedMessages-db
-	broker.retainedMessages, err = messagestore.Open()
+	broker.retainedMessages, err = messagestore.Open("messages.db")
 	if err != nil {
 		return
 	}
@@ -67,7 +67,7 @@ func Serve(config Config) (broker *Broker, err error) {
 			time.Sleep(time.Minute * 1)
 
 			// check if we need to resend messages that are not replyed with PUBACK
-			log.Debug().Msg("Check if we packets we should resend")
+			log.Debug().Msg("Check for packets we should resend")
 			broker.retainedMessages.IteratePackets("resend", func(retainedPacket *packets.PublishPacket) {
 				for _, client := range broker.clients {
 

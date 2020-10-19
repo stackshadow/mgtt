@@ -2,14 +2,16 @@ package messagestore
 
 import (
 	"bytes"
+	"errors"
 
 	"github.com/boltdb/bolt"
 	"github.com/eclipse/paho.mqtt.golang/packets"
-	"github.com/rs/zerolog/log"
 )
 
-// StorePacket will store an published-packet in a bucket
-func (store *Store) StorePacket(bucket string, id string, packet *packets.PublishPacket) (err error) {
+// storePacket will store an published-packet in a bucket
+//
+// If the id already exist an error will be returned
+func (store *Store) storePacket(bucket string, key []byte, packet *packets.PublishPacket) (err error) {
 
 	// payload
 	writer := bytes.NewBuffer([]byte{})
@@ -18,24 +20,24 @@ func (store *Store) StorePacket(bucket string, id string, packet *packets.Publis
 
 	// save it to the db
 	err = store.db.Update(func(tx *bolt.Tx) error {
+
+		// get bucket
 		var b *bolt.Bucket
 		b, err = tx.CreateBucketIfNotExists([]byte(bucket))
-		err = b.Put([]byte(id), payload)
+		if b == nil {
+			return nil
+		}
+
+		// only save if not exist
+		existingPacket := b.Get(key)
+		if existingPacket != nil {
+			err = errors.New("Packet already exist in bucket, can not be overwritten")
+		} else {
+			err = b.Put(key, payload)
+		}
+
 		return err
 	})
-
-	if err != nil {
-		log.Debug().
-			Str("id", id).
-			Str("bucket", bucket).
-			Err(err).
-			Msg("Can not store payload to retained-store")
-	} else {
-		log.Debug().
-			Str("id", id).
-			Str("bucket", bucket).
-			Msg("Stored payload to retained-store")
-	}
 
 	return
 }
