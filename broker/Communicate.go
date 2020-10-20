@@ -13,13 +13,13 @@ func (broker *Broker) Communicate() {
 		event := <-broker.clientEvents
 
 		log.Debug().
-			Uint16("mid", event.Packet.Details().MessageID).
-			Uint8("Qos", event.Packet.Details().Qos).
-			Str("packet", event.Packet.String()).
+			Uint16("mid", event.packet.Details().MessageID).
+			Uint8("Qos", event.packet.Details().Qos).
+			Str("packet", event.packet.String()).
 			Msg("Received packet")
 
 		var err error = nil
-		switch event.Packet.(type) {
+		switch event.packet.(type) {
 
 		case *packets.ConnectPacket:
 			err = broker.handleConnectPacket(event)
@@ -35,6 +35,12 @@ func (broker *Broker) Communicate() {
 
 		case *packets.PubackPacket:
 			err = broker.handlePubacPacket(event)
+
+		case *packets.PubrecPacket:
+			err = broker.handlePubrecPacket(event)
+
+		case *packets.PubrelPacket:
+			err = broker.handlePubrelPacket(event)
 		}
 
 		if err != nil {

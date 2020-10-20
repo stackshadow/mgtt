@@ -8,10 +8,10 @@ import (
 	"gitlab.com/mgtt/plugin"
 )
 
-func (broker *Broker) handleSubscribePacket(event *client.Event) (err error) {
+func (broker *Broker) handleSubscribePacket(event *Event) (err error) {
 
 	// check package
-	packet, ok := event.Packet.(*packets.SubscribePacket)
+	packet, ok := event.packet.(*packets.SubscribePacket)
 	if ok == false {
 		err = errors.New("Expected SubscribePacket")
 		return
@@ -23,16 +23,16 @@ func (broker *Broker) handleSubscribePacket(event *client.Event) (err error) {
 		qos := packet.Qoss[topicIndex]
 
 		// call plugins
-		if plugin.CallOnSubscriptionRequest(event.Client.ID(), topic) == true {
+		if plugin.CallOnSubscriptionRequest(event.client.ID(), topic) == true {
 			topicResuls = append(topicResuls, qos)
-			event.Client.SubScriptionAdd(topic)
+			event.client.SubScriptionAdd(topic)
 		} else {
 			topicResuls = append(topicResuls, client.SubackErr)
 		}
 	}
 
 	// thats all, respond
-	event.SendSuback(topicResuls)
+	event.client.SendSuback(packet, topicResuls)
 
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client

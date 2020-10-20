@@ -1,8 +1,6 @@
 package client
 
 import (
-	"errors"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
@@ -23,22 +21,15 @@ const (
 )
 
 // SendSuback will send an SUBACK-Package
-func (evt *Event) SendSuback(ReturnCodes []byte) (err error) {
-
-	// convert
-	subscr, ok := evt.Packet.(*packets.SubscribePacket)
-	if ok == false {
-		err = errors.New("Package is not packets.SubscribePacket")
-		return
-	}
+func (client *MgttClient) SendSuback(packet *packets.SubscribePacket, ReturnCodes []byte) (err error) {
 
 	// construct the package
 	suback := packets.NewControlPacket(packets.Suback).(*packets.SubackPacket)
-	suback.MessageID = subscr.MessageID
+	suback.MessageID = packet.MessageID
 	suback.ReturnCodes = ReturnCodes
 
 	// send it
-	err = suback.Write(evt.Client.connection)
+	err = suback.Write(client.connection)
 
 	return
 }
