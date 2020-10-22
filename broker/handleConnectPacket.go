@@ -39,6 +39,11 @@ func (broker *Broker) handleConnectPacket(event *Event) (err error) {
 
 	// add client to the list
 	if err == nil { // prevent multiple return
+
+		// store the username
+		event.client.UsernameSet(packet.Username)
+
+		//
 		log.Info().Str("clientid", event.client.ID()).Msg("Add new client to client-list")
 		broker.clients[event.client.ID()] = event.client
 

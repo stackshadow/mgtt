@@ -16,7 +16,7 @@ func (broker *Broker) Communicate() {
 			Uint16("mid", event.packet.Details().MessageID).
 			Uint8("Qos", event.packet.Details().Qos).
 			Str("packet", event.packet.String()).
-			Msg("Received packet")
+			Msg("Handle packet")
 
 		var err error = nil
 		switch event.packet.(type) {
@@ -41,6 +41,10 @@ func (broker *Broker) Communicate() {
 
 		case *packets.PubrelPacket:
 			err = broker.handlePubrelPacket(event)
+
+		case *packets.PubcompPacket:
+			err = broker.handlePubcompPacket(event)
+
 		}
 
 		if err != nil {

@@ -35,8 +35,9 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 		}
 	}
 
-	//  QoS-1/2 - Store package
-	if (publishPacket.Qos == client.SubackQoS1 || publishPacket.Qos == client.SubackQoS2) && publishPacket.Dup == false {
+	//  QoS1/QoS2 - Store package only if its from a real client
+	if event.client != nil && (publishPacket.Qos == client.SubackQoS1 || publishPacket.Qos == client.SubackQoS2) && publishPacket.Dup == false {
+
 		// we need a new ID
 		broker.lastIDLock.Lock()
 
@@ -47,7 +48,12 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 			Packet:          publishPacket,
 		}
 
-		err = broker.retainedMessages.StoreResendPacket("resend", &options)
+		// on QoS-2, not released yet
+		if publishPacket.Qos == client.SubackQoS1 {
+			err = broker.retainedMessages.StoreResendPacket("resend", &options)
+		} else {
+			err = broker.retainedMessages.StoreResendPacket("unreleased", &options)
+		}
 
 		// because we stored the original message with the original messageID, we can now manipulate it
 		broker.lastID = options.BrokerMessageID
@@ -55,46 +61,44 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 		broker.lastIDLock.Unlock()
 	}
 
+	if publishPacket.Qos == client.SubackQoS2 {
+		if event.client != nil {
+			event.client.SendPubrec(publishPacketID)
+		}
+		return
+	}
+
 	// Publish to all clients
-	//
-	// [MQTT-3.3.1-9]
-	// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a Client
-	// because it matches an established subscription
 	var published bool
-	var messagedelivered bool = true
-	if err == nil { // prevent multiple return
+	var messagedelivered bool
+	if err == nil {
+
+		// [MQTT-3.3.1-9]
+		// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a Client
+		// because it matches an established subscription
 		publishPacket.Retain = false
 
 		for _, client := range broker.clients {
 			published, err = client.Publish(publishPacket)
 			messagedelivered = messagedelivered || published
 		}
-	}
 
-	// no message delivered
-	if messagedelivered == false {
-		log.Info().
-			Str("topic", publishPacket.TopicName).
-			Uint16("mid", publishPacket.MessageID).
-			Msg("Nobody is interested in this message")
-	}
-
-	// Handle QoS-1/2
-	if (publishPacket.Qos == client.SubackQoS1 || publishPacket.Qos == client.SubackQoS2) && publishPacket.Dup == false {
-
-		if messagedelivered == true {
-			if publishPacket.Qos == client.SubackQoS1 {
-				// we ignore the returned err by purpose
-				event.client.SendPuback(publishPacketID)
-			}
-			if publishPacket.Qos == client.SubackQoS2 {
-				// we ignore the returned err by purpose
-				event.client.SendPubrec(publishPacketID)
-			}
+		// no message delivered
+		if messagedelivered == false {
+			log.Info().
+				Str("topic", publishPacket.TopicName).
+				Uint16("mid", publishPacket.MessageID).
+				Msg("Nobody is interested in this message")
 		} else {
 			broker.retainedMessages.DeletePacketWithID("resend", publishPacket.MessageID)
 		}
 
+	}
+
+	if publishPacket.Qos == client.SubackQoS1 {
+		if event.client != nil {
+			event.client.SendPuback(publishPacketID)
+		}
 	}
 
 	return

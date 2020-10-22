@@ -10,4 +10,8 @@ type CLICommon struct {
 // CLI is the overall cli-struct
 var CLI struct {
 	CLICommon
+
+	URL      string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:1883"`
+	CertFile string `help:"The certificate to use for TLS. If not set, TLS is disabled"  env:"CERT" default:"cert.pem"`
+	Keyfile  string `help:"The private key to use for TLS"  env:"KEY" default:"key.pem"`
 }

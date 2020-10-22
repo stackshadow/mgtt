@@ -28,7 +28,6 @@ func Test_Store(t *testing.T) {
 
 	option := StoreResendPacketOption{
 		BrokerMessageID: 0,
-		ClientID:        "client1",
 		ResendAt:        time.Now().Add(time.Minute * 1),
 		Packet:          newPacket,
 	}

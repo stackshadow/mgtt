@@ -1,7 +1,10 @@
 package broker
 
 import (
+	"crypto/tls"
+	"fmt"
 	"net"
+	"net/url"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -26,12 +29,43 @@ func Serve(config Config) (broker *Broker, err error) {
 
 	// incoming clients
 	go func() {
+		var serverURL *url.URL
+		serverURL, err = url.Parse(config.URL)
 		var serverListener net.Listener
-		serverListener, err = net.Listen("tcp", config.URL)
-		if err != nil {
-			log.Error().Err(err).Send()
-			return
+
+		// check schema
+		if serverURL.Scheme != "tcp" {
+			err = fmt.Errorf("Unsupported scheme '%s'", serverURL.Scheme)
 		}
+
+		// start listener
+		if err == nil {
+
+			if config.CertFile == "" {
+				serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
+
+			} else {
+				var cert tls.Certificate
+				cert, err = tls.LoadX509KeyPair(config.CertFile, config.Keyfile)
+				cfg := &tls.Config{
+					Certificates:       []tls.Certificate{cert},
+					InsecureSkipVerify: true,
+				}
+				serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), cfg)
+			}
+
+		}
+
+		if err == nil {
+			if config.CertFile == "" {
+				log.Info().Str("listen", serverURL.Host).Bool("tls", false).Msg("Listening")
+			} else {
+				log.Info().Str("listen", serverURL.Host).Bool("tls", true).Msg("Listening")
+			}
+		} else {
+			log.Fatal().Err(err).Send()
+		}
+
 		for {
 
 			// wait for a new client
@@ -64,6 +98,10 @@ func Serve(config Config) (broker *Broker, err error) {
 						}
 
 						broker.clientEvents <- &newEvent
+					}
+
+					if err != nil {
+						log.Error().Err(err).Send()
 					}
 
 					log.Info().Str("clientid", newClient.ID()).Msg("Remove client from client-list")

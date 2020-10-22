@@ -7,7 +7,7 @@ import (
 
 // DeletePacketWithTopic will delete an published-packet in a bucket if it exist
 //
-// this function only return an error Returns an error if the bucket was
+// this function only return an error if the bucket was
 // created from a read-only transaction
 func (store *Store) DeletePacketWithTopic(bucket string, id string) (err error) {
 

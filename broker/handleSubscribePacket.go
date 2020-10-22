@@ -23,7 +23,7 @@ func (broker *Broker) handleSubscribePacket(event *Event) (err error) {
 		qos := packet.Qoss[topicIndex]
 
 		// call plugins
-		if plugin.CallOnSubscriptionRequest(event.client.ID(), topic) == true {
+		if plugin.CallOnSubscriptionRequest(event.client.ID(), event.client.Username(), topic) == true {
 			topicResuls = append(topicResuls, qos)
 			event.client.SubScriptionAdd(topic)
 		} else {

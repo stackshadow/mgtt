@@ -5,6 +5,6 @@ type Config struct {
 	// the MQTT-Port
 	URL string
 
-	// the MQTTS-Port
-	URLTLS string
+	CertFile string
+	Keyfile  string
 }

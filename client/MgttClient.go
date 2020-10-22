@@ -8,6 +8,7 @@ import (
 // MgttClient represents a mqtt-client
 type MgttClient struct {
 	id         string
+	username   string
 	connection io.ReadWriter
 
 	subscriptionTopics []string

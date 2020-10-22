@@ -20,7 +20,7 @@ type StoreResendPacketOption struct {
 }
 
 type packetInfo struct {
-	ClientID   string    `json:"s"`
+	ClientID   string    `json:"c,omitempty"`
 	ResendAt   time.Time `json:"t"`
 	PacketData []byte    `json:"p"` // this should not be set from outside, it will be overwritten
 }

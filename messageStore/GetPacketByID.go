@@ -9,8 +9,8 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
-// IterateResendPackets will iterate packages that are stored with StoreResendPacket()
-func (store *Store) GetResendPacket(bucket string, brokerMessageID uint16) (storedInfo *StoreResendPacketOption, err error) {
+// GetPacketByID return the package by id
+func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (storedInfo *StoreResendPacketOption, err error) {
 
 	err = store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
