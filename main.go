@@ -35,11 +35,11 @@ func init() {
 
 	// we check if key is set and exist
 	// if not exist, we create a key for you :)
-	if cli.CLI.Keyfile != "" {
-		if _, err := os.Stat(cli.CLI.Keyfile); err != nil {
+	if cli.CLI.KeyFile != "" {
+		if _, err := os.Stat(cli.CLI.KeyFile); err != nil {
 
 			// open keyfile
-			keyOut, err := os.OpenFile(cli.CLI.Keyfile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+			keyOut, err := os.OpenFile(cli.CLI.KeyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to open key for writing")
 			}
@@ -70,7 +70,7 @@ func init() {
 		if _, err := os.Stat(cli.CLI.CertFile); err != nil {
 
 			// open keyfile
-			privKeyData, err := ioutil.ReadFile(cli.CLI.Keyfile)
+			privKeyData, err := ioutil.ReadFile(cli.CLI.KeyFile)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to open key for writing")
 			}
@@ -129,7 +129,7 @@ func main() {
 		broker.Config{
 			URL:      cli.CLI.URL,
 			CertFile: cli.CLI.CertFile,
-			Keyfile:  cli.CLI.Keyfile,
+			KeyFile:  cli.CLI.KeyFile,
 		},
 	)
 	newBroker.Communicate()

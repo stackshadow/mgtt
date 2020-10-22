@@ -1,0 +1,29 @@
+sequenceDiagram
+    Publisher->>Publisher: Store Message
+    Publisher->>Broker: PUBLISH
+    Broker->>Broker: Store Message to "unreleased"
+    Broker->>Publisher: PUBREC
+
+    Publisher->>Broker: PUBREL
+    Broker->>Broker: Move Message from "unreleased" to "retry"
+
+    Broker->>Subscriber: PUBLISH
+    rect rgb(255, 255, 200)
+      Broker->>Publisher: PUBCOMP
+    end
+    Note right of Publisher: This is the original one, we don't do this in mGoTT
+    Publisher->>Publisher: Delete Message
+
+    Subscriber->>Subscriber: Store Message
+    Subscriber->>Broker: PUBREC
+    rect rgb(200, 255, 200)
+      Broker->>Publisher: PUBCOMP
+    end
+    Note right of Publisher: We do this ! this ensure that the client got notified when the packet is received by an subscriber
+
+    Broker->>Subscriber: PUBREL
+
+    Subscriber->>Subscriber: Notify
+    Subscriber->>Broker: PUBCOMP
+
+    Broker->>Broker: Delete Message

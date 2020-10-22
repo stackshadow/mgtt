@@ -41,12 +41,13 @@ func Serve(config Config) (broker *Broker, err error) {
 		// start listener
 		if err == nil {
 
+			// non-tls
 			if config.CertFile == "" {
 				serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
 
-			} else {
+			} else { // tls
 				var cert tls.Certificate
-				cert, err = tls.LoadX509KeyPair(config.CertFile, config.Keyfile)
+				cert, err = tls.LoadX509KeyPair(config.CertFile, config.KeyFile)
 				cfg := &tls.Config{
 					Certificates:       []tls.Certificate{cert},
 					InsecureSkipVerify: true,

@@ -6,5 +6,5 @@ type Config struct {
 	URL string
 
 	CertFile string
-	Keyfile  string
+	KeyFile  string
 }
