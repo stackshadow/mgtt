@@ -18,10 +18,6 @@ type Broker struct {
 	lastID     uint16
 	lastIDLock sync.Mutex
 
-	// remember pubrecs
-	// map of broker-Message-ID
-	pubrec map[uint16]*messagestore.StoreResendPacketOption
-
 	// an boltDB to store retained messages
 	retainedMessages *messagestore.Store
 }
