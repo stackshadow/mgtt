@@ -14,4 +14,6 @@ var CLI struct {
 	URL      string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:1883"`
 	CertFile string `help:"The certificate to use for TLS. If not set, TLS is disabled"  env:"CERT" default:"cert.pem"`
 	KeyFile  string `help:"The private key to use for TLS"  env:"KEY" default:"key.pem"`
+
+	DBFilename string `help:"Filename for retained message-db"  env:"DBFILENAME" default:"messages.db"`
 }

@@ -38,6 +38,7 @@ func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (published bool, 
 		// The Topic Name in a PUBLISH Packet sent by a Server to a subscribing Client
 		// MUST match the Subscription’s Topic Filter
 		if match(subscriptionTopicArray, topicArray) == true {
+
 			log.Info().
 				Str("clientid", c.ID()).
 				Uint16("mid", pubpacket.MessageID).

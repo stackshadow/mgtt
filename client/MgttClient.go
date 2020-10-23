@@ -10,6 +10,7 @@ type MgttClient struct {
 	id         string
 	username   string
 	connection io.ReadWriter
+	Connected  bool
 
 	subscriptionTopics []string
 }
