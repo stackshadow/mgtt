@@ -8,7 +8,7 @@ import (
 // Communicate will handle incoming messages
 //
 // - this is a BLOCKING function
-func (broker *Broker) Communicate() {
+func (broker *Broker) loopHandleBrokerPackets() {
 	for {
 		event := <-broker.clientEvents
 
@@ -19,10 +19,22 @@ func (broker *Broker) Communicate() {
 			Msg("Handle packet")
 
 		var err error = nil
-		switch event.packet.(type) {
 
+		switch event.packet.(type) {
 		case *packets.ConnectPacket:
 			err = broker.handleConnectPacket(event)
+		}
+
+		// check if client connects correctly
+		if event.client != nil {
+			if event.client.Connected == false {
+				log.Error().Msg("Client not send an CONECT-Packet")
+				// TODO: Force disconnect of the client
+				continue
+			}
+		}
+
+		switch event.packet.(type) {
 
 		case *packets.SubscribePacket:
 			err = broker.handleSubscribePacket(event)

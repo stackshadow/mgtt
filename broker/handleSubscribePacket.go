@@ -17,7 +17,7 @@ func (broker *Broker) handleSubscribePacket(event *Event) (err error) {
 		return
 	}
 
-	// call CallOnSubscriptionRequest - check if subscription is accepted
+	// PLUGINS: call CallOnSubscriptionRequest - check if subscription is accepted
 	var topicResuls []byte
 	for topicIndex, topic := range packet.Topics {
 		qos := packet.Qoss[topicIndex]
