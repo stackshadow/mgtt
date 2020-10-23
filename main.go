@@ -16,7 +16,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/broker"
 	"gitlab.com/mgtt/cli"
-	parameter "gitlab.com/mgtt/cli"
 )
 
 func init() {
@@ -31,7 +30,7 @@ func init() {
 		kong.Vars{
 			"version": "0.0.1",
 		})
-	parameter.CLI.CLICommon.Debug.AfterApply() // ensure debugger is setuped
+	cli.CLI.CLICommon.Debug.AfterApply() // ensure debugger is setuped
 
 	// we check if key is set and exist
 	// if not exist, we create a key for you :)
@@ -125,14 +124,13 @@ func init() {
 
 func main() {
 
-	newBroker, err := broker.Serve(
+	_, err := broker.Serve(
 		broker.Config{
 			URL:      cli.CLI.URL,
 			CertFile: cli.CLI.CertFile,
 			KeyFile:  cli.CLI.KeyFile,
 		},
 	)
-	newBroker.Communicate()
 
 	if err != nil {
 		log.Error().Err(err).Send()

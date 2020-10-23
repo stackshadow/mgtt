@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
 	messagestore "gitlab.com/mgtt/messageStore"
+	"gitlab.com/mgtt/plugin"
 )
 
 func (broker *Broker) handlePublishPacket(event *Event) (err error) {
@@ -20,19 +21,18 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 	}
 	publishPacketID := publishPacket.MessageID
 
-	if err == nil { // prevent multiple return
-		// retain message ?
-		if publishPacket.Retain == true && publishPacket.Dup == false {
+	// RETAINED-Packet
+	if err == nil && publishPacket.Retain == true && publishPacket.Dup == false { // prevent multiple return
 
-			// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
-			// [MQTT-3.3.1-11] A zero byte retained message MUST NOT be stored as a retained message on the Server.
-			if len(publishPacket.Payload) == 0 {
-				err = broker.retainedMessages.DeletePacketWithTopic("retained", publishPacket.TopicName)
-			} else {
-				// [MQTT-3.3.1-5]
-				err = broker.retainedMessages.StorePacketWithTopic("retained", publishPacket.TopicName, publishPacket)
-			}
+		// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
+		// [MQTT-3.3.1-11] A zero byte retained message MUST NOT be stored as a retained message on the Server.
+		if len(publishPacket.Payload) == 0 {
+			err = broker.retainedMessages.DeletePacketWithTopic("retained", publishPacket.TopicName)
+		} else {
+			// [MQTT-3.3.1-5]
+			err = broker.retainedMessages.StorePacketWithTopic("retained", publishPacket.TopicName, publishPacket)
 		}
+
 	}
 
 	//  QoS1/QoS2 - Store package only if its from a real client
@@ -78,9 +78,12 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 		// because it matches an established subscription
 		publishPacket.Retain = false
 
-		for _, client := range broker.clients {
-			published, err = client.Publish(publishPacket)
-			messagedelivered = messagedelivered || published
+		// PLUGINS: call CallOnPublishRequest - check if publish is accepted
+		if plugin.CallOnPublishRequest(event.client.ID(), event.client.Username(), publishPacket.TopicName) == true {
+			for _, client := range broker.clients {
+				published, err = client.Publish(publishPacket)
+				messagedelivered = messagedelivered || published
+			}
 		}
 
 		// no message delivered
