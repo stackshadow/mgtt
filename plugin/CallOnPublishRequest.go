@@ -12,7 +12,7 @@ func CallOnPublishRequest(clientID string, username string, publishTopic string)
 
 	for pluginName, plugin := range pluginList {
 		if plugin.OnPublishRequest != nil {
-			log.Debug().Str("name", pluginName).Msg("call OnConnect")
+			log.Debug().Str("name", pluginName).Msg("call OnPublishRequest")
 			accepted = accepted && plugin.OnPublishRequest(clientID, username, publishTopic)
 		}
 	}

@@ -13,9 +13,12 @@ type V1 struct {
 	// return false if plugin request an abort of an subscription
 	OnSubscriptionRequest func(clientID string, username string, subscriptionTopic string) bool
 
-	// OnPublishRequest gets called, when an client request an publish
+	// OnPublishRequest gets called before an message will be sended to a subscriber
 	// return false if plugin request an abort of an publish-message
 	OnPublishRequest func(clientID string, username string, publishTopic string) bool
+
+	// OnIncoming get called when an published message arrived from a broker
+	OnIncoming func(clientID string, topic string, payload string)
 }
 
 var pluginList map[string]*V1 = make(map[string]*V1)

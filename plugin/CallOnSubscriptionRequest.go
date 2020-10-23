@@ -12,7 +12,7 @@ func CallOnSubscriptionRequest(clientID string, username string, subscriptionTop
 
 	for pluginName, plugin := range pluginList {
 		if plugin.OnSubscriptionRequest != nil {
-			log.Debug().Str("name", pluginName).Msg("call OnConnect")
+			log.Debug().Str("name", pluginName).Msg("call OnSubscriptionRequest")
 			accepted = accepted && plugin.OnSubscriptionRequest(clientID, username, subscriptionTopic)
 		}
 	}
