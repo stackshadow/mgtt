@@ -29,7 +29,7 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 - [x] QoS 2 messages
 - [x] Retained messages stored on [boltdb](https://github.com/boltdb/bolt) on disk
 - [ ] Will messages
-- [ ] Plugins ( Prepared, on going )
+- [x] Plugins
 - [x] TLS/SSL
 - [ ] Disconnect
 
@@ -40,7 +40,7 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 - [ ] Docker-Compose
 
 ## Plugins
-- [ ] Username/Password auth
+- [x] Username/Password auth
 - [ ] ACL
 - [ ] Metrics
 - [ ] $SYS-Support

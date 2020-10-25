@@ -16,6 +16,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/broker"
 	"gitlab.com/mgtt/cli"
+	"gitlab.com/mgtt/plugins/auth"
 )
 
 func init() {
@@ -128,6 +129,9 @@ func main() {
 	if err != nil {
 		log.Error().Err(err).Send()
 	}
+
+	// register plugins
+	auth.LocalInit()
 
 	err = newbroker.Serve(
 		broker.Config{
