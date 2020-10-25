@@ -124,14 +124,18 @@ func init() {
 
 func main() {
 
-	_, err := broker.Serve(
+	newbroker, err := broker.New()
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
+	err = newbroker.Serve(
 		broker.Config{
 			URL:      cli.CLI.URL,
 			CertFile: cli.CLI.CertFile,
 			KeyFile:  cli.CLI.KeyFile,
 		},
 	)
-
 	if err != nil {
 		log.Error().Err(err).Send()
 	}

@@ -8,24 +8,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
-	messagestore "gitlab.com/mgtt/messageStore"
 )
 
 // Connect will connect to an broker
-func Connect(config Config, username, password string) (broker *Broker, err error) {
-
-	broker = &Broker{
-		clients:      make(map[string]*client.MgttClient),
-		clientEvents: make(chan *Event, 10),
-	}
-
-	// retainedMessages-db
-	broker.retainedMessages, err = messagestore.Open(cli.CLI.DBFilename)
-	if err != nil {
-		return
-	}
+func (broker *Broker) Connect(config Config, username, password string) (err error) {
 
 	// connect to the broker
 	var serverURL *url.URL
@@ -68,6 +55,7 @@ func Connect(config Config, username, password string) (broker *Broker, err erro
 
 	// create the client
 	newClient := client.New(clientListener)
+	newClient.SubScriptionAdd("#")
 
 	// retrys
 	go broker.loopHandleResendPackets()

@@ -7,24 +7,11 @@ import (
 	"net/url"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
-	messagestore "gitlab.com/mgtt/messageStore"
 )
 
 // Serve will create a new broker and wait for clients
-func Serve(config Config) (broker *Broker, err error) {
-
-	broker = &Broker{
-		clients:      make(map[string]*client.MgttClient),
-		clientEvents: make(chan *Event, 10),
-	}
-
-	// retainedMessages-db
-	broker.retainedMessages, err = messagestore.Open(cli.CLI.DBFilename)
-	if err != nil {
-		return
-	}
+func (broker *Broker) Serve(config Config) (err error) {
 
 	// incoming clients
 	go func() {
@@ -79,7 +66,7 @@ func Serve(config Config) (broker *Broker, err error) {
 			// create a new client
 			if err == nil {
 				newClient := client.New(newConnection)
-				log.Info().Str("clientid", newClient.ID()).Msg("New client connected")
+				log.Info().Msg("New client connected")
 
 				// do communication
 				go func() {
