@@ -28,7 +28,7 @@ import (
 
 func TestRetained(t *testing.T) {
 
-	cli.CLI.URL = "tcp://127.0.0.1:1235"
+	cli.CLI.URL = "tcp://127.0.0.1:1236"
 	cli.CLI.CLICommon.Terminal = true
 	cli.CLI.CLICommon.Terminal.AfterApply()
 	cli.CLI.CLICommon.Debug = true

@@ -77,27 +77,7 @@ func (broker *Broker) Connect(config Config, username, password string) (err err
 		return
 	}
 
-	for {
-
-		// new event
-		newEvent := Event{
-			client: newClient,
-		}
-
-		// wait for a packet
-		newEvent.packet, err = newClient.ReadPacket()
-		if err != nil {
-			break
-		}
-
-		broker.clientEvents <- &newEvent
-	}
-
-	if err != nil {
-		log.Error().Err(err).Send()
-	}
-
-	log.Info().Str("clientid", newClient.ID()).Msg("Disconnected")
+	broker.loopReadPackets(newClient)
 
 	return
 }
