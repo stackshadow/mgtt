@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/rs/zerolog/log"
 )
 
 // 0x00 - Success - Maximum QoS 0
@@ -27,6 +28,12 @@ func (client *MgttClient) SendSuback(packet *packets.SubscribePacket, ReturnCode
 	suback := packets.NewControlPacket(packets.Suback).(*packets.SubackPacket)
 	suback.MessageID = packet.MessageID
 	suback.ReturnCodes = ReturnCodes
+
+	log.Debug().
+		Str("cid", client.ID()).
+		Uint16("mid", packet.MessageID).
+		Bytes("return code", ReturnCodes).
+		Msg("Send PUBCOMP")
 
 	// send it
 	err = suback.Write(client.connection)

@@ -1,6 +1,9 @@
 package client
 
-import "github.com/eclipse/paho.mqtt.golang/packets"
+import (
+	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/rs/zerolog/log"
+)
 
 // respond
 // 0x00 	Connection Accepted
@@ -24,6 +27,11 @@ func (client *MgttClient) SendConnack(ReturnCode byte) (err error) {
 	// construct the package
 	conAck := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
 	conAck.ReturnCode = ReturnCode
+
+	log.Debug().
+		Str("cid", client.ID()).
+		Uint8("return code", ReturnCode).
+		Msg("Send CONACK")
 
 	// send it
 	err = conAck.Write(client.connection)
