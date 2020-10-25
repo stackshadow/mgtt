@@ -52,6 +52,11 @@ func (broker *Broker) handleConnectPacket(event *Event) (err error) {
 
 		// send CONACK
 		err = event.client.SendConnack(client.ConnackAccepted)
+
+		// PLUGINS: call CallOnAcceptNewClient - check if we accept the client
+		if err == nil {
+			plugin.CallOnConnected(event.client.ID())
+		}
 	}
 
 	return

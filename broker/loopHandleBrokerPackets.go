@@ -20,6 +20,7 @@ func (broker *Broker) loopHandleBrokerPackets() {
 
 		var err error = nil
 
+		// CONNACK-Packet
 		switch event.packet.(type) {
 		case *packets.ConnectPacket:
 			err = broker.handleConnectPacket(event)

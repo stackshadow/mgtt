@@ -21,6 +21,13 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 	}
 	publishPacketID := publishPacket.MessageID
 
+	// call plugin
+	if event.client != nil { // we can not filter resend-packets
+		if plugin.CallOnPublishRecvRequest(event.client.ID(), publishPacket.TopicName, string(publishPacket.Payload)) == false {
+			return nil
+		}
+	}
+
 	// RETAINED-Packet
 	if err == nil && publishPacket.Retain == true && publishPacket.Dup == false { // prevent multiple return
 
@@ -64,8 +71,9 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 	if publishPacket.Qos == client.SubackQoS2 {
 		if event.client != nil {
 			event.client.SendPubrec(publishPacketID)
+			return
 		}
-		return
+
 	}
 
 	// Publish to all clients
@@ -79,8 +87,8 @@ func (broker *Broker) handlePublishPacket(event *Event) (err error) {
 		publishPacket.Retain = false
 
 		// PLUGINS: call CallOnPublishRequest - check if publish is accepted
-		if plugin.CallOnPublishRequest(event.client.ID(), event.client.Username(), publishPacket.TopicName) == true {
-			for _, client := range broker.clients {
+		for _, client := range broker.clients {
+			if plugin.CallOnPublishSendRequest(client.ID(), client.Username(), publishPacket.TopicName) == true {
 				published, err = client.Publish(publishPacket)
 				messagedelivered = messagedelivered || published
 			}
