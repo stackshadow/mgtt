@@ -4,7 +4,6 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
-	"gitlab.com/mgtt/plugin"
 )
 
 // Communicate will handle incoming messages
@@ -22,15 +21,23 @@ func (broker *Broker) loopHandleClientPackets() {
 
 		var err error = nil
 
+		// CONNACK-Packet
 		switch event.packet.(type) {
 		case *packets.ConnackPacket:
 			err = broker.handleConackPacket(event)
 		}
 
+		// check if client connects correctly
+		if event.client != nil {
+			if event.client.Connected == false {
+				log.Error().Msg("Client not send an CONECT-Packet")
+				continue
+			}
+		}
+
 		switch packet := event.packet.(type) {
 
 		case *packets.PublishPacket:
-			plugin.CallOnIncoming(event.client.ID(), packet.TopicName, string(packet.Payload))
 
 			if packet.Qos == client.SubackQoS1 {
 				event.client.SendPuback(packet.MessageID)
