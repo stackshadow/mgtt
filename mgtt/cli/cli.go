@@ -13,7 +13,7 @@ var CLI struct {
 
 	ConfigPath string `help:"Path where config files are stored. This can be used by plugins"  env:"CONFIGPATH" default:"./"`
 
-	URL      string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:1883"`
+	URL      string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:8883"`
 	CertFile string `help:"The certificate to use for TLS. If not set, TLS is disabled"  env:"CERT" default:"cert.pem"`
 	KeyFile  string `help:"The private key to use for TLS"  env:"KEY" default:"key.pem"`
 
