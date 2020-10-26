@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
 )
 
@@ -66,7 +67,7 @@ func (broker *Broker) Serve(config Config) (err error) {
 
 			// create a new client
 			if err == nil {
-				newClient := client.New(newConnection)
+				newClient := client.New(newConnection, cli.CLI.ConnectTimeout)
 				log.Info().Msg("New client connected")
 
 				// do communication

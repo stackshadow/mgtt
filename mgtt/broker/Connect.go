@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
 )
 
@@ -54,7 +55,7 @@ func (broker *Broker) Connect(config Config, username, password string) (err err
 	}
 
 	// create the client
-	newClient := client.New(clientListener)
+	newClient := client.New(clientListener, cli.CLI.ConnectTimeout)
 	newClient.SubScriptionAdd("#")
 
 	// retrys

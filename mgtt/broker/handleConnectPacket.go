@@ -46,6 +46,9 @@ func (broker *Broker) handleConnectPacket(event *Event) (err error) {
 		// set the client to connected so that the broker will accept other packets from it
 		event.client.Connected = true
 
+		// reset timeout
+		event.client.ResetTimeout()
+
 		// add client to the list
 		log.Info().Str("clientid", event.client.ID()).Msg("Add new client to client-list")
 		broker.clients[event.client.ID()] = event.client
