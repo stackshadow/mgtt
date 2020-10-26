@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  mgtt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      labels:
+        mgtt.version: "0.5.0"
+      network: host
+      shm_size: '2gb'
+      target: prod
+
+    image: mgtt:latest
+    volumes:
+       - data:/data
+    tmpfs:
+      - /run
+      - /tmp
+
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+    restart: always
+
+volumes:
+  data:

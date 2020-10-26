@@ -37,9 +37,9 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 
 - [x] Zerolog with terminal-output and json-output-support
 - [x] Kong command-line-parser with environment-support
-- [ ] Dockerfile
+- [x] Dockerfile
 - [ ] Healthcheck
-- [ ] Docker-Compose
+- [x] Docker-Compose
 
 ## Plugins
 - [x] Username/Password auth
