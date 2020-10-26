@@ -4,13 +4,15 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"log"
+
 	"sync"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/radovskyb/watcher"
+	"github.com/rs/zerolog/log"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -53,10 +55,10 @@ func loadConfig(filename string) (err error) {
 	var fileData []byte
 	fileData, err = ioutil.ReadFile(config.filename)
 	if err != nil {
-		log.Println("Error opening config file:", err)
-		log.Println("Creating default auth.yml file")
+		log.Warn().Err(err).Msg("Error opening config file")
+		log.Info().Msg("Creating default auth.yml file")
 		if err = ioutil.WriteFile(config.filename, []byte(defaultConfigContent), 0664); err != nil {
-			log.Fatalln("Error creating default file:", err)
+			log.Warn().Err(err).Msg("Error creating default file")
 		}
 		fileData = []byte(defaultConfigContent)
 	}
@@ -91,7 +93,7 @@ func watchConfig() (err error) {
 				loadConfig(config.filename)
 
 			case err := <-w.Error:
-				log.Fatalln(err)
+				log.Err(err).Send()
 			case <-w.Closed:
 				return
 			}
@@ -100,7 +102,7 @@ func watchConfig() (err error) {
 
 	// Start the watching process - it'll check for changes every 100ms.
 	if err := w.Start(time.Millisecond * 100); err != nil {
-		log.Fatalln(err)
+		log.Err(err).Send()
 	}
 
 	return
@@ -120,7 +122,7 @@ func passwordAdd(username string, password string) (err error) {
 	confidData, err := yaml.Marshal(config)
 	if err == nil {
 		if err = ioutil.WriteFile(config.filename, confidData, 0664); err != nil {
-			log.Fatalln("Error creating default auth.yml file:", err)
+			log.Err(err).Msg("Error creating default auth.yml file")
 		}
 	}
 
