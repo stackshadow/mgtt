@@ -35,7 +35,7 @@ func (broker *Broker) loopHandleBrokerPackets() {
 			}
 		}
 
-		switch event.packet.(type) {
+		switch recvPacket := event.packet.(type) {
 
 		case *packets.SubscribePacket:
 			err = broker.handleSubscribePacket(event)
@@ -44,7 +44,7 @@ func (broker *Broker) loopHandleBrokerPackets() {
 			err = broker.handlePingreqPacket(event)
 
 		case *packets.PublishPacket:
-			err = broker.handlePublishPacket(event)
+			err = broker.handlePublishPacket(event.client, recvPacket)
 
 		case *packets.PubackPacket:
 			err = broker.handlePubacPacket(event)
