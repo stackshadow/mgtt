@@ -23,7 +23,12 @@ func (broker *Broker) loopReadPackets(Client *client.MgttClient) (err error) {
 		broker.clientEvents <- &newEvent
 	}
 
-	log.Info().Str("clientid", Client.ID()).Msg("Remove client from client-list")
+	log.Info().
+		Str("clientid", Client.ID()).
+		Err(err).
+		Msg("Remove client from client-list")
+
+	Client.Close()
 	delete(broker.clients, Client.ID())
 
 	return

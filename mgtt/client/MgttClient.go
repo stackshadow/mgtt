@@ -1,16 +1,17 @@
 package client
 
 import (
-	"io"
 	"net"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // MgttClient represents a mqtt-client
 type MgttClient struct {
 	id         string
 	username   string
-	connection io.ReadWriter
+	connection net.Conn
 	Connected  bool
 
 	subscriptionTopics []string
@@ -25,15 +26,18 @@ func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
 	}
 
 	// setup timeout
-	connection.SetDeadline(time.Now().Add(time.Second * time.Duration(secondsTimeout)))
+	if secondsTimeout > 0 {
+		log.Debug().Int64("timeout", secondsTimeout).Msg("Set deadline for client")
+		connection.SetDeadline(time.Now().Add(time.Second * time.Duration(secondsTimeout)))
+	}
 
 	return
 }
 
 // ResetTimeout will disable the timeout
 func (c *MgttClient) ResetTimeout() {
-	var connection net.Conn = c.connection.(net.Conn)
-	connection.SetDeadline(time.Time{})
+
+	c.connection.SetDeadline(time.Time{})
 }
 
 // IDSet set the clientID

@@ -1,8 +1,11 @@
 package broker
 
 import (
+	"net"
+	"os"
 	"sync"
 	"testing"
+	"time"
 
 	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/plugin"
@@ -26,6 +29,42 @@ import (
 	fmt.Printf("%s\n", stdoutStderr)
 */
 
+func TestTimeout(t *testing.T) {
+
+	cli.CLI.URL = "tcp://127.0.0.1:1237"
+	cli.CLI.CLICommon.Terminal = true
+	cli.CLI.CLICommon.Terminal.AfterApply()
+	cli.CLI.CLICommon.Debug = true
+	cli.CLI.CLICommon.Debug.AfterApply()
+	cli.CLI.DBFilename = "test1.db"
+	cli.CLI.ConnectTimeout = 1
+
+	// the broker
+	os.Remove(cli.CLI.DBFilename)
+	server, _ := New()
+	go server.Serve(
+		Config{
+			URL:      cli.CLI.URL,
+			CertFile: cli.CLI.CertFile,
+			KeyFile:  cli.CLI.KeyFile,
+		},
+	)
+	time.Sleep(time.Second * 2)
+
+	connection, err := net.Dial("tcp", "127.0.0.1:1237")
+	if err != nil {
+		t.FailNow()
+	}
+
+	msg := make([]byte, 4000)
+
+	_, err = connection.Read(msg)
+	if err == nil {
+		t.FailNow()
+	}
+
+}
+
 func TestRetained(t *testing.T) {
 
 	cli.CLI.URL = "tcp://127.0.0.1:1236"
@@ -36,6 +75,7 @@ func TestRetained(t *testing.T) {
 	cli.CLI.DBFilename = "test1.db"
 
 	// the broker
+	os.Remove(cli.CLI.DBFilename)
 	server, _ := New()
 	go server.Serve(
 		Config{
@@ -44,13 +84,13 @@ func TestRetained(t *testing.T) {
 			KeyFile:  cli.CLI.KeyFile,
 		},
 	)
-	//time.Sleep(time.Millisecond * 500)
 
 	// register an plugin for test-purpose
 	var sendRetained sync.Mutex
 	sendRetained.Lock()
 
 	cli.CLI.DBFilename = "test2.db"
+	os.Remove(cli.CLI.DBFilename)
 	client, _ := New()
 
 	clientPlugin := plugin.V1{
