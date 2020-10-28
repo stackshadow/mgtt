@@ -12,7 +12,7 @@ func CallOnAcceptNewClient(clientID string, username string, password string) (a
 
 	for pluginName, plugin := range pluginList {
 		if plugin.OnAcceptNewClient != nil {
-			log.Debug().Str("name", pluginName).Msg("call OnAcceptNewClient")
+			log.Debug().Str("plugin", pluginName).Msg("call OnAcceptNewClient")
 			accepted = accepted && plugin.OnAcceptNewClient(clientID, username, password)
 		}
 	}

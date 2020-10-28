@@ -10,12 +10,14 @@ import (
 	"io/ioutil"
 	"math/big"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/broker"
 	"gitlab.com/mgtt/cli"
+	"gitlab.com/mgtt/plugins/acl"
 	"gitlab.com/mgtt/plugins/auth"
 )
 
@@ -131,7 +133,12 @@ func main() {
 	}
 
 	// register plugins
-	auth.LocalInit()
+	if strings.Contains(cli.CLI.Plugins, "auth") == true {
+		auth.LocalInit()
+	}
+	if strings.Contains(cli.CLI.Plugins, "acl") == true {
+		acl.LocalInit()
+	}
 
 	err = newbroker.Serve(
 		broker.Config{

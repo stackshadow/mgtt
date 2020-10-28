@@ -21,4 +21,6 @@ var CLI struct {
 
 	// ConnectTimeout holds the timeout in seconds for CONNECT
 	ConnectTimeout int64 `help:"Timeout in seconds for CONNECT. If an client don't send a connect after this time, it will be disconnected" env:"CONNECT_TIMEOUT" default:"30"`
+
+	Plugins string `help:"Name of enabled plugins comma separated"  env:"PLUGINS" default:"auth,acl"`
 }
