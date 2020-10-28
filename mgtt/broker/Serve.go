@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"time"
 
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
@@ -46,41 +48,79 @@ func (broker *Broker) Serve(config Config) (err error) {
 		if config.CertFile == "" {
 			log.Info().Str("listen", serverURL.Host).Bool("tls", false).Msg("Listening")
 		} else {
-			log.Info().Str("listen", serverURL.Host).Bool("tls", true).Msg("Listening")
+			log.Info().Str("listen", serverURL.Host).
+				Bool("tls", true).
+				Str("cert", config.CertFile).
+				Str("key", config.KeyFile).
+				Msg("Listening")
 		}
 	} else {
 		log.Fatal().Err(err).Send()
 	}
 
-	// incoming clients
+	// retrys
+	var retryPackets chan packets.ControlPacket = make(chan packets.ControlPacket, 100)
+	broker.loopHandleResendPackets(retryPackets)
 	go func() {
 
-		for {
+		netserver, _ := net.Pipe()
+		retryClient := client.New(netserver, 0)
+		retryClient.IDSet("resend")
+		retryClient.Connected = true
 
-			// wait for a new client
-			log.Info().Msg("Wait for new client")
-			var newConnection net.Conn
-			newConnection, err = serverListener.Accept()
-			if err != nil {
-				log.Error().Err(err).Msg("not accepted")
+		for {
+			retryPacket := <-retryPackets
+			normalClose, err := broker.loopHandleBrokerPacket(retryClient, retryPacket)
+			if err != nil || normalClose {
+				break
 			}
 
-			// create a new client
-			if err == nil {
+			// a small delay to not flood our clients
+			time.Sleep(time.Millisecond * 500)
+		}
+
+		netserver.Close()
+	}()
+
+	for {
+
+		// wait for a new client
+		log.Info().Msg("Wait for new client")
+		var newConnection net.Conn
+		newConnection, err = serverListener.Accept()
+		if err != nil {
+			log.Error().Err(err).Msg("Accept()")
+		}
+
+		// create a new client
+		if err == nil {
+
+			go func() {
 				newClient := client.New(newConnection, cli.CLI.ConnectTimeout)
 				log.Info().Msg("New client connected")
 
+				// run communicate
+				newClient.Communicate()
+
 				// do communication
-				go broker.loopReadPackets(newClient)
-			}
+				var normalClose bool
+				for {
+					recvdPacket := newClient.GetPacket()
+					normalClose, err = broker.loopHandleBrokerPacket(newClient, recvdPacket)
+					if err != nil || normalClose {
+						break
+					}
+				}
+
+				if err != nil {
+					log.Error().Err(err).Send()
+				}
+				broker.handleDisConnectPacket(newClient)
+				newClient.Close()
+
+			}()
+
 		}
-	}()
+	}
 
-	// retrys
-	go broker.loopHandleResendPackets()
-
-	// handle packets
-	broker.loopHandleBrokerPackets()
-
-	return
 }

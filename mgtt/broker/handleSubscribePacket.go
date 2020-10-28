@@ -1,21 +1,12 @@
 package broker
 
 import (
-	"errors"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/client"
 	"gitlab.com/mgtt/plugin"
 )
 
-func (broker *Broker) handleSubscribePacket(event *Event) (err error) {
-
-	// check package
-	packet, ok := event.packet.(*packets.SubscribePacket)
-	if ok == false {
-		err = errors.New("Expected SubscribePacket")
-		return
-	}
+func (broker *Broker) handleSubscribePacket(connectedClient *client.MgttClient, packet *packets.SubscribePacket) (err error) {
 
 	// PLUGINS: call CallOnSubscriptionRequest - check if subscription is accepted
 	var topicResuls []byte
@@ -23,16 +14,16 @@ func (broker *Broker) handleSubscribePacket(event *Event) (err error) {
 		qos := packet.Qoss[topicIndex]
 
 		// call plugins
-		if plugin.CallOnSubscriptionRequest(event.client.ID(), event.client.Username(), topic) == true {
+		if plugin.CallOnSubscriptionRequest(connectedClient.ID(), connectedClient.Username(), topic) == true {
 			topicResuls = append(topicResuls, qos)
-			event.client.SubScriptionAdd(topic)
+			connectedClient.SubScriptionAdd(topic)
 		} else {
 			topicResuls = append(topicResuls, client.SubackErr)
 		}
 	}
 
 	// thats all, respond
-	event.client.SendSuback(packet, topicResuls)
+	connectedClient.SendSuback(packet, topicResuls)
 
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client

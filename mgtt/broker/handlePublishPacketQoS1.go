@@ -7,15 +7,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
 	messagestore "gitlab.com/mgtt/messageStore"
-	"gitlab.com/mgtt/plugin"
 )
 
 func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	var packetID uint16 = packet.MessageID
 
-	//  QoS1/QoS2 - Store package only if its from a real client
-	if client != nil && packet.Dup == false {
+	//  QoS1/QoS2 - Store package only if its not duplicated
+	if packet.Dup == false {
 
 		// we need a new ID
 		broker.lastIDLock.Lock()
@@ -42,14 +41,11 @@ func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet 
 
 	// on QoS2 we end here
 	if packet.Qos == 2 {
-		if client != nil {
-			client.SendPubrec(packetID)
-		}
+		client.SendPubrec(packetID)
 		return
 	}
 
 	// Publish to all clients
-	var published bool
 	var messagedelivered bool
 	if err == nil {
 
@@ -58,13 +54,8 @@ func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet 
 		// because it matches an established subscription
 		packet.Retain = false
 
-		// PLUGINS: call CallOnPublishRequest - check if publish is accepted
-		for _, client := range broker.clients {
-			if plugin.CallOnPublishSendRequest(client.ID(), client.Username(), packet.TopicName) == true {
-				published, err = client.Publish(packet)
-				messagedelivered = messagedelivered || published
-			}
-		}
+		// publish packet to all subscribers
+		messagedelivered, err = broker.PublishPacket(packet, false)
 
 		// no message delivered
 		if messagedelivered == false {
@@ -78,9 +69,6 @@ func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet 
 
 	}
 
-	if client != nil {
-		client.SendPuback(packetID)
-	}
-
+	client.SendPuback(packetID)
 	return
 }

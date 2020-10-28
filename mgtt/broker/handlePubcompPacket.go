@@ -1,21 +1,13 @@
 package broker
 
 import (
-	"errors"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"gitlab.com/mgtt/client"
 )
 
-func (broker *Broker) handlePubcompPacket(event *Event) (err error) {
+func (broker *Broker) handlePubcompPacket(connectedClient *client.MgttClient, packet *packets.PubcompPacket) (err error) {
 
-	// check package
-	pubcompPacket, ok := event.packet.(*packets.PubcompPacket)
-	if ok == false {
-		err = errors.New("Package is not packets.PublishPacket")
-		return
-	}
-
-	err = broker.retainedMessages.DeletePacketWithID("resend", pubcompPacket.MessageID)
+	err = broker.retainedMessages.DeletePacketWithID("resend", packet.MessageID)
 
 	return
 }

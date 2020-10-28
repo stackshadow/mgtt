@@ -58,12 +58,6 @@ func (broker *Broker) Connect(config Config, username, password string) (err err
 	newClient := client.New(clientListener, cli.CLI.ConnectTimeout)
 	newClient.SubScriptionAdd("#")
 
-	// retrys
-	go broker.loopHandleResendPackets()
-
-	// handle client packets
-	go broker.loopHandleClientPackets()
-
 	// Send Connect-packet
 	var newUUID uuid.UUID
 	newUUID, err = uuid.NewRandom()

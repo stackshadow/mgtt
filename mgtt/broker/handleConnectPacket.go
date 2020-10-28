@@ -9,30 +9,24 @@ import (
 	"gitlab.com/mgtt/plugin"
 )
 
-func (broker *Broker) handleConnectPacket(event *Event) (err error) {
-
-	// check package
-	packet, ok := event.packet.(*packets.ConnectPacket)
-	if ok == false {
-		err = errors.New("Package is not packets.ConnectPacket")
-	}
+func (broker *Broker) handleConnectPacket(connectedClient *client.MgttClient, packet *packets.ConnectPacket) (err error) {
 
 	// set the client id
-	event.client.IDSet(packet.ClientIdentifier)
+	connectedClient.IDSet(packet.ClientIdentifier)
 
 	// MQTT-3.1.0-2
 	// Check if the client is already connected
 	if err == nil { // prevent multiple return
-		if _, exists := broker.clients[event.client.ID()]; exists == true {
-			err = errors.New("Protocol violation")
+		if _, exists := broker.clients[connectedClient.ID()]; exists == true {
+			err = errors.New("Protocol violation. Client already exist")
 		}
 	}
 
 	// PLUGINS: call CallOnAcceptNewClient - check if we accept the client
 	if err == nil { // prevent multiple return
-		accepted := plugin.CallOnAcceptNewClient(event.client.ID(), packet.Username, string(packet.Password))
+		accepted := plugin.CallOnAcceptNewClient(connectedClient.ID(), packet.Username, string(packet.Password))
 		if accepted == false {
-			err = event.client.SendConnack(client.ConnackUnauthorized)
+			err = connectedClient.SendConnack(client.ConnackUnauthorized)
 			err = errors.New("Client not accepted by plugin")
 		}
 	}
@@ -41,24 +35,24 @@ func (broker *Broker) handleConnectPacket(event *Event) (err error) {
 	if err == nil { // prevent multiple return
 
 		// store the username
-		event.client.UsernameSet(packet.Username)
+		connectedClient.UsernameSet(packet.Username)
 
 		// set the client to connected so that the broker will accept other packets from it
-		event.client.Connected = true
+		connectedClient.Connected = true
 
 		// reset timeout
-		event.client.ResetTimeout()
+		connectedClient.ResetTimeout()
 
 		// add client to the list
-		log.Info().Str("clientid", event.client.ID()).Msg("Add new client to client-list")
-		broker.clients[event.client.ID()] = event.client
+		log.Info().Str("clientid", connectedClient.ID()).Msg("Add new client to client-list")
+		broker.clients[connectedClient.ID()] = connectedClient
 
 		// send CONACK
-		err = event.client.SendConnack(client.ConnackAccepted)
+		err = connectedClient.SendConnack(client.ConnackAccepted)
 
 		// PLUGINS: call CallOnAcceptNewClient - check if we accept the client
 		if err == nil {
-			plugin.CallOnConnected(event.client.ID())
+			plugin.CallOnConnected(connectedClient.ID())
 		}
 	}
 

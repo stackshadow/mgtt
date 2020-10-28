@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func match(route []string, topic []string) bool {
+func Match(route []string, topic []string) bool {
 	if len(route) == 0 {
 		return len(topic) == 0
 	}
@@ -21,7 +21,7 @@ func match(route []string, topic []string) bool {
 	}
 
 	if (route[0] == "+") || (route[0] == topic[0]) {
-		return match(route[1:], topic[1:])
+		return Match(route[1:], topic[1:])
 	}
 	return false
 }
@@ -37,7 +37,7 @@ func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (published bool, 
 		// [MQTT-3.3.2-3]
 		// The Topic Name in a PUBLISH Packet sent by a Server to a subscribing Client
 		// MUST match the Subscription’s Topic Filter
-		if match(subscriptionTopicArray, topicArray) == true {
+		if Match(subscriptionTopicArray, topicArray) == true {
 
 			log.Info().
 				Str("clientid", c.ID()).

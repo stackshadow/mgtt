@@ -1,23 +1,16 @@
 package broker
 
 import (
-	"errors"
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"gitlab.com/mgtt/client"
 )
 
-func (broker *Broker) handlePubrelPacket(event *Event) (err error) {
-
-	// check package
-	pubrelPacket, ok := event.packet.(*packets.PubrelPacket)
-	if ok == false {
-		err = errors.New("Package is not packets.PubrelPacket")
-		return
-	}
+func (broker *Broker) handlePubrelPacket(connectedClient *client.MgttClient, packet *packets.PubrelPacket) (err error) {
 
 	// find the package
-	storedInfo, err := broker.retainedMessages.FindPacket("unreleased", event.client.ID(), pubrelPacket.MessageID)
+	storedInfo, err := broker.retainedMessages.FindPacket("unreleased", connectedClient.ID(), packet.MessageID)
 	if err != nil {
 		return err
 	}
@@ -48,13 +41,7 @@ func (broker *Broker) handlePubrelPacket(event *Event) (err error) {
 	storedInfo.Packet.Retain = false
 
 	// WE publish exact once !
-	var published bool
-	for _, client := range broker.clients {
-		published, err = client.Publish(storedInfo.Packet)
-		if published == true {
-			break
-		}
-	}
+	_, err = broker.PublishPacket(storedInfo.Packet, true)
 
 	// we dont do this
 	// we wait for pubrec then we notify

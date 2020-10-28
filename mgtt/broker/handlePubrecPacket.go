@@ -5,20 +5,14 @@ import (
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/client"
 )
 
-func (broker *Broker) handlePubrecPacket(event *Event) (err error) {
-
-	// check package
-	pubrecPacket, ok := event.packet.(*packets.PubrecPacket)
-	if ok == false {
-		err = errors.New("Package is not packets.PubrecPacket")
-		return
-	}
+func (broker *Broker) handlePubrecPacket(connectedClient *client.MgttClient, packet *packets.PubrecPacket) (err error) {
 
 	// okay, we try to find the package in our "resend"-storage
 	// find the package
-	storedInfo, err := broker.retainedMessages.GetPacketByID("resend", pubrecPacket.MessageID)
+	storedInfo, err := broker.retainedMessages.GetPacketByID("resend", packet.MessageID)
 	if err != nil {
 		return err
 	}
@@ -37,7 +31,7 @@ func (broker *Broker) handlePubrecPacket(event *Event) (err error) {
 		log.Info().Msg("No client stored, this should not happen, but we proceeed")
 	}
 
-	event.client.SendPubrel(pubrecPacket.MessageID)
+	connectedClient.SendPubrel(packet.MessageID)
 
 	// err = broker.retainedMessages.DeletePacketWithID("unreleased", pubrecPacket.MessageID)
 
