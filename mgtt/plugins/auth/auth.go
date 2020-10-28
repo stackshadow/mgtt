@@ -14,7 +14,7 @@ func LocalInit() {
 	newPlugin := plugin.V1{
 		OnAcceptNewClient: OnAcceptNewClient,
 	}
-	plugin.Register(cli.CLI.ConfigPath+"auth", &newPlugin)
+	plugin.Register("auth", &newPlugin)
 }
 
 // OnInit open the config file and watch for changes

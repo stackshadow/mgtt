@@ -2,7 +2,6 @@ package auth
 
 import (
 	"encoding/base64"
-	"fmt"
 	"io/ioutil"
 
 	"sync"
@@ -34,31 +33,30 @@ type pluginConfig struct {
 	} `yaml:"new,omitempty"`
 
 	BcryptedPassword map[string]string
-
-	filename string
-	mutex    sync.Mutex
 }
 
+var mutex sync.Mutex
+var filename string
 var config *pluginConfig = &pluginConfig{
 	BcryptedPassword: make(map[string]string),
 }
 
 // loadConfig will load an file
-func loadConfig(filename string) (err error) {
+func loadConfig(filenameToLoad string) (err error) {
 
-	config.mutex.Lock()
-	defer config.mutex.Unlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 
 	// store filename
-	config.filename = filename
+	filename = filenameToLoad
 
 	var fileData []byte
-	fileData, err = ioutil.ReadFile(config.filename)
+	fileData, err = ioutil.ReadFile(filename)
 	if err != nil {
-		log.Warn().Err(err).Msg("Error opening config file")
-		log.Info().Msg("Creating default auth.yml file")
-		if err = ioutil.WriteFile(config.filename, []byte(defaultConfigContent), 0664); err != nil {
-			log.Warn().Err(err).Msg("Error creating default file")
+		log.Warn().Str("filename", filenameToLoad).Err(err).Msg("Error opening config file")
+		log.Info().Str("filename", filenameToLoad).Msg("Creating default file")
+		if err = ioutil.WriteFile(filename, []byte(defaultConfigContent), 0664); err != nil {
+			log.Warn().Str("filename", filenameToLoad).Err(err).Msg("Error creating default file")
 		}
 		fileData = []byte(defaultConfigContent)
 	}
@@ -75,6 +73,7 @@ func loadConfig(filename string) (err error) {
 		}
 	}
 
+	log.Info().Str("filename", filenameToLoad).Msg("Loaded config file")
 	return
 }
 
@@ -83,17 +82,17 @@ func watchConfig() (err error) {
 	w := watcher.New()
 	w.SetMaxEvents(1)
 	w.FilterOps(watcher.Write)
-	w.Add(config.filename)
+	w.Add(filename)
 
 	go func() {
 		for {
 			select {
 			case event := <-w.Event:
-				fmt.Println(event) // Print the event's info.
-				loadConfig(config.filename)
+				log.Info().Str("filename", event.Path).Str("event", event.String()).Msg("File change detected")
+				loadConfig(filename)
 
 			case err := <-w.Error:
-				log.Err(err).Send()
+				log.Error().Err(err).Send()
 			case <-w.Closed:
 				return
 			}
@@ -102,7 +101,7 @@ func watchConfig() (err error) {
 
 	// Start the watching process - it'll check for changes every 100ms.
 	if err := w.Start(time.Millisecond * 100); err != nil {
-		log.Err(err).Send()
+		log.Error().Err(err).Send()
 	}
 
 	return
@@ -121,8 +120,8 @@ func passwordAdd(username string, password string) (err error) {
 
 	confidData, err := yaml.Marshal(config)
 	if err == nil {
-		if err = ioutil.WriteFile(config.filename, confidData, 0664); err != nil {
-			log.Err(err).Msg("Error creating default auth.yml file")
+		if err = ioutil.WriteFile(filename, confidData, 0664); err != nil {
+			log.Error().Str("filename", filename).Err(err).Msg("Error creating file")
 		}
 	}
 
