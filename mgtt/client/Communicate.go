@@ -18,6 +18,7 @@ func (client *MgttClient) Communicate() {
 			var recvdPacket packets.ControlPacket
 			recvdPacket, err = client.readPacket()
 			if err != nil {
+				close(client.recvPackets)
 				break
 			}
 
@@ -25,6 +26,7 @@ func (client *MgttClient) Communicate() {
 		}
 
 		log.Error().Err(err).Send()
+		//client.recvPackets <- nil
 	}()
 
 	return
