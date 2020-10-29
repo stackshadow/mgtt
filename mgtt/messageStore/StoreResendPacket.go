@@ -11,16 +11,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// PacketResendInfo hold information about a package that should be resended
-type StoreResendPacketOption struct {
-	BrokerMessageID uint16
-	ClientID        string
-	ResendAt        time.Time
-	Packet          *packets.PublishPacket
+type StoreResendPacketOptions struct {
+	ClientID string
+	OriginID uint16
+	ResendAt time.Time
+	Packet   *packets.PublishPacket
 }
 
 type packetInfo struct {
 	ClientID   string    `json:"c,omitempty"`
+	OriginID   uint16    `json:"o,omitempty"`
 	ResendAt   time.Time `json:"t"`
 	PacketData []byte    `json:"p"` // this should not be set from outside, it will be overwritten
 }
@@ -30,21 +30,14 @@ type packetInfo struct {
 // If IDStart is already used, a new free id will returned in IDUsed
 //
 // if IDStart is free, IDUsed = IDStart
-func (store *Store) StoreResendPacket(bucket string, option *StoreResendPacketOption) (err error) {
+func (store *Store) StoreResendPacket(bucket string, lastUsedID *uint16, options *StoreResendPacketOptions) (err error) {
 
-	// convert packet to bytes
-	writer := bytes.NewBuffer([]byte{})
-	option.Packet.Write(writer)
+	var newPacketInfo packetInfo
 
-	// packetinfo
-	newPacketInfo := packetInfo{
-		ClientID:   option.ClientID,
-		ResendAt:   option.ResendAt,
-		PacketData: writer.Bytes(),
-	}
-
-	// some ne
-	newIDBytes := make([]byte, 2)
+	// store already known infos
+	newPacketInfo.ClientID = options.ClientID
+	newPacketInfo.OriginID = options.Packet.MessageID
+	newPacketInfo.ResendAt = options.ResendAt
 
 	// save it to the db
 	err = store.db.Update(func(tx *bolt.Tx) error {
@@ -57,21 +50,32 @@ func (store *Store) StoreResendPacket(bucket string, option *StoreResendPacketOp
 		}
 
 		// try to find a free ID
+		newIDBytes := make([]byte, 2)
 		for {
 			// create id from uint16
-			binary.LittleEndian.PutUint16(newIDBytes, option.BrokerMessageID)
+			binary.LittleEndian.PutUint16(newIDBytes, *lastUsedID)
 
 			existingPacket := b.Get(newIDBytes)
 			if existingPacket == nil {
 				break
 			}
 
-			option.BrokerMessageID++
+			*lastUsedID++
 		}
+
+		// okay, found a free ID, we store it to the packet
+		options.Packet.MessageID = *lastUsedID
+
+		// convert packet to bytes
+		writer := bytes.NewBuffer([]byte{})
+		options.Packet.Write(writer)
+		newPacketInfo.PacketData = writer.Bytes()
 
 		// create json-byte-array
 		var payload []byte
 		payload, err = json.Marshal(newPacketInfo)
+
+		// save it to DB
 		err = b.Put(newIDBytes, payload)
 
 		return err
@@ -79,15 +83,13 @@ func (store *Store) StoreResendPacket(bucket string, option *StoreResendPacketOp
 
 	if err != nil {
 		log.Error().
-			Uint16("packet-mid", option.Packet.MessageID).
-			Uint16("broker-mid", option.BrokerMessageID).
+			Uint16("mid", options.Packet.MessageID).
 			Str("bucket", bucket).
 			Err(err).
 			Msg("Can not store packet")
 	} else {
 		log.Debug().
-			Uint16("packet-mid", option.Packet.MessageID).
-			Uint16("broker-mid", option.BrokerMessageID).
+			Uint16("mid", options.Packet.MessageID).
 			Str("bucket", bucket).
 			Msg("Packet stored")
 	}

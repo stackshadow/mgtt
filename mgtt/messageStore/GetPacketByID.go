@@ -10,7 +10,7 @@ import (
 )
 
 // GetPacketByID return the package by id
-func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (storedInfo *StoreResendPacketOption, err error) {
+func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (storedInfo *StoreResendPacketOptions, err error) {
 
 	err = store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
@@ -40,11 +40,11 @@ func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (stored
 		publishPacket := publishPacketGeneric.(*packets.PublishPacket)
 
 		//
-		storedInfo = &StoreResendPacketOption{
-			BrokerMessageID: brokerMessageID,
-			ClientID:        info.ClientID,
-			ResendAt:        info.ResendAt,
-			Packet:          publishPacket,
+		storedInfo = &StoreResendPacketOptions{
+			ClientID: info.ClientID,
+			OriginID: info.OriginID,
+			ResendAt: info.ResendAt,
+			Packet:   publishPacket,
 		}
 
 		return nil

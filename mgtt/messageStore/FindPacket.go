@@ -2,7 +2,6 @@ package messagestore
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 
@@ -11,7 +10,7 @@ import (
 )
 
 // FindPacket looks for a packet with an clientID and the original messageID
-func (store *Store) FindPacket(bucket string, clientID string, originalMessageID uint16) (storedInfo *StoreResendPacketOption, err error) {
+func (store *Store) FindPacket(bucket string, clientID string, originalMessageID uint16) (storedInfo *StoreResendPacketOptions, err error) {
 
 	err = store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
@@ -30,21 +29,22 @@ func (store *Store) FindPacket(bucket string, clientID string, originalMessageID
 				return err
 			}
 
-			// load the packet
-			publishPacketData := bytes.NewBuffer(info.PacketData)
-			publishPacketGeneric, err := packets.ReadPacket(publishPacketData)
-			if err != nil {
-				return err
-			}
-			publishPacket := publishPacketGeneric.(*packets.PublishPacket)
+			if info.OriginID == originalMessageID && info.ClientID == clientID {
 
-			if publishPacket.MessageID == originalMessageID && info.ClientID == clientID {
+				// load the packet
+				publishPacketData := bytes.NewBuffer(info.PacketData)
+				publishPacketGeneric, err := packets.ReadPacket(publishPacketData)
+				if err != nil {
+					return err
+				}
+				publishPacket := publishPacketGeneric.(*packets.PublishPacket)
+
 				//
-				storedInfo = &StoreResendPacketOption{
-					BrokerMessageID: binary.LittleEndian.Uint16(k),
-					ClientID:        info.ClientID,
-					ResendAt:        info.ResendAt,
-					Packet:          publishPacket,
+				storedInfo = &StoreResendPacketOptions{
+					ClientID: info.ClientID,
+					OriginID: info.OriginID,
+					ResendAt: info.ResendAt,
+					Packet:   publishPacket,
 				}
 
 				return nil

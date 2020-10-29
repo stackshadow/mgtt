@@ -2,7 +2,6 @@ package messagestore
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/json"
 
 	"github.com/boltdb/bolt"
@@ -10,7 +9,7 @@ import (
 )
 
 // IterateResendPackets will iterate packages that are stored with StoreResendPacket()
-func (store *Store) IterateResendPackets(bucket string, iterate func(storedInfo *StoreResendPacketOption)) (err error) {
+func (store *Store) IterateResendPackets(bucket string, iterate func(storedInfo *StoreResendPacketOptions)) (err error) {
 
 	err = store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
@@ -39,11 +38,11 @@ func (store *Store) IterateResendPackets(bucket string, iterate func(storedInfo 
 			publishPacket := publishPacketGeneric.(*packets.PublishPacket)
 
 			//
-			storedInfo := StoreResendPacketOption{
-				BrokerMessageID: binary.LittleEndian.Uint16(k),
-				ClientID:        info.ClientID,
-				ResendAt:        info.ResendAt,
-				Packet:          publishPacket,
+			storedInfo := StoreResendPacketOptions{
+				ClientID: info.ClientID,
+				OriginID: info.OriginID,
+				ResendAt: info.ResendAt,
+				Packet:   publishPacket,
 			}
 
 			// call iterate-function
