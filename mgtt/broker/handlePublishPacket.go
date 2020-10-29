@@ -30,10 +30,13 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 
 	}
 
-	if packet.Qos == 0 {
+	switch packet.Qos {
+	case 0:
 		err = broker.handlePublishPacketQoS0(client, packet)
-	} else {
+	case 1:
 		err = broker.handlePublishPacketQoS1(client, packet)
+	case 2:
+		err = broker.handlePublishPacketQoS2(client, packet)
 	}
 
 	return
