@@ -14,26 +14,21 @@ func (broker *Broker) handlePubrelPacket(connectedClient *client.MgttClient, pac
 	if err != nil {
 		return err
 	}
-	messageIDInUnreleased := storedInfo.BrokerMessageID
 
 	// and store it to "resend"
 	broker.lastIDLock.Lock()
+
 	storedInfo.ResendAt = time.Now().Add(time.Minute * 1)
 	storedInfo.Packet.Dup = true
-	storedInfo.BrokerMessageID = broker.lastID + 1
-
-	err = broker.retainedMessages.StoreResendPacket("resend", storedInfo)
+	err = broker.retainedMessages.StoreResendPacket("resend", &broker.lastID, storedInfo)
 	if err != nil {
 		return err
 	}
-	broker.lastID = storedInfo.BrokerMessageID
+
 	broker.lastIDLock.Unlock()
 
 	// remove it from unreleased
-	broker.retainedMessages.DeletePacketWithID("unreleased", messageIDInUnreleased)
-
-	// because we stored the original message with the original messageID, we can now manipulate it
-	storedInfo.Packet.MessageID = storedInfo.BrokerMessageID
+	broker.retainedMessages.DeletePacketWithID("unreleased", packet.MessageID)
 
 	// [MQTT-3.3.1-9]
 	// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a Client

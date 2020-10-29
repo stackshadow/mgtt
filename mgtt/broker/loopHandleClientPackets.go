@@ -9,7 +9,7 @@ import (
 // Communicate will handle incoming messages
 //
 // - this is a BLOCKING function
-func (broker *Broker) loopHandleClientPackets(connectedClient *client.MgttClient, packet packets.ControlPacket) {
+func (broker *Broker) loopHandleClientPackets(connectedClient *client.MgttClient, packet packets.ControlPacket) (normalClose bool, err error) {
 	for {
 		event := <-broker.clientEvents
 

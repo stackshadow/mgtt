@@ -26,7 +26,7 @@ func (broker *Broker) handlePubrecPacket(connectedClient *client.MgttClient, pac
 		}
 
 		// send pubcomp
-		client.SendPubcomp(storedInfo.Packet.MessageID)
+		client.SendPubcomp(storedInfo.OriginID)
 	} else {
 		log.Info().Msg("No client stored, this should not happen, but we proceeed")
 	}

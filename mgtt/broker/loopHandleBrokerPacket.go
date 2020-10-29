@@ -23,6 +23,9 @@ func (broker *Broker) loopHandleBrokerPacket(eventClient *client.MgttClient, eve
 	case *packets.ConnectPacket:
 		err = broker.handleConnectPacket(eventClient, recvPacket)
 		return
+	case *packets.DisconnectPacket:
+		err = broker.handleDisConnectPacket(eventClient)
+		return
 	}
 
 	// check if client connects correctly
@@ -54,9 +57,6 @@ func (broker *Broker) loopHandleBrokerPacket(eventClient *client.MgttClient, eve
 
 	case *packets.PubcompPacket:
 		err = broker.handlePubcompPacket(eventClient, recvPacket)
-
-	case *packets.DisconnectPacket:
-		err = broker.handleDisConnectPacket(eventClient)
 
 	}
 

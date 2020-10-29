@@ -46,7 +46,9 @@ func (broker *Broker) Serve(config Config) (err error) {
 
 	if err == nil {
 		if config.CertFile == "" {
-			log.Info().Str("listen", serverURL.Host).Bool("tls", false).Msg("Listening")
+			log.Info().Str("listen", serverURL.Host).
+				Bool("tls", false).
+				Msg("Listening")
 		} else {
 			log.Info().Str("listen", serverURL.Host).
 				Bool("tls", true).
@@ -105,7 +107,16 @@ func (broker *Broker) Serve(config Config) (err error) {
 				// do communication
 				var normalClose bool
 				for {
+
+					// get packet from the client-buffer
 					recvdPacket := newClient.GetPacket()
+
+					// if we get a nil-packet, client-connection is closed
+					if recvdPacket == nil {
+						err = nil
+						break
+					}
+
 					normalClose, err = broker.loopHandleBrokerPacket(newClient, recvdPacket)
 					if err != nil || normalClose {
 						break

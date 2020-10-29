@@ -10,6 +10,11 @@ func (broker *Broker) PublishPacket(packet *packets.PublishPacket, once bool) (m
 
 	var published bool
 
+	// [MQTT-3.3.1-9]
+	// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a Client
+	// because it matches an established subscription
+	packet.Retain = false
+
 	// PLUGINS: call CallOnPublishRequest - check if publish is accepted
 	for _, client := range broker.clients {
 		clientID := client.ID()
