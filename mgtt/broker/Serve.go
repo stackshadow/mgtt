@@ -9,12 +9,19 @@ import (
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
+	messagestore "gitlab.com/mgtt/messageStore"
+	"gitlab.com/mgtt/plugin"
 )
 
 // Serve will create a new broker and wait for clients
 func (broker *Broker) Serve(config Config) (err error) {
+
+	// retainedMessages-db
+	broker.retainedMessages, err = messagestore.Open(config.DBFilename)
+	if err != nil {
+		return
+	}
 
 	var serverURL *url.URL
 	serverURL, err = url.Parse(config.URL)
@@ -25,39 +32,40 @@ func (broker *Broker) Serve(config Config) (err error) {
 		err = fmt.Errorf("Unsupported scheme '%s'", serverURL.Scheme)
 	}
 
-	// start listener
-	if err == nil {
-
-		// non-tls
-		if config.CertFile == "" {
-			serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
-
-		} else { // tls
-			var cert tls.Certificate
-			cert, err = tls.LoadX509KeyPair(config.CertFile, config.KeyFile)
-			cfg := &tls.Config{
-				Certificates:       []tls.Certificate{cert},
-				InsecureSkipVerify: true,
-			}
-			serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), cfg)
-		}
-
+	// check if an error occurred
+	if err != nil {
+		log.Fatal().Err(err).Send()
 	}
 
-	if err == nil {
-		if config.CertFile == "" {
-			log.Info().Str("listen", serverURL.Host).
-				Bool("tls", false).
-				Msg("Listening")
-		} else {
-			log.Info().Str("listen", serverURL.Host).
-				Bool("tls", true).
-				Str("cert", config.CertFile).
-				Str("key", config.KeyFile).
-				Msg("Listening")
+	// non-tls
+	if config.CertFile == "" {
+		serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
+
+	} else { // tls
+		var TLSConfig *tls.Config
+		TLSConfig, err = getTLSConfig(config)
+		if err == nil {
+			serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), TLSConfig)
 		}
-	} else {
+	}
+
+	// check if an error occured
+	if err != nil {
 		log.Fatal().Err(err).Send()
+	}
+
+	// logging
+	if config.CertFile == "" {
+		log.Info().Str("listen", serverURL.Host).
+			Bool("tls", false).
+			Msg("Listening")
+	} else {
+		log.Info().Str("listen", serverURL.Host).
+			Bool("tls", true).
+			Str("ca", config.CAFile).
+			Str("cert", config.CertFile).
+			Str("key", config.KeyFile).
+			Msg("Listening")
 	}
 
 	// retrys
@@ -98,8 +106,10 @@ func (broker *Broker) Serve(config Config) (err error) {
 		if err == nil {
 
 			go func() {
-				newClient := client.New(newConnection, cli.CLI.ConnectTimeout)
+				newClient := client.New(newConnection, ConnectTimeout)
 				log.Info().Msg("New client connected")
+
+				plugin.CallRemoteAddr(newClient.RemoteAddr())
 
 				// run communicate
 				newClient.Communicate()

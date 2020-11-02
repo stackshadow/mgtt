@@ -5,6 +5,9 @@ type Config struct {
 	// the MQTT-Port
 	URL string
 
+	CAFile   string
 	CertFile string
 	KeyFile  string
+
+	DBFilename string
 }

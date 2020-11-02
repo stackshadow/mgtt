@@ -11,13 +11,11 @@ type CLICommon struct {
 var CLI struct {
 	CLICommon
 
+	CreateCA   CmdCreateCA   `cmd help:"Create a ca"`
+	CreateCert CmdCreateCert `cmd help:"Create a cert"`
+	Serve      CmdServe      `cmd help:"Serve"`
+
 	ConfigPath string `help:"Path where config files are stored. This can be used by plugins"  env:"CONFIGPATH" default:"./"`
-
-	URL      string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:8883"`
-	CertFile string `help:"The certificate to use for TLS. If not set, TLS is disabled"  env:"CERT" default:"cert.pem"`
-	KeyFile  string `help:"The private key to use for TLS"  env:"KEY" default:"key.pem"`
-
-	DBFilename string `help:"Filename for retained message-db"  env:"DBFILENAME" default:"messages.db"`
 
 	// ConnectTimeout holds the timeout in seconds for CONNECT
 	ConnectTimeout int64 `help:"Timeout in seconds for CONNECT. If an client don't send a connect after this time, it will be disconnected" env:"CONNECT_TIMEOUT" default:"30"`
