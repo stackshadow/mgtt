@@ -10,6 +10,8 @@ docker:
 	docker-compose build
 docker-run:
 	docker-compose run mgtt
+docker-down:
+	docker-compose down --volumes --remove-orphans
 
 docs/assets/node_modules/.bin/mmdc:
 	cd docs && \

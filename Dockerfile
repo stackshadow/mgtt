@@ -134,4 +134,4 @@ COPY --from=mgtt --chown=nobody:0 /data /data
 #COPY --from=base --chown=nobody:0 /usr/lib/libncurses* /usr/lib/
 
 USER nobody
-CMD ["/mgtt", "--debug", "--terminal", "serve", "--db-filename=/data/messages.db", "--ca-file=/data/ca.pem", "--cert-file=/data/cert.pem", "--key-file=/data/key.pem", "--config-path=/data/" ]
+CMD ["/mgtt", "--debug", "--terminal", "serve", "--db-filename=/data/messages.db", "--ca-file=/data/ca.crt", "--cert-file=/data/server.crt", "--key-file=/data/server.key", "--config-path=/data/" ]

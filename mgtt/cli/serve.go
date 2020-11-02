@@ -24,7 +24,12 @@ func (c *CmdServe) Run() (err error) {
 
 	if CLI.Serve.TLS == true {
 		// create ca and server-cert
+		CLI.CreateCA.CAFile = c.CAFile
 		CLI.CreateCA.Run()
+
+		CLI.CreateCert.CAFile = c.CAFile
+		CLI.CreateCert.CertFile = c.CertFile
+		CLI.CreateCert.KeyFile = c.KeyFile
 		CLI.CreateCert.Run()
 	}
 
