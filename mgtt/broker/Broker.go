@@ -7,6 +7,8 @@ import (
 	messagestore "gitlab.com/mgtt/messageStore"
 )
 
+var ConnectTimeout int64 = 30
+
 // Broker represents a broker
 type Broker struct {
 	clients map[string]*client.MgttClient

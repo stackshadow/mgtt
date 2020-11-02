@@ -1,20 +1,12 @@
 package broker
 
 import (
-	"errors"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"gitlab.com/mgtt/client"
 )
 
-func (broker *Broker) handlePingreqPacket(event *Event) (err error) {
+func (broker *Broker) handlePingreqPacket(connectedClient *client.MgttClient, packet *packets.PingreqPacket) (err error) {
 
-	// check package
-	_, ok := event.packet.(*packets.PingreqPacket)
-	if ok == false {
-		err = errors.New("Package is not packets.PingreqPacket")
-		return
-	}
-
-	err = event.client.SendPingresp()
+	err = connectedClient.SendPingresp()
 	return
 }

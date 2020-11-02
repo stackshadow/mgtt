@@ -1,14 +1,18 @@
 package broker
 
-import "gitlab.com/mgtt/plugin"
+import (
+	"github.com/eclipse/paho.mqtt.golang/packets"
+	"gitlab.com/mgtt/client"
+	"gitlab.com/mgtt/plugin"
+)
 
-func (broker *Broker) handleConackPacket(event *Event) (err error) {
-	event.client.Connected = true
-	broker.clients[event.client.ID()] = event.client
+func (broker *Broker) handleConackPacket(connectedClient *client.MgttClient, packet *packets.ConnackPacket) (err error) {
+	connectedClient.Connected = true
+	broker.clients[connectedClient.ID()] = connectedClient
 
 	// PLUGINS: call CallOnAcceptNewClient - check if we accept the client
 	if err == nil {
-		plugin.CallOnConnack(event.client.ID())
+		plugin.CallOnConnack(connectedClient.ID())
 	}
 
 	return

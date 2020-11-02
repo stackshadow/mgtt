@@ -1,25 +1,24 @@
 package auth
 
 import (
-	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/plugin"
 )
 
 // LocalInit will init the auth-plugin and register it
-func LocalInit() {
+func LocalInit(ConfigPath string) {
 
 	// OnInit open the config file and watch for changes
-	OnInit()
+	OnInit(ConfigPath)
 
 	newPlugin := plugin.V1{
 		OnAcceptNewClient: OnAcceptNewClient,
 	}
-	plugin.Register(cli.CLI.ConfigPath+"auth", &newPlugin)
+	plugin.Register("auth", &newPlugin)
 }
 
 // OnInit open the config file and watch for changes
-func OnInit() {
-	loadConfig(cli.CLI.ConfigPath + "auth.yml")
+func OnInit(ConfigPath string) {
+	loadConfig(ConfigPath + "auth.yml")
 	go watchConfig()
 }
 

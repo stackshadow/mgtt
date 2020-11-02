@@ -1,0 +1,28 @@
+= Plugin: Auth
+Martin Langlotz <martin.langlotz@evilbrain.de>
+:source-highlighter: highlightjs
+:toc:
+:icons: font
+
+This plugin
+
+- Authenticate a user with an local auth-file.
+- passwords for users are stored with bcrypt.
+- auth-file is stored in provided config-path
+
+== Watch for file changes
+
+Change to the auth-file are detected during runtime.
+
+You can add a new user to the file and the password will be automatically crypted with bcrypt. The user will be immediately active
+
+Also the cleartext-password will be deleted
+
+=== Structure for the new user
+
+```yaml
+new:
+  username: ANewUser
+  password: cleartextpassword
+```
+

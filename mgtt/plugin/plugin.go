@@ -1,11 +1,16 @@
 package plugin
 
-import "github.com/rs/zerolog/log"
+import (
+	"github.com/rs/zerolog/log"
+)
 
 // V1 represents an plugin in version 1
 type V1 struct {
 
-	// OnAcceptNewClient gets called, when a new client connects but is not yet added to the list of known clients
+	// OnNewClient gets called when a new client is incoming
+	OnNewClient func(remoteAddr string)
+
+	// OnAcceptNewClient gets called, when a CONNECT-Packet arrived but is not yet added to the list of known clients
 	// if this function return false, the client will not added to the known-client-list and get disconnected with return code "not authorized"
 	OnAcceptNewClient func(clientID string, username string, password string) bool
 
@@ -19,13 +24,11 @@ type V1 struct {
 	// return false if plugin request an abort of an subscription
 	OnSubscriptionRequest func(clientID string, username string, subscriptionTopic string) bool
 
-	// OnPublishRecvRequest get called when an published message arrived on the broker from a publisher
-	// return false to abort publish to all subscribers
-	OnPublishRecvRequest func(clientID string, topic string, payload string) bool
+	// OnPublishRequest get called when an publisher try to publish to the broker
+	OnPublishRequest func(clientID string, username string, topic string, payload string) bool
 
-	// OnPublishSendRequest gets called before an message will be sended to a subscriber
-	// return false to abort publish to an specific subscriber
-	OnPublishSendRequest func(clientID string, username string, publishTopic string) bool
+	// OnSubscribeRequest get called when the broker try to publish a message to an subscriber
+	OnSubscribeRequest func(clientID string, username string, publishTopic string) bool
 }
 
 var pluginList map[string]*V1 = make(map[string]*V1)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/cli"
 	"gitlab.com/mgtt/client"
 )
 
@@ -46,39 +45,58 @@ func (broker *Broker) Connect(config Config, username, password string) (err err
 
 	if err == nil {
 		if config.CertFile == "" {
-			log.Info().Str("listen", serverURL.Host).Bool("tls", false).Msg("Connected")
+			log.Info().Str("listen", serverURL.Host).
+				Bool("tls", false).
+				Msg("Connected")
 		} else {
-			log.Info().Str("listen", serverURL.Host).Bool("tls", true).Msg("Connected")
+			log.Info().Str("listen", serverURL.Host).
+				Bool("tls", true).
+				Str("cert", config.CertFile).
+				Str("key", config.KeyFile).
+				Msg("Listening")
 		}
 	} else {
 		log.Fatal().Err(err).Send()
 	}
 
 	// create the client
-	newClient := client.New(clientListener, cli.CLI.ConnectTimeout)
+	newClient := client.New(clientListener, ConnectTimeout)
 	newClient.SubScriptionAdd("#")
 
-	// retrys
-	go broker.loopHandleResendPackets()
+	// run communicate
+	newClient.Communicate()
 
-	// handle client packets
-	go broker.loopHandleClientPackets()
-
-	// Send Connect-packet
+	// We need a random uuid
 	var newUUID uuid.UUID
 	newUUID, err = uuid.NewRandom()
 	if err != nil {
 		return
 	}
 
-	// add the client to
-
+	// send it to the client
 	err = newClient.SendConnect(username, password, newUUID.String())
 	if err != nil {
 		return
 	}
 
-	broker.loopReadPackets(newClient)
+	// do communication
+	var normalClose bool
+	for {
+
+		// get packet from the client-buffer
+		recvdPacket := newClient.GetPacket()
+
+		// if we get a nil-packet, client-connection is closed
+		if recvdPacket == nil {
+			err = nil
+			break
+		}
+
+		normalClose, err = broker.loopHandleClientPackets(newClient, recvdPacket)
+		if err != nil || normalClose {
+			break
+		}
+	}
 
 	return
 }

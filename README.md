@@ -6,6 +6,10 @@ This MQTT-Broker is currently under development. But basic functionality works (
 
 THIS PROJECT IS MAINTAINED ON GITLAB.COM ( https://gitlab.com/stackshadow/mgtt ) Please create feature requests or bugs there :)
 
+## Usage
+
+Read the docs in the ./docs folder
+
 ## Why
 
 All the other broker, that i checked, are complicated to read/understand.
@@ -16,6 +20,8 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 - For the Publisher, the protocol ends and the message is treated as received
 - But i really want to know if the QoS-2-Message was delivered
 - So MGTT is waiting that an client send back PUBREC
+
+![Flow Diagram for QoS2](docs/assets/QoS2.png)
 
 ## Features
 

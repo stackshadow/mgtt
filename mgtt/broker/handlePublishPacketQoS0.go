@@ -1,24 +1,14 @@
 package broker
 
 import (
-	"errors"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
-	"gitlab.com/mgtt/plugin"
 )
 
 func (broker *Broker) handlePublishPacketQoS0(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
-	// client can not be nil
-	if client == nil {
-		err = errors.New("Client can not be nil")
-		return
-	}
-
 	// Publish to all clients
-	var published bool
 	var messagedelivered bool
 	if err == nil {
 
@@ -27,13 +17,8 @@ func (broker *Broker) handlePublishPacketQoS0(client *client.MgttClient, packet 
 		// because it matches an established subscription
 		packet.Retain = false
 
-		// PLUGINS: call CallOnPublishRequest - check if publish is accepted
-		for _, client := range broker.clients {
-			if plugin.CallOnPublishSendRequest(client.ID(), client.Username(), packet.TopicName) == true {
-				published, err = client.Publish(packet)
-				messagedelivered = messagedelivered || published
-			}
-		}
+		// publish packet to all subscribers
+		messagedelivered, err = broker.PublishPacket(packet, false)
 
 		// no message delivered
 		if messagedelivered == false {

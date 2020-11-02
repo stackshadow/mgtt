@@ -9,14 +9,11 @@ import (
 func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	// call plugin
-	if client != nil { // resend-packets
-		if plugin.CallOnPublishRecvRequest(client.ID(), packet.TopicName, string(packet.Payload)) == false {
-			return nil
-		}
-	} else { //  resend-packets
-		if plugin.CallOnPublishRecvRequest("resend", packet.TopicName, string(packet.Payload)) == false {
-			return nil
-		}
+	acceptPublish := plugin.CallOnPublishRequest(client.ID(), client.Username(), packet.TopicName, string(packet.Payload))
+
+	if acceptPublish == false {
+		client.Close()
+		return
 	}
 
 	// RETAINED-Packet
@@ -33,10 +30,13 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 
 	}
 
-	if packet.Qos == 0 {
+	switch packet.Qos {
+	case 0:
 		err = broker.handlePublishPacketQoS0(client, packet)
-	} else {
+	case 1:
 		err = broker.handlePublishPacketQoS1(client, packet)
+	case 2:
+		err = broker.handlePublishPacketQoS2(client, packet)
 	}
 
 	return

@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 )
 
@@ -15,14 +16,17 @@ type MgttClient struct {
 	Connected  bool
 
 	subscriptionTopics []string
+
+	recvPackets chan packets.ControlPacket
 }
 
 // New create a new MgttClient with id of "unknown"
 func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
 
 	newClient = &MgttClient{
-		id:         "unknown",
-		connection: connection,
+		id:          "unknown",
+		connection:  connection,
+		recvPackets: make(chan packets.ControlPacket, 10),
 	}
 
 	// setup timeout

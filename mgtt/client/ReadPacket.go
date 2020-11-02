@@ -4,9 +4,7 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
-// ReadPacket reads a single packet from the connection
-//
-// return err if an error occurred
-func (c *MgttClient) ReadPacket() (packet packets.ControlPacket, err error) {
+// readPacket reads a single packet from the connection and store it to the buffer
+func (c *MgttClient) readPacket() (packet packets.ControlPacket, err error) {
 	return packets.ReadPacket(c.connection)
 }

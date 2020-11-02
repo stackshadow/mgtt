@@ -16,7 +16,6 @@ services:
     tmpfs:
       - /run
       - /tmp
-
     ports:
       - "1883:1883"
       - "8883:8883"

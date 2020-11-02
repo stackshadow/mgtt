@@ -1,14 +1,17 @@
 package broker
 
 import (
-	"net"
 	"os"
 	"sync"
 	"testing"
 	"time"
 
-	"gitlab.com/mgtt/cli"
+	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/plugin"
+
+	paho "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 )
 
 /*
@@ -29,96 +32,89 @@ import (
 	fmt.Printf("%s\n", stdoutStderr)
 */
 
-func TestTimeout(t *testing.T) {
+func TESTCreatePahoOpts() (*paho.ClientOptions, error) {
+	opts := paho.NewClientOptions()
 
-	cli.CLI.URL = "tcp://127.0.0.1:1237"
-	cli.CLI.CLICommon.Terminal = true
-	cli.CLI.CLICommon.Terminal.AfterApply()
-	cli.CLI.CLICommon.Debug = true
-	cli.CLI.CLICommon.Debug.AfterApply()
-	cli.CLI.DBFilename = "test1.db"
-	cli.CLI.ConnectTimeout = 1
-
-	// the broker
-	os.Remove(cli.CLI.DBFilename)
-	server, _ := New()
-	go server.Serve(
-		Config{
-			URL:      cli.CLI.URL,
-			CertFile: cli.CLI.CertFile,
-			KeyFile:  cli.CLI.KeyFile,
-		},
-	)
-	time.Sleep(time.Second * 2)
-
-	connection, err := net.Dial("tcp", "127.0.0.1:1237")
-	if err != nil {
-		t.FailNow()
-	}
-
-	msg := make([]byte, 4000)
-
-	_, err = connection.Read(msg)
-	if err == nil {
-		t.FailNow()
-	}
-
+	clientIDUUID, _ := uuid.NewRandom()
+	opts.SetClientID(clientIDUUID.String())
+	opts.SetUsername("dummy")
+	opts.SetPassword("dummy")
+	opts.AddBroker("tcp://127.0.0.1:1237")
+	opts.SetAutoReconnect(true)
+	return opts, nil
 }
 
 func TestRetained(t *testing.T) {
 
-	cli.CLI.URL = "tcp://127.0.0.1:1236"
-	cli.CLI.CLICommon.Terminal = true
-	cli.CLI.CLICommon.Terminal.AfterApply()
-	cli.CLI.CLICommon.Debug = true
-	cli.CLI.CLICommon.Debug.AfterApply() // ensure debugger is setuped
-	cli.CLI.DBFilename = "test1.db"
+	// setup logger
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	// the broker
-	os.Remove(cli.CLI.DBFilename)
+	// create a plugin that unlocks the connection of a client
+	var clientLock sync.Mutex
+	var clientLockPlugin plugin.V1
+	clientLockPlugin.OnConnected = func(clientID string) {
+		clientLock.Unlock()
+	}
+	plugin.Register("clientLock", &clientLockPlugin)
+
+	// ############################################### the broker
+	os.Remove("test1.db")
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:      cli.CLI.URL,
-			CertFile: cli.CLI.CertFile,
-			KeyFile:  cli.CLI.KeyFile,
+			URL:        "tcp://127.0.0.1:1237",
+			DBFilename: "test1.db",
 		},
 	)
+	time.Sleep(time.Second * 1)
 
-	// register an plugin for test-purpose
-	var sendRetained sync.Mutex
-	sendRetained.Lock()
+	// ###############################################  Client
+	pahoOpts, _ := TESTCreatePahoOpts()
+	somerandomvalue, _ := uuid.NewRandom()
 
-	cli.CLI.DBFilename = "test2.db"
-	os.Remove(cli.CLI.DBFilename)
-	client, _ := New()
+	// connect and send an retained value
+	pahoClient := paho.NewClient(pahoOpts)
 
-	clientPlugin := plugin.V1{
-		OnConnack: func(clientID string) {
-			client.Publish("/test/retained", []byte{0, 0}, true, 0)
+	clientLock.Lock()
+	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
+	}
+	clientLock.Lock() // the plugin should unlock this
+
+	if token := pahoClient.Publish("retained/value", 0, true, somerandomvalue.String()); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
+	}
+	pahoClient.Disconnect(200)
+	time.Sleep(time.Second * 1)
+
+	// connect again and we should get the value
+	var subscribeLock sync.Mutex
+	pahoClient = paho.NewClient(pahoOpts)
+
+	clientLock.Unlock()
+	clientLock.Lock()
+	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
+	}
+	clientLock.Lock() // the plugin should unlock this
+
+	subscribeLock.Lock()
+	if token := pahoClient.Subscribe("retained/#", 0, func(client paho.Client, msg paho.Message) {
+		if string(msg.Payload()) != somerandomvalue.String() {
+			t.FailNow()
 			return
-		},
-		OnPublishRecvRequest: func(clientID string, topic string, payload string) bool {
-			if "/test/retained" == topic {
-				sendRetained.Unlock()
-			}
-			return true
-		},
-	}
-	plugin.Register("clientPlugin", &clientPlugin)
-
-	go client.Connect(
-		Config{
-			URL:      cli.CLI.URL,
-			CertFile: cli.CLI.CertFile,
-			KeyFile:  cli.CLI.KeyFile,
-		},
-		"",
-		"",
-	)
-	sendRetained.Lock()
-	for _, client := range server.clients {
-		client.SendPingreq()
+		}
+		pahoClient.Disconnect(200)
+		subscribeLock.Unlock()
+	}); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
 	}
 
+	subscribeLock.Lock()
+	time.Sleep(time.Second * 1)
 }
