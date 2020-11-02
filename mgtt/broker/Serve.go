@@ -38,15 +38,14 @@ func (broker *Broker) Serve(config Config) (err error) {
 	}
 
 	// non-tls
-	if config.CertFile == "" {
-		serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
-
-	} else { // tls
+	if config.TLS == true {
 		var TLSConfig *tls.Config
 		TLSConfig, err = getTLSConfig(config)
 		if err == nil {
 			serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), TLSConfig)
 		}
+	} else {
+		serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
 	}
 
 	// check if an error occured
