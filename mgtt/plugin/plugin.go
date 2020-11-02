@@ -1,11 +1,16 @@
 package plugin
 
-import "github.com/rs/zerolog/log"
+import (
+	"github.com/rs/zerolog/log"
+)
 
 // V1 represents an plugin in version 1
 type V1 struct {
 
-	// OnAcceptNewClient gets called, when a new client connects but is not yet added to the list of known clients
+	// OnNewClient gets called when a new client is incoming
+	OnNewClient func(remoteAddr string)
+
+	// OnAcceptNewClient gets called, when a CONNECT-Packet arrived but is not yet added to the list of known clients
 	// if this function return false, the client will not added to the known-client-list and get disconnected with return code "not authorized"
 	OnAcceptNewClient func(clientID string, username string, password string) bool
 
