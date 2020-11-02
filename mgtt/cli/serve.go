@@ -12,17 +12,26 @@ import (
 // CmdServe represents the flag which create certs
 type CmdServe struct {
 	URL        string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:8883"`
-	CAFile     string `help:"The ca to use for TLS. If not set, TLS is disabled"  env:"CA" default:"tls/ca.crt.pem"`
-	CertFile   string `help:"The certificate to use for TLS. If not set, TLS is disabled"  env:"CERT" default:"tls/server.crt.pem"`
-	KeyFile    string `help:"The private key to use for TLS"  env:"KEY" default:"tls/server.key.pem"`
+	TLS        bool   `help:"Enable TLS"  env:"TLS" default:"true"`
+	CAFile     string `help:"The ca to use for TLS"  env:"CA" default:"tls/ca.crt"`
+	CertFile   string `help:"The certificate to use for TLS"  env:"CERT" default:"tls/server.crt"`
+	KeyFile    string `help:"The private key to use for TLS"  env:"KEY" default:"tls/server.key"`
 	DBFilename string `help:"Filename for retained message-db"  env:"DBFILENAME" default:"messages.db"`
 }
 
 // Run will run the command
 func (c *CmdServe) Run() (err error) {
 
+	if CLI.Serve.TLS == true {
+		// create ca and server-cert
+		CLI.CreateCA.Run()
+		CLI.CreateCert.Run()
+	}
+
+	// set the broker-connection-timeout
 	broker.ConnectTimeout = CLI.ConnectTimeout
 
+	// create the broker
 	newbroker, err := broker.New()
 	if err != nil {
 		log.Error().Err(err).Send()
@@ -39,6 +48,7 @@ func (c *CmdServe) Run() (err error) {
 	err = newbroker.Serve(
 		broker.Config{
 			URL:        c.URL,
+			TLS:        c.TLS,
 			CAFile:     c.CAFile,
 			CertFile:   c.CertFile,
 			KeyFile:    c.KeyFile,

@@ -29,7 +29,7 @@
       "mode": "debug",
       "program": "${workspaceFolder}/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-cert", "--name", "server"]
+      "args": ["--terminal", "-v", "create-cert"]
     },
     {
       "name": "Client - Cert",
@@ -38,7 +38,15 @@
       "mode": "debug",
       "program": "${workspaceFolder}/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-cert", "--name", "client"]
+      "args": [
+        "--terminal",
+        "-v",
+        "create-cert",
+        "--cert-file",
+        "tls/client.crt",
+        "--key-file",
+        "tls/client.key"
+      ]
     }
   ]
 }

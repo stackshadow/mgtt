@@ -8,7 +8,8 @@ help:
 
 docker:
 	docker-compose build
-
+docker-run:
+	docker-compose run mgtt
 
 docs/assets/node_modules/.bin/mmdc:
 	cd docs && \

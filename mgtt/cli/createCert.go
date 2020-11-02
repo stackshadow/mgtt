@@ -12,7 +12,9 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -20,25 +22,44 @@ import (
 
 // CmdCreateCert represents the flag which create certs
 type CmdCreateCert struct {
-	OutputDirectory string `help:"Ouput directory" default:"tls"`
-	Organization    string `help:"Organisation of the ca" default:"FeelGood Inc."`
-	Country         string `help:"Country-Code" default:"DE"`
-	Province        string `help:"Province" default:"Local"`
-	Locality        string `help:"Locality (City)" default:"Berlin"`
-	StreetAddress   string `help:"Adress" default:"Corner 42"`
-	PostalCode      string `help:"PostalCode" default:"030423"`
-	Name            string `help:"Name of new cert" default:"client"`
+	CAFile   string `help:"The ca to use for TLS"  env:"CA" default:"tls/ca.crt"`
+	CertFile string `help:"The certificate to use for TLS"  env:"CERT" default:"tls/server.crt"`
+	KeyFile  string `help:"The private key to use for TLS"  env:"KEY" default:"tls/server.key"`
+
+	Organization  string `help:"Organisation of the ca" default:"FeelGood Inc."`
+	Country       string `help:"Country-Code" default:"DE"`
+	Province      string `help:"Province" default:"Local"`
+	Locality      string `help:"Locality (City)" default:"Berlin"`
+	StreetAddress string `help:"Adress" default:"Corner 42"`
+	PostalCode    string `help:"PostalCode" default:"030423"`
 }
 
 // Run will run the command
 func (c *CmdCreateCert) Run() (err error) {
+
+	baseDirName := filepath.Dir(c.CAFile)
+	baseFileName := filepath.Base(strings.TrimSuffix(c.CAFile, path.Ext(c.CAFile)))
+	caCertFileName := baseDirName + "/" + baseFileName + ".crt"
+	caPrivKeyFileName := baseDirName + "/" + baseFileName + ".key"
+	certificateFileName := c.CertFile
+	certificatePrivKeyFileName := c.KeyFile
+
+	// check if the files already exist
+	if _, statErr := os.Stat(certificateFileName); !os.IsNotExist(statErr) {
+		log.Info().Str("Certificate", certificateFileName).Msg("Already exist, no need to create it")
+		return
+	}
+	if _, statErr := os.Stat(certificatePrivKeyFileName); !os.IsNotExist(statErr) {
+		log.Info().Str("Private-Key", certificatePrivKeyFileName).Msg("Already exist, no need to create it")
+		return
+	}
 
 	// cert-data
 	var caCert *x509.Certificate
 
 	// Load CA
 	var catls tls.Certificate
-	catls, err = tls.LoadX509KeyPair(c.OutputDirectory+"/ca.crt.pem", c.OutputDirectory+"/ca.key.pem")
+	catls, err = tls.LoadX509KeyPair(caCertFileName, caPrivKeyFileName)
 	if err != nil {
 		panic(err)
 	}
@@ -104,16 +125,16 @@ func (c *CmdCreateCert) Run() (err error) {
 	*/
 
 	// create subdirectory
-	os.Mkdir(filepath.Dir(c.OutputDirectory), 0700)
+	os.Mkdir(filepath.Dir(baseDirName), 0700)
 
 	// write file
-	err = ioutil.WriteFile(c.OutputDirectory+"/"+c.Name+".crt.pem", certPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(certificateFileName, certPEM.Bytes(), 0777)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write certificate")
 	}
 
 	// write file
-	err = ioutil.WriteFile(c.OutputDirectory+"/"+c.Name+".key.pem", certPrivKeyPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(certificatePrivKeyFileName, certPrivKeyPEM.Bytes(), 0777)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write key")
 	}

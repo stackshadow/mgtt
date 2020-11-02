@@ -10,24 +10,44 @@ import (
 	"io/ioutil"
 	"math/big"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
 )
 
-// DebugFlag represents the flag which enable debugging
+// CmdCreateCA reflect the create-ca command
 type CmdCreateCA struct {
-	OutputDirectory string `arg help:"Ouput directory" default:"tls"`
-	Organization    string `arg help:"Organisation of the ca" default:"FeelGood Inc."`
-	Country         string `arg help:"Country-Code" default:"DE"`
-	Province        string `arg help:"Province" default:"Local"`
-	Locality        string `arg help:"Locality (City)" default:"Berlin"`
-	StreetAddress   string `arg help:"Adress" default:"Corner 42"`
-	PostalCode      string `arg help:"PostalCode" default:"030423"`
+	CAFile string `help:"The ca to use for TLS"  env:"CA" default:"tls/ca.crt"`
+
+	Organization  string `arg help:"Organisation of the ca" default:"FeelGood Inc."`
+	Country       string `arg help:"Country-Code" default:"DE"`
+	Province      string `arg help:"Province" default:"Local"`
+	Locality      string `arg help:"Locality (City)" default:"Berlin"`
+	StreetAddress string `arg help:"Adress" default:"Corner 42"`
+	PostalCode    string `arg help:"PostalCode" default:"030423"`
 }
 
+// Run will create a new CA
 func (c *CmdCreateCA) Run() (err error) {
+
+	// filepath.Ext() filepath.Base(CLI.Serve.CAFile)
+	baseDirName := filepath.Dir(c.CAFile)
+	baseFileName := filepath.Base(strings.TrimSuffix(c.CAFile, path.Ext(c.CAFile)))
+	caCertFileName := baseDirName + "/" + baseFileName + ".crt"
+	caPrivKeyFileName := baseDirName + "/" + baseFileName + ".key"
+
+	// check if the files already exist
+	if _, statErr := os.Stat(caCertFileName); !os.IsNotExist(statErr) {
+		log.Info().Str("CA-Certificate", caCertFileName).Msg("Already exist, no need to create it")
+		return
+	}
+	if _, statErr := os.Stat(caPrivKeyFileName); !os.IsNotExist(statErr) {
+		log.Info().Str("CA-Private-Key", caPrivKeyFileName).Msg("Already exist, no need to create it")
+		return
+	}
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
@@ -78,16 +98,16 @@ func (c *CmdCreateCA) Run() (err error) {
 	})
 
 	// create subdirectory
-	os.Mkdir(filepath.Dir(c.OutputDirectory), 0700)
+	os.Mkdir(filepath.Dir(baseDirName), 0700)
 
 	// write file
-	err = ioutil.WriteFile(c.OutputDirectory+"/ca.crt.pem", caPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(caCertFileName, caPEM.Bytes(), 0777)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write certificate")
 	}
 
 	// write file
-	err = ioutil.WriteFile(c.OutputDirectory+"/ca.key.pem", caPrivKeyPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(caPrivKeyFileName, caPrivKeyPEM.Bytes(), 0777)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write key")
 	}
