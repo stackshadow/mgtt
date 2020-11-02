@@ -1,4 +1,11 @@
 
+.PHONY: help
+help:
+	@echo "make docker: Build docker-image"
+	@echo "make images: Will build all images from mermaid-files"
+	@echo "make tests: Run all tests"
+	@echo "make clean: clean all files which are created during build"
+
 docker:
 	docker-compose build
 
@@ -25,3 +32,4 @@ tests:
 clean:
 	@rm -fv coverage.*
 	@rm -fv *.pem
+	@find . -name "*.db" -print -delete
