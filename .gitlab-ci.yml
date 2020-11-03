@@ -9,7 +9,7 @@ stages:
 ################################################ build and test ################################################
 build docker image:
   stage: build_docker
-  image: alpinelinux/docker-cli:latest
+  image: linuxserver/docker-compose:latest
   script:
     - mkdir -p ~/.docker
     - echo "${DOCKER_AUTH_CONFIG}" > ~/.docker/config.json
