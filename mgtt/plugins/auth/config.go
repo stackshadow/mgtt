@@ -20,19 +20,20 @@ const (
 
 # use this to create a new user
 #new:
-#  username:
-#  password:
+#  - username:
+#    password:
 
 `
 )
 
 type pluginConfig struct {
-	New struct {
-		Username string `yaml:"username,omitempty"`
-		Password string `yaml:"password,omitempty"`
-	} `yaml:"new,omitempty"`
-
+	New              []pluginConfigNewUser `yaml:"new,omitempty"`
 	BcryptedPassword map[string]string
+}
+
+type pluginConfigNewUser struct {
+	Username string `yaml:"username,omitempty"`
+	Password string `yaml:"password,omitempty"`
 }
 
 var mutex sync.Mutex
@@ -55,25 +56,42 @@ func loadConfig(filenameToLoad string) (err error) {
 	if err != nil {
 		log.Warn().Str("filename", filenameToLoad).Err(err).Msg("Error opening config file")
 		log.Info().Str("filename", filenameToLoad).Msg("Creating default file")
-		if err = ioutil.WriteFile(filename, []byte(defaultConfigContent), 0664); err != nil {
-			log.Warn().Str("filename", filenameToLoad).Err(err).Msg("Error creating default file")
-		}
-		fileData = []byte(defaultConfigContent)
+
+		saveConfig(filenameToLoad)
 	}
 
 	err = yaml.Unmarshal(fileData, config)
 	if err == nil {
-		if config.New.Username != "" && config.New.Password != "" {
-			newUsername := config.New.Username
-			newPassword := config.New.Password
 
-			config.New.Username = ""
-			config.New.Password = ""
-			err = passwordAdd(newUsername, newPassword)
+		newUserExist := false
+		for _, newUser := range config.New {
+			if newUser.Username != "" && newUser.Password != "" {
+				newUsername := newUser.Username
+				newPassword := newUser.Password
+				err = passwordAdd(newUsername, newPassword)
+				newUserExist = true
+			}
+		}
+		config.New = []pluginConfigNewUser{}
+
+		if newUserExist == true {
+			saveConfig(filenameToLoad)
 		}
 	}
 
 	log.Info().Str("filename", filenameToLoad).Msg("Loaded config file")
+	return
+}
+
+func saveConfig(filenameToLoad string) (err error) {
+	var confidData []byte
+	confidData, err = yaml.Marshal(config)
+	if err == nil {
+		if err = ioutil.WriteFile(filename, confidData, 0664); err != nil {
+			log.Error().Str("filename", filename).Err(err).Msg("Error creating file")
+		}
+	}
+
 	return
 }
 
@@ -117,13 +135,6 @@ func passwordAdd(username string, password string) (err error) {
 
 	// save it to the config
 	config.BcryptedPassword[username] = bcryptedBase64
-
-	confidData, err := yaml.Marshal(config)
-	if err == nil {
-		if err = ioutil.WriteFile(filename, confidData, 0664); err != nil {
-			log.Error().Str("filename", filename).Err(err).Msg("Error creating file")
-		}
-	}
 
 	return
 }
