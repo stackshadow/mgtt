@@ -14,5 +14,4 @@ build docker image:
     - mkdir -p ~/.docker
     - echo "${DOCKER_AUTH_CONFIG}" > ~/.docker/config.json
     - docker-compose -f docker-compose.yml build --pull
-    - docker login
     - docker-compose -f docker-compose.yml push
