@@ -17,6 +17,8 @@ type CmdServe struct {
 	CertFile   string `help:"The certificate to use for TLS"  env:"CERT" default:"tls/server.crt"`
 	KeyFile    string `help:"The private key to use for TLS"  env:"KEY" default:"tls/server.key"`
 	DBFilename string `help:"Filename for retained message-db"  env:"DBFILENAME" default:"messages.db"`
+
+	SelfSigned bool `help:"Use self-signed-certificate and ignore CAFile" default:"false"`
 }
 
 // Run will run the command
@@ -50,16 +52,20 @@ func (c *CmdServe) Run() (err error) {
 		acl.LocalInit(CLI.ConfigPath)
 	}
 
-	err = newbroker.Serve(
-		broker.Config{
-			URL:        c.URL,
-			TLS:        c.TLS,
-			CAFile:     c.CAFile,
-			CertFile:   c.CertFile,
-			KeyFile:    c.KeyFile,
-			DBFilename: c.DBFilename,
-		},
-	)
+	newBrokerConfig := broker.Config{
+		URL:        c.URL,
+		TLS:        c.TLS,
+		CAFile:     c.CAFile,
+		CertFile:   c.CertFile,
+		KeyFile:    c.KeyFile,
+		DBFilename: c.DBFilename,
+	}
+
+	if c.SelfSigned == true {
+		c.CAFile = ""
+	}
+
+	err = newbroker.Serve(newBrokerConfig)
 	if err != nil {
 		log.Error().Err(err).Send()
 	}

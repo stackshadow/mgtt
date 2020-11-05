@@ -1,0 +1,34 @@
+= TLS
+Martin Langlotz <martin.langlotz@evilbrain.de>
+:source-highlighter: highlightjs
+:toc:
+:experimental:
+:icons: font
+
+== mTLS
+
+MGTT support mTLS by default. If no CA and Server-Certificate is present, mgtt will create both for you.
+
+The server-certificate will be signed with the CA-Certificate.
+
+You can create a new client-certificate with `mgtt create-cert --cert-file="tls/client.crt" --key-file="tls/client.key"`
+
+If the certificate already exist, nothing will be done
+
+== Self Signed Certificate
+
+To create an self-signed-certificate you need to pass the `--self-signed` option.
+
+`mgtt create-cert --ca-file="" --cert-file="tls/server.crt" --key-file="tls/server.key" --self-signed`
+
+When you would like to run with an self-signed-certificate, you normally don't have an CA. So set it to empty string
+
+`mgtt serve --ca-file="" --cert-file="tls/server.crt" --key-file="tls/server.key"`
+
+or force self-signed:
+
+`mgtt serve --cert-file="tls/server.crt" --key-file="tls/server.key" --self-signed`
+
+
+
+
