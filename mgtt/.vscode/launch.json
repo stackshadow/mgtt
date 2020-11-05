@@ -5,13 +5,31 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
+      "name": "serve",
       "type": "go",
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}/main.go",
       "env": {},
       "args": ["--terminal", "-v", "serve", "--url", "tcp://0.0.0.0:8883"]
+    },
+    {
+      "name": "Create Self Signed Certificate",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/main.go",
+      "env": {},
+      "args": ["--terminal", "-v", "create-cert", "--self-signed"]
+    },
+    {
+      "name": "serve - self signed",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/main.go",
+      "env": {},
+      "args": ["--terminal", "-v", "serve", "--url", "tcp://0.0.0.0:8883", "--ca-file", ""]
     },
     {
       "name": "Create CA",
@@ -29,7 +47,7 @@
       "mode": "debug",
       "program": "${workspaceFolder}/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-cert"]
+      "args": ["--terminal", "-v", "create-cert" ]
     },
     {
       "name": "Client - Cert",

@@ -32,15 +32,14 @@ type CmdCreateCert struct {
 	Locality      string `help:"Locality (City)" default:"Berlin"`
 	StreetAddress string `help:"Adress" default:"Corner 42"`
 	PostalCode    string `help:"PostalCode" default:"030423"`
+
+	SelfSigned bool `help:"Create self signed certificate" default:"false"`
 }
 
 // Run will run the command
 func (c *CmdCreateCert) Run() (err error) {
 
 	baseDirName := filepath.Dir(c.CAFile)
-	baseFileName := filepath.Base(strings.TrimSuffix(c.CAFile, path.Ext(c.CAFile)))
-	caCertFileName := baseDirName + "/" + baseFileName + ".crt"
-	caPrivKeyFileName := baseDirName + "/" + baseFileName + ".key"
 	certificateFileName := c.CertFile
 	certificatePrivKeyFileName := c.KeyFile
 
@@ -52,20 +51,6 @@ func (c *CmdCreateCert) Run() (err error) {
 	if _, statErr := os.Stat(certificatePrivKeyFileName); !os.IsNotExist(statErr) {
 		log.Info().Str("Private-Key", certificatePrivKeyFileName).Msg("Already exist, no need to create it")
 		return
-	}
-
-	// cert-data
-	var caCert *x509.Certificate
-
-	// Load CA
-	var catls tls.Certificate
-	catls, err = tls.LoadX509KeyPair(caCertFileName, caPrivKeyFileName)
-	if err != nil {
-		panic(err)
-	}
-	caCert, err = x509.ParseCertificate(catls.Certificate[0])
-	if err != nil {
-		panic(err)
 	}
 
 	// caCert, err = tls.LoadX509KeyPair(c.OutputDirectory+"/ca.crt.pem", c.OutputDirectory+"/ca.key.pem")
@@ -88,8 +73,14 @@ func (c *CmdCreateCert) Run() (err error) {
 		NotBefore:    time.Now(),
 		NotAfter:     time.Now().AddDate(10, 0, 0),
 		SubjectKeyId: []byte{1, 2, 3, 4, 6},
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
-		KeyUsage:     x509.KeyUsageDigitalSignature,
+	}
+
+	if c.SelfSigned == false {
+		cert.KeyUsage = x509.KeyUsageDigitalSignature
+		cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}
+	} else {
+		cert.KeyUsage = x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature
+		cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 	}
 
 	var certPrivKey *rsa.PrivateKey
@@ -99,10 +90,39 @@ func (c *CmdCreateCert) Run() (err error) {
 	}
 
 	var certBytes []byte
-	certBytes, err = x509.CreateCertificate(rand.Reader, cert, caCert, &certPrivKey.PublicKey, catls.PrivateKey)
-	if err != nil {
-		return err
+
+	if c.SelfSigned == false {
+		baseFileName := filepath.Base(strings.TrimSuffix(c.CAFile, path.Ext(c.CAFile)))
+		caCertFileName := baseDirName + "/" + baseFileName + ".crt"
+		caPrivKeyFileName := baseDirName + "/" + baseFileName + ".key"
+
+		// Load CA
+		var catls tls.Certificate
+		catls, err = tls.LoadX509KeyPair(caCertFileName, caPrivKeyFileName)
+		if err != nil {
+			panic(err)
+		}
+
+		// cert-data
+		var caCert *x509.Certificate
+		caCert, err = x509.ParseCertificate(catls.Certificate[0])
+		if err != nil {
+			panic(err)
+		}
+
+		certBytes, err = x509.CreateCertificate(rand.Reader, cert, caCert, &certPrivKey.PublicKey, catls.PrivateKey)
+		if err != nil {
+			return err
+		}
+	} else {
+
+		certBytes, err = x509.CreateCertificate(rand.Reader, cert, cert, &certPrivKey.PublicKey, certPrivKey)
+		if err != nil {
+			return err
+		}
+
 	}
+
 	certPEM := new(bytes.Buffer)
 	pem.Encode(certPEM, &pem.Block{
 		Type:  "CERTIFICATE",
