@@ -24,16 +24,19 @@ func getTLSConfig(config Config) (cfg *tls.Config, err error) {
 		}
 	}
 
-	// Read in the cert file
-	if err == nil {
-		clientCABytes, err = ioutil.ReadFile(config.CAFile)
-	}
+	// no caFile was set
+	if config.CAFile != "" {
+		// Read in the cert file
+		if err == nil {
+			clientCABytes, err = ioutil.ReadFile(config.CAFile)
+		}
 
-	// Append our cert to the system pool
-	if err == nil {
-		if ok := clientCAs.AppendCertsFromPEM(clientCABytes); !ok {
-			log.Warn().
-				Msg("No certs appended, using system certs only")
+		// Append our cert to the system pool
+		if err == nil {
+			if ok := clientCAs.AppendCertsFromPEM(clientCABytes); !ok {
+				log.Warn().
+					Msg("No certs appended, using system certs only")
+			}
 		}
 	}
 
@@ -41,7 +44,12 @@ func getTLSConfig(config Config) (cfg *tls.Config, err error) {
 		Certificates:       []tls.Certificate{cert},
 		InsecureSkipVerify: true,
 		ClientCAs:          clientCAs,
-		ClientAuth:         tls.RequireAndVerifyClientCert,
+	}
+
+	if config.CAFile != "" {
+		cfg.ClientAuth = tls.RequireAndVerifyClientCert
+	} else {
+		cfg.ClientAuth = tls.NoClientCert
 	}
 
 	return

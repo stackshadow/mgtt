@@ -10,7 +10,7 @@ services:
       shm_size: '2gb'
       target: prod
 
-    image: mgtt:latest
+    image: stackshadow/mgtt:latest
     volumes:
        - data:/data
     tmpfs:

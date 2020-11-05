@@ -22,7 +22,7 @@ Also the cleartext-password will be deleted
 
 ```yaml
 new:
-  username: ANewUser
-  password: cleartextpassword
+  - username: ANewUser
+    password: cleartextpassword
 ```
 

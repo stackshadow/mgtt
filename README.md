@@ -38,7 +38,7 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 - [ ] Will messages
 - [x] Plugins
 - [x] TLS/SSL
-- [ ] Disconnect
+- [x] Disconnect
 
 
 - [x] Zerolog with terminal-output and json-output-support
@@ -49,7 +49,7 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 
 ## Plugins
 - [x] Username/Password auth
-- [ ] ACL
+- [x] ACL
 - [ ] Metrics
 - [ ] $SYS-Support
 
@@ -69,7 +69,5 @@ CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt .
 # Usage
 
 For a small help use `mgtt -h`
-
-If `--cert-file` or `--key-file` is used and the files don't exist, a new certificate/key will be created (of course, self signed )
 
 

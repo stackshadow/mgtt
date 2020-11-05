@@ -1,0 +1,17 @@
+
+stages:
+  - build_docker
+ 
+# global variables
+# variables:
+
+  
+################################################ build and test ################################################
+build docker image:
+  stage: build_docker
+  image: linuxserver/docker-compose:latest
+  script:
+    - mkdir -p ~/.docker
+    - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
+    - docker-compose -f docker-compose.yml build --pull
+    - docker-compose -f docker-compose.yml push

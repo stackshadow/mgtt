@@ -92,9 +92,9 @@ WORKDIR /
 
 # download modules - this is cached when go.mod and go.sum not changes
 COPY mgtt/go.mod mgtt/go.sum /
-RUN mkdir /vendor
-COPY mgtt/vendor/modules.txt /vendor/
-RUN go mod download
+#RUN mkdir /vendor
+#COPY mgtt/vendor/modules.txt /vendor/
+RUN go mod download 
 
 # Copy the rest
 COPY mgtt/ /

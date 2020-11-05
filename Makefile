@@ -13,6 +13,11 @@ docker-run:
 docker-down:
 	docker-compose down --volumes --remove-orphans
 
+mgtt: mgtt/mgtt
+mgtt/mgtt:
+	cd mgtt && \
+	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt .
+
 docs/assets/node_modules/.bin/mmdc:
 	cd docs && \
 	yarn add -s @mermaid-js/mermaid-cli
@@ -35,4 +40,5 @@ tests:
 clean:
 	@rm -fv coverage.*
 	@rm -fv *.pem
+	@rm -fv mgtt/mgtt
 	@find . -name "*.db" -print -delete

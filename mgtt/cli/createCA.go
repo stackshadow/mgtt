@@ -22,12 +22,12 @@ import (
 type CmdCreateCA struct {
 	CAFile string `help:"The ca to use for TLS"  env:"CA" default:"tls/ca.crt"`
 
-	Organization  string `arg help:"Organisation of the ca" default:"FeelGood Inc."`
-	Country       string `arg help:"Country-Code" default:"DE"`
-	Province      string `arg help:"Province" default:"Local"`
-	Locality      string `arg help:"Locality (City)" default:"Berlin"`
-	StreetAddress string `arg help:"Adress" default:"Corner 42"`
-	PostalCode    string `arg help:"PostalCode" default:"030423"`
+	Organization  string `help:"Organisation of the ca" default:"FeelGood Inc."`
+	Country       string `help:"Country-Code" default:"DE"`
+	Province      string `help:"Province" default:"Local"`
+	Locality      string `help:"Locality (City)" default:"Berlin"`
+	StreetAddress string `help:"Adress" default:"Corner 42"`
+	PostalCode    string `help:"PostalCode" default:"030423"`
 }
 
 // Run will create a new CA
