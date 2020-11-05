@@ -52,6 +52,10 @@ func (c *CmdServe) Run() (err error) {
 		acl.LocalInit(CLI.ConfigPath)
 	}
 
+	if c.SelfSigned == true {
+		c.CAFile = ""
+	}
+
 	newBrokerConfig := broker.Config{
 		URL:        c.URL,
 		TLS:        c.TLS,
@@ -59,10 +63,6 @@ func (c *CmdServe) Run() (err error) {
 		CertFile:   c.CertFile,
 		KeyFile:    c.KeyFile,
 		DBFilename: c.DBFilename,
-	}
-
-	if c.SelfSigned == true {
-		c.CAFile = ""
 	}
 
 	err = newbroker.Serve(newBrokerConfig)
