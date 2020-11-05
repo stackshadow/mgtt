@@ -39,6 +39,7 @@ func (c *CmdServe) Run() (err error) {
 		CLI.CreateCert.CAFile = c.CAFile
 		CLI.CreateCert.CertFile = c.CertFile
 		CLI.CreateCert.KeyFile = c.KeyFile
+		CLI.CreateCert.SelfSigned = c.SelfSigned
 		CLI.CreateCert.Run()
 	}
 

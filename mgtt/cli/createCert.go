@@ -43,6 +43,10 @@ func (c *CmdCreateCert) Run() (err error) {
 	certificateFileName := c.CertFile
 	certificatePrivKeyFileName := c.KeyFile
 
+	if c.SelfSigned == false {
+		c.CAFile = ""
+	}
+
 	// check if the files already exist
 	if _, statErr := os.Stat(certificateFileName); !os.IsNotExist(statErr) {
 		log.Info().Str("Certificate", certificateFileName).Msg("Already exist, no need to create it")
@@ -75,7 +79,7 @@ func (c *CmdCreateCert) Run() (err error) {
 		SubjectKeyId: []byte{1, 2, 3, 4, 6},
 	}
 
-	if c.SelfSigned == false {
+	if c.CAFile != "" {
 		cert.KeyUsage = x509.KeyUsageDigitalSignature
 		cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}
 	} else {
@@ -91,7 +95,7 @@ func (c *CmdCreateCert) Run() (err error) {
 
 	var certBytes []byte
 
-	if c.SelfSigned == false {
+	if c.CAFile != "" {
 		baseFileName := filepath.Base(strings.TrimSuffix(c.CAFile, path.Ext(c.CAFile)))
 		caCertFileName := baseDirName + "/" + baseFileName + ".crt"
 		caPrivKeyFileName := baseDirName + "/" + baseFileName + ".key"
