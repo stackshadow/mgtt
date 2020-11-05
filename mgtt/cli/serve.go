@@ -24,10 +24,17 @@ type CmdServe struct {
 // Run will run the command
 func (c *CmdServe) Run() (err error) {
 
+	if c.SelfSigned == true {
+		c.CAFile = ""
+	}
+
 	if CLI.Serve.TLS == true {
-		// create ca and server-cert
-		CLI.CreateCA.CAFile = c.CAFile
-		CLI.CreateCA.Run()
+
+		if c.CAFile != "" {
+			// create ca and server-cert
+			CLI.CreateCA.CAFile = c.CAFile
+			CLI.CreateCA.Run()
+		}
 
 		CLI.CreateCert.CAFile = c.CAFile
 		CLI.CreateCert.CertFile = c.CertFile
@@ -50,10 +57,6 @@ func (c *CmdServe) Run() (err error) {
 	}
 	if strings.Contains(CLI.Plugins, "acl") == true {
 		acl.LocalInit(CLI.ConfigPath)
-	}
-
-	if c.SelfSigned == true {
-		c.CAFile = ""
 	}
 
 	newBrokerConfig := broker.Config{
