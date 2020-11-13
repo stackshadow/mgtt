@@ -24,18 +24,20 @@ type CmdServe struct {
 // Run will run the command
 func (c *CmdServe) Run() (err error) {
 
-	if c.SelfSigned == true {
-		c.CAFile = ""
-	}
-
+	// did we use TLS ?
 	if CLI.Serve.TLS == true {
 
+		if c.SelfSigned == true {
+			c.CAFile = ""
+		}
+
+		// create ca
 		if c.CAFile != "" {
-			// create ca and server-cert
 			CLI.CreateCA.CAFile = c.CAFile
 			CLI.CreateCA.Run()
 		}
 
+		// create certificate if not exist
 		CLI.CreateCert.CAFile = c.CAFile
 		CLI.CreateCert.CertFile = c.CertFile
 		CLI.CreateCert.KeyFile = c.KeyFile
