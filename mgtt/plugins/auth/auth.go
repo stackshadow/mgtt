@@ -22,6 +22,7 @@ func OnInit(ConfigPath string) {
 	go watchConfig()
 }
 
+// OnAcceptNewClient gets called, when a CONNECT-Packet arrived but is not yet added to the list of known clients
 func OnAcceptNewClient(clientID string, username string, password string) (accepted bool) {
 	return passwordCheck(username, password)
 }
