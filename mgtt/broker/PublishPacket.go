@@ -19,7 +19,7 @@ func (broker *Broker) PublishPacket(packet *packets.PublishPacket, once bool) (m
 	for _, client := range broker.clients {
 		clientID := client.ID()
 		userName := client.Username()
-		if plugin.CallOnSubscribeRequest(clientID, userName, packet.TopicName) == true {
+		if plugin.CallOnSendToSubscriberRequest(clientID, userName, packet.TopicName) == true {
 			published, err = client.Publish(packet)
 			if once == true {
 				if published == true {

@@ -10,7 +10,6 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 
 	// call plugin
 	acceptPublish := plugin.CallOnPublishRequest(client.ID(), client.Username(), packet.TopicName, string(packet.Payload))
-
 	if acceptPublish == false {
 		client.Close()
 		return

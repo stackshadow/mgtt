@@ -27,8 +27,8 @@ type V1 struct {
 	// OnPublishRequest get called when an publisher try to publish to the broker
 	OnPublishRequest func(clientID string, username string, topic string, payload string) bool
 
-	// OnSubscribeRequest get called when the broker try to publish a message to an subscriber
-	OnSubscribeRequest func(clientID string, username string, publishTopic string) bool
+	// OnSendToSubscriberRequest get called when the broker try to publish a message to an subscriber
+	OnSendToSubscriberRequest func(clientID string, username string, publishTopic string) bool
 }
 
 var pluginList map[string]*V1 = make(map[string]*V1)

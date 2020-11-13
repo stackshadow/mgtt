@@ -25,8 +25,8 @@ func LocalInit(ConfigPath string) {
 	OnInit(ConfigPath)
 
 	newPlugin := plugin.V1{
-		OnPublishRequest:   OnPublishRequest,
-		OnSubscribeRequest: OnSubscribeRequest,
+		OnPublishRequest:          OnPublishRequest,
+		OnSendToSubscriberRequest: OnSendToSubscriberRequest,
 	}
 	plugin.Register("acl", &newPlugin)
 }
@@ -80,7 +80,7 @@ func OnPublishRequest(clientID string, username string, topic string, payload st
 	return checkACL(clientID, username, topic, "w")
 }
 
-// OnSubscribeRequest get called when the broker try to publish a message to an subscriber
-func OnSubscribeRequest(clientID string, username string, publishTopic string) (accepted bool) {
+// OnSendToSubscriberRequest get called when the broker try to publish a message to an subscriber
+func OnSendToSubscriberRequest(clientID string, username string, publishTopic string) (accepted bool) {
 	return checkACL(clientID, username, publishTopic, "r")
 }
