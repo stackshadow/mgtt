@@ -1,14 +1,20 @@
 package broker
 
 import (
+	"net"
 	"time"
 
-	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/client"
 	messagestore "gitlab.com/mgtt/messageStore"
 )
 
-func (broker *Broker) loopHandleResendPackets(resendPackets chan packets.ControlPacket) {
+func (broker *Broker) loopHandleResendPackets() {
+
+	netserver, _ := net.Pipe()
+	retryClient := client.New(netserver, 0)
+	retryClient.IDSet("resend")
+	retryClient.Connected = true
 
 	go func() {
 		for {
@@ -31,7 +37,14 @@ func (broker *Broker) loopHandleResendPackets(resendPackets chan packets.Control
 						Str("topic", storedInfo.Packet.TopicName).
 						Msg("Resend packet")
 
-					resendPackets <- storedInfo.Packet
+					normalClose, err := broker.loopHandleBrokerPacket(retryClient, storedInfo.Packet)
+					if err != nil || normalClose {
+						return
+					}
+
+					// a small delay to not flood our clients
+					time.Sleep(time.Millisecond * 500)
+
 				}
 
 			})

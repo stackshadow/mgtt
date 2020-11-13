@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"time"
 
-	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
 	messagestore "gitlab.com/mgtt/messageStore"
@@ -67,29 +65,8 @@ func (broker *Broker) Serve(config Config) (err error) {
 			Msg("Listening")
 	}
 
-	// retrys
-	var retryPackets chan packets.ControlPacket = make(chan packets.ControlPacket, 100)
-	broker.loopHandleResendPackets(retryPackets)
-	go func() {
-
-		netserver, _ := net.Pipe()
-		retryClient := client.New(netserver, 0)
-		retryClient.IDSet("resend")
-		retryClient.Connected = true
-
-		for {
-			retryPacket := <-retryPackets
-			normalClose, err := broker.loopHandleBrokerPacket(retryClient, retryPacket)
-			if err != nil || normalClose {
-				break
-			}
-
-			// a small delay to not flood our clients
-			time.Sleep(time.Millisecond * 500)
-		}
-
-		netserver.Close()
-	}()
+	// retry
+	go broker.loopHandleResendPackets()
 
 	for {
 
