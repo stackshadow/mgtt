@@ -10,7 +10,7 @@ services:
       shm_size: '2gb'
       target: prod
 
-    image: stackshadow/mgtt:latest
+    image: stackshadow/mgtt:${CI_COMMIT_SHORT_SHA:-local}
     volumes:
        - data:/data
     tmpfs:

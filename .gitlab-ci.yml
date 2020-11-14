@@ -1,7 +1,8 @@
 
 stages:
   - build_docker
- 
+  - release
+
 # global variables
 # variables:
 
@@ -15,3 +16,15 @@ build docker image:
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
     - docker-compose -f docker-compose.yml build --pull
     - docker-compose -f docker-compose.yml push
+
+release:
+  stage: release
+  image: linuxserver/docker-compose:latest
+  script:
+    - docker-compose -f docker-compose.yml pull
+    - docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:latest
+    - docker push stackshadow/mgtt:latest
+    - export VERSION=$(cat VERSION)
+    - docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:${VERSION}
+    - docker push stackshadow/mgtt:${VERSION}
+  when: manual
