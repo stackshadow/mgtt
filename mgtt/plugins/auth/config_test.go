@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -30,20 +29,3 @@ new:
 
 `
 )
-
-func TestChangeOfConfigFile(t *testing.T) {
-
-	loadConfig("integrationtest.yml")
-
-	// add a new user
-	if err := ioutil.WriteFile(filename, []byte(newconfig), 0664); err != nil {
-		t.FailNow()
-	}
-	loadConfig(filename)
-
-	if passwordCheck("testuser", "dummypassword") == false {
-		t.FailNow()
-	}
-
-	os.Remove(filename)
-}

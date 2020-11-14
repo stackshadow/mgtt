@@ -15,6 +15,11 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 		return
 	}
 
+	// call plugin that possible handle the message
+	if plugin.CallOnHandleMessage(client.ID(), packet.TopicName, packet.Payload) == true {
+		return
+	}
+
 	// RETAINED-Packet
 	if err == nil && packet.Retain == true && packet.Dup == false { // prevent multiple return
 

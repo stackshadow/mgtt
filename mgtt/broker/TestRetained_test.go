@@ -69,7 +69,7 @@ func TestRetained(t *testing.T) {
 	)
 	time.Sleep(time.Second * 1)
 
-	// ###############################################  Client
+	// ###############################################  Write an retained value
 	pahoOpts, _ := TESTCreatePahoOpts()
 	somerandomvalue, _ := uuid.NewRandom()
 
@@ -89,6 +89,8 @@ func TestRetained(t *testing.T) {
 	}
 	pahoClient.Disconnect(200)
 	time.Sleep(time.Second * 1)
+
+	// ###############################################  Check for stored value
 
 	// connect again and we should get the value
 	var subscribeLock sync.Mutex

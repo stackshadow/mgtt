@@ -25,9 +25,26 @@ type V1 struct {
 	OnSubscriptionRequest func(clientID string, username string, subscriptionTopic string) bool
 
 	// OnPublishRequest get called when an publisher try to publish to the broker
+	//
+	// If an plugin return false, connection will be closed
 	OnPublishRequest func(clientID string, username string, topic string, payload string) bool
 
+	// OnHandleMessage gets called after OnPublishRequest
+	//
+	// If this function return true, the next plugin will handle the message
+	//
+	// If a plugin handle the message, it will NOT sended to subscribers
+	OnHandleMessage func(originClientID string, topic string, payload []byte) (notHandled bool)
+
 	// OnSendToSubscriberRequest get called when the broker try to publish a message to an subscriber
+	//
+	// if an plugin set it to false, the message will NOT be sended to clientID
+	//
+	// This function gets called BEFORE check if the subscriber subscribe to the topic
+	//
+	// clientID: The clientID of the target client
+	// username: The username of the target client
+	// publishTopic: The topic the broker try to publish to the subscriber
 	OnSendToSubscriberRequest func(clientID string, username string, publishTopic string) bool
 }
 
