@@ -13,6 +13,13 @@ docker-run:
 docker-down:
 	docker-compose down --volumes --remove-orphans
 
+
+currentversion: mgtt/cli/currentversion.go
+mgtt/cli/currentversion.go:
+	@touch $@
+	@echo "package cli" > $@
+	@echo "var version string = \"$$(cat VERSION)\"" >> $@
+
 mgtt: mgtt/mgtt
 mgtt/mgtt:
 	cd mgtt && \
@@ -36,7 +43,13 @@ tests:
 	cd mgtt ;\
 	go test -timeout 30s -parallel 1 -coverprofile=coverage.out  ./... ;\
 	go tool cover -html=coverage.out -o coverage.html
-	
+
+gocyclo: ~/go/bin/gocyclo
+~/go/bin/gocyclo:
+	go get github.com/fzipp/gocyclo/cmd/gocyclo
+cyclic: gocyclo
+		
+
 clean:
 	@rm -fv coverage.*
 	@rm -fv *.pem
