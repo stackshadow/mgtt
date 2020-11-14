@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/alecthomas/kong"
+	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/cli"
 )
 
@@ -15,9 +16,13 @@ func init() {
 			Compact: false,
 		}),
 		kong.Vars{
-			"version": "0.0.1",
+			"version": cli.Version,
 		})
 	cli.CLI.CLICommon.Debug.AfterApply() // ensure debugger is setuped
+
+	// print version
+	log.Info().Str("version", cli.Version).Send()
+
 	err := ctx.Run()
 	ctx.FatalIfErrorf(err)
 
