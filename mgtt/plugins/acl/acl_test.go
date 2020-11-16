@@ -35,19 +35,19 @@ func TestPublish(t *testing.T) {
 		},
 	}
 
-	if OnPublishRequest("", "testuser", "$SYS/broker/clients", "1") == true {
+	if OnPublishRequest("", "testuser", "$SYS/broker/clients") == true {
 		t.FailNow()
 	}
-	if OnPublishRequest("", "testuser", "$SYS/connections/count", "1") == true {
+	if OnPublishRequest("", "testuser", "$SYS/connections/count") == true {
 		t.FailNow()
 	}
-	if OnPublishRequest("", "testuser", "sensors/temp/first", "1") == false {
+	if OnPublishRequest("", "testuser", "sensors/temp/first") == false {
 		t.FailNow()
 	}
-	if OnPublishRequest("", "testuser", "sensors/temp/second", "1") == false {
+	if OnPublishRequest("", "testuser", "sensors/temp/second") == false {
 		t.FailNow()
 	}
-	if OnPublishRequest("", "testuser", "commands/power/off", "1") == true {
+	if OnPublishRequest("", "testuser", "commands/power/off") == true {
 		t.FailNow()
 	}
 }
