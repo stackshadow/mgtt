@@ -1,5 +1,5 @@
 
-.PHONY: help
+.PHONY: help 
 help:
 	@echo "make docker: Build docker-image"
 	@echo "make images: Will build all images from mermaid-files"
@@ -14,11 +14,10 @@ docker-down:
 	docker-compose down --volumes --remove-orphans
 
 
-currentversion: mgtt/cli/currentversion.go
-mgtt/cli/currentversion.go:
-	@touch $@
-	@echo "package cli" > $@
-	@echo "var version string = \"$$(cat VERSION)\"" >> $@
+currentversion:
+	@touch mgtt/cli/currentversion.go
+	@echo "package cli" > mgtt/cli/currentversion.go
+	@echo "var Version string = \"$$(cat VERSION)\"" >> mgtt/cli/currentversion.go
 
 mgtt: mgtt/mgtt
 mgtt/mgtt:
