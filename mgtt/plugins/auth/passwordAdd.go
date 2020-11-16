@@ -7,6 +7,8 @@ import (
 )
 
 // passwordAdd will add a new user with an password
+//
+// if the user already exist, we override the password
 func passwordAdd(username string, password string) (err error) {
 
 	// convert passwort to base64-bcrypt
