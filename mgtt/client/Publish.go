@@ -7,6 +7,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+func MatchRoute(route string, topic string) (match bool) {
+
+	routeArray := strings.Split(route, "/")
+	topicArray := strings.Split(topic, "/")
+
+	return Match(routeArray, topicArray)
+}
+
 func Match(route []string, topic []string) bool {
 	if len(route) == 0 {
 		return len(topic) == 0
