@@ -9,7 +9,7 @@ import (
 func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	// call plugin
-	acceptPublish := plugin.CallOnPublishRequest(client.ID(), client.Username(), packet.TopicName, string(packet.Payload))
+	acceptPublish := plugin.CallOnPublishRequest(client.ID(), client.Username(), packet.TopicName)
 	if acceptPublish == false {
 		client.Close()
 		return
