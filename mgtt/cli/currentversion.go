@@ -1,2 +1,2 @@
 package cli
-var Version string = "0.9.0"
+var Version string = "0.9.1"

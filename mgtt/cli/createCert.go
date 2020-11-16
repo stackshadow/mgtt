@@ -43,7 +43,7 @@ func (c *CmdCreateCert) Run() (err error) {
 	certificateFileName := c.CertFile
 	certificatePrivKeyFileName := c.KeyFile
 
-	if c.SelfSigned == false {
+	if c.SelfSigned == true {
 		c.CAFile = ""
 	}
 
