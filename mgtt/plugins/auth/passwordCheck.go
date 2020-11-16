@@ -9,6 +9,10 @@ import (
 // passwordCheck
 func passwordCheck(username string, password string) (isOkay bool) {
 
+	if config.Anonym == true && username == "" {
+		return true
+	}
+
 	base64Data, exist := config.BcryptedPassword[username]
 	if exist == true {
 		basswordBytes, err := base64.StdEncoding.DecodeString(base64Data)

@@ -18,6 +18,23 @@ You can add a new user to the file and the password will be automatically crypte
 
 Also the cleartext-password will be deleted
 
+=== Global Options
+
+[cols="1,1,1", options="header", width="100%"] 
+.Global options
+|===
+| Option
+| Type
+| Description
+
+| anonym
+| bool
+a|
+If set to `true`, you can login without username and password
+
+|===
+
+
 === Structure for the new user
 
 ```yaml

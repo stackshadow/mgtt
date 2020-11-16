@@ -7,6 +7,9 @@ import (
 const (
 	defaultConfigContent = `# Auth-plugin config-file
 
+# uncomment this to enable anonym-login
+# anonym: true
+
 # use this to create a new user
 #new:
 #  - username:
@@ -17,7 +20,8 @@ const (
 
 type pluginConfig struct {
 	New              []pluginConfigNewUser `yaml:"new,omitempty"`
-	BcryptedPassword map[string]string
+	BcryptedPassword map[string]string     `yaml:"bcryptedpassword"`
+	Anonym           bool                  `yaml:"anonym"`
 }
 
 type pluginConfigNewUser struct {
