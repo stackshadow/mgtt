@@ -12,6 +12,7 @@ func LocalInit(ConfigPath string) {
 
 	newPlugin := plugin.V1{
 		OnAcceptNewClient: OnAcceptNewClient,
+		OnHandleMessage:   OnHandleMessage,
 	}
 	plugin.Register("auth", &newPlugin)
 }
