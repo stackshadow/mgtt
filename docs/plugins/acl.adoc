@@ -66,7 +66,14 @@ rules:
       direction: r
       allow: false
 
+# This is if no user was provided
+  _anonym:
+    - route: "#"
+      direction: w
+      allow: true
 
-
+	  - route: "#"
+      direction: r
+      allow: true
 ```
 

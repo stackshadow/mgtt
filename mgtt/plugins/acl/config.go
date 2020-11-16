@@ -33,6 +33,17 @@ rules:
       direction: r
       allow: true
 
+# This is an anonymouse user
+#  _anonym:
+#	- route: "#"
+#      direction: w
+#      allow: true
+
+#	- route: "#"
+#      direction: r
+#      allow: true
+
+
 `
 )
 

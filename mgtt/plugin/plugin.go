@@ -11,6 +11,7 @@ type V1 struct {
 	OnNewClient func(remoteAddr string)
 
 	// OnAcceptNewClient gets called, when a CONNECT-Packet arrived but is not yet added to the list of known clients
+	//
 	// if this function return false, the client will not added to the known-client-list and get disconnected with return code "not authorized"
 	OnAcceptNewClient func(clientID string, username string, password string) bool
 

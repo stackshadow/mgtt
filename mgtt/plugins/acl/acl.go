@@ -51,6 +51,11 @@ func checkACL(clientID string, username string, topic string, direction string) 
 		}
 	}()
 
+	// if username is empty,
+	if username == "" {
+		username = "_anonym"
+	}
+
 	// try to get the acl
 	entryArray, exist := config.Rules[username]
 	if exist == false {
