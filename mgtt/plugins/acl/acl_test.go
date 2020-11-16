@@ -1,8 +1,14 @@
 package acl
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestPublish(t *testing.T) {
+
+	os.Remove("./integrationtest_auth.yml")
+	LocalInit("integrationtest_")
 
 	// we add some acls
 	config.Rules["testuser"] = []aclEntry{
@@ -50,4 +56,35 @@ func TestPublish(t *testing.T) {
 	if OnPublishRequest("", "testuser", "commands/power/off") == true {
 		t.FailNow()
 	}
+
+	// we add some acls
+	config.Rules["_anonym"] = []aclEntry{
+		// we not allow write to clients
+		aclEntry{
+			Direction: "r",
+			Route:     "system/users",
+			Allow:     true,
+		},
+		aclEntry{
+			Direction: "w",
+			Route:     "system/config",
+			Allow:     true,
+		},
+	}
+
+	if OnPublishRequest("", "", "system/users") == true {
+		t.FailNow()
+	}
+	if OnSendToSubscriberRequest("", "", "system/users") == false {
+		t.FailNow()
+	}
+
+	if OnPublishRequest("", "", "system/config") == false {
+		t.FailNow()
+	}
+	if OnSendToSubscriberRequest("", "", "system/config") == true {
+		t.FailNow()
+	}
+
+	os.Remove("./integrationtest_auth.yml")
 }
