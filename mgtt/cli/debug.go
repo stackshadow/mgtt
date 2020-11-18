@@ -14,7 +14,7 @@ func (v *DebugFlag) AfterApply() error {
 		log.Logger = log.Logger.With().Caller().Logger()
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
-		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 	return nil
 }
