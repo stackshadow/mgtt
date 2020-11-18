@@ -63,6 +63,7 @@ func (c *CmdServe) Run() (err error) {
 	}
 
 	newBrokerConfig := broker.Config{
+		Version:    Version,
 		URL:        c.URL,
 		TLS:        c.TLS,
 		CAFile:     c.CAFile,

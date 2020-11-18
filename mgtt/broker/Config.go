@@ -2,6 +2,8 @@ package broker
 
 // Config represents the config of your broker
 type Config struct {
+	Version string
+
 	// the MQTT-Port
 	URL string
 

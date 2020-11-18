@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/client"
 	messagestore "gitlab.com/mgtt/messageStore"
@@ -20,6 +21,15 @@ func (broker *Broker) Serve(config Config) (err error) {
 	if err != nil {
 		return
 	}
+
+	//	store version information
+	pub := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+	pub.MessageID = 0
+	pub.Retain = false
+	pub.TopicName = "$SYS/broker/version"
+	pub.Payload = []byte(config.Version)
+	pub.Qos = 0
+	broker.retainedMessages.StorePacketWithTopic("retained", pub.TopicName, pub)
 
 	var serverURL *url.URL
 	serverURL, err = url.Parse(config.URL)
