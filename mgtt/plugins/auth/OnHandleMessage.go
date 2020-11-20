@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"gitlab.com/mgtt/broker"
 	"gitlab.com/mgtt/client"
 )
 
@@ -15,25 +16,36 @@ type userListElement struct {
 // If a plugin handle the message, it will NOT sended to subscribers
 func OnHandleMessage(originClientID string, topic string, payload []byte) (handled bool) {
 
+	switch {
+
+	// who is currently logged in
+	case topic == "$SYS/auth/user/whoami":
+		// topic matched, we handled it
+		handled = true
+		broker.Current.PublishToClient(
+			originClientID,
+			"$SYS/auth/user/name",
+			[]byte(broker.Current.UserNameOfClient(originClientID)),
+		)
+
 	// list all users
-	if topic == "$SYS/auth/users/list" {
+	case topic == "$SYS/auth/users/list":
 		// topic matched, we handled it
 		handled = true
 		go onHandleUserList(originClientID)
-	}
 
 	// set a new password
-	if client.MatchRoute("$SYS/auth/user/+/password/set", topic) {
+	case client.MatchRoute("$SYS/auth/user/+/password/set", topic):
 		// topic matched, we handled it
 		handled = true
 		go onHandlePasswordSet(originClientID, topic, string(payload))
-	}
 
 	// delete a user
-	if client.MatchRoute("$SYS/auth/user/+/delete", topic) {
+	case client.MatchRoute("$SYS/auth/user/+/delete", topic):
 		// topic matched, we handled it
 		handled = true
 		go onHandleUserDelete(originClientID, topic)
+
 	}
 
 	return

@@ -58,6 +58,18 @@ Here are the topics this plugin will handle
 | Direction
 | Description
 
+| $SYS/auth/user/whoami
+| -
+| -
+| publish
+| Request the current username
+
+| $SYS/auth/user/name
+| username
+| john
+| subscribe
+| The current loggedin user
+
 | $SYS/auth/users/list
 | any
 | true
