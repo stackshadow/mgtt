@@ -1,5 +1,10 @@
-docs/node_modules
-Dockerfile
-docker-compose.yml
-Makefile
-docs
+.*
+*.md
+*.adoc
+
+.vscode/
+build/
+deployments/
+vendor/
+docs/
+
