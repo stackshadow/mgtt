@@ -14,8 +14,10 @@ build docker image:
   script:
     - mkdir -p ~/.docker
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
-    - docker-compose -f docker-compose.yml build --pull
-    - docker-compose -f docker-compose.yml push
+    - |
+      export VERSION=${CI_COMMIT_SHORT_SHA}
+      docker-compose -f deployments/docker-compose/docker-compose.yml build --pull
+      docker-compose -f deployments/docker-compose/docker-compose.yml push
 
 release:
   stage: release
@@ -23,10 +25,17 @@ release:
   script:
     - mkdir -p ~/.docker
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
-    - docker-compose -f docker-compose.yml pull
-    - docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:latest
-    - docker push stackshadow/mgtt:latest
-    - export VERSION=$(cat VERSION)
-    - docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:${VERSION}
-    - docker push stackshadow/mgtt:${VERSION}
+    
+    - |
+      export VERSION=${CI_COMMIT_SHORT_SHA}
+      docker-compose -f deployments/docker-compose/docker-compose.yml pull
+      source .env
+      docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:${VERSION}
+      docker push stackshadow/mgtt:${VERSION}
+
+    - |
+      export VERSION=${CI_COMMIT_SHORT_SHA}
+      docker-compose -f deployments/docker-compose/docker-compose.yml pull
+      docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:latest
+      docker push stackshadow/mgtt:latest
   when: manual

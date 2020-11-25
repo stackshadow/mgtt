@@ -5,12 +5,12 @@ services:
       context: ${PWD}
       dockerfile: ./build/docker/Dockerfile
       labels:
-        mgtt.version: "0.5.0"
+        mgtt.version: "${VERSION:-local}"
       network: host
       shm_size: '2gb'
       target: prod
 
-    image: stackshadow/mgtt:${CI_COMMIT_SHORT_SHA:-local}
+    image: stackshadow/mgtt:${VERSION:-local}
     volumes:
        - data:/data
     tmpfs:

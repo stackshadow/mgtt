@@ -1,3 +1,7 @@
+# Build with make -f ./build/local/Makefile
+
+include .env
+export
 
 .PHONY: help 
 help:
@@ -13,11 +17,10 @@ docker-run:
 docker-down:
 	docker-compose down --volumes --remove-orphans
 
-
 currentversion:
-	@touch mgtt/cli/currentversion.go
-	@echo "package cli" > mgtt/cli/currentversion.go
-	@echo "var Version string = \"$$(cat VERSION)\"" >> mgtt/cli/currentversion.go
+	@echo "package cli" > internal/mgtt/cli/currentversion.go
+	@echo "" >> internal/mgtt/cli/currentversion.go
+	@echo "var Version string = \"$${VERSION}\"" >> internal/mgtt/cli/currentversion.go
 
 mgtt: mgtt/mgtt
 mgtt/mgtt:
