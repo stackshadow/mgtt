@@ -4,7 +4,7 @@ include .env
 export
 
 .PHONY: help 
-help:
+help: currentversion
 	@echo "make docker: Build docker-image"
 	@echo "make images: Will build all images from mermaid-files"
 	@echo "make tests: Run all tests"

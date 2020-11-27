@@ -6,4 +6,9 @@ vendor
 *.db
 *.pem
 *.key
+*.crt
 coverage.*
+
+integrationtest*.yml
+acl.yml
+auth.yml
