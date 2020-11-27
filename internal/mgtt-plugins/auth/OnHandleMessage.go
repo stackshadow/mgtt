@@ -5,10 +5,6 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-type userListElement struct {
-	Username string `json:"username"`
-}
-
 // OnHandleMessage gets called after OnPublishRequest
 //
 // If this function return true, the plugin handled the message and no other plugin will get it
@@ -19,12 +15,12 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 	switch {
 
 	// who is currently logged in
-	case topic == "$SYS/auth/user/whoami":
+	case topic == "$SYS/self/username/get":
 		// topic matched, we handled it
 		handled = true
 		broker.Current.PublishToClient(
 			originClientID,
-			"$SYS/auth/user/name",
+			"$SYS/self/username",
 			[]byte(broker.Current.UserNameOfClient(originClientID)),
 		)
 

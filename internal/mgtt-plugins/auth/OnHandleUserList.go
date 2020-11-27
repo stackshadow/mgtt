@@ -6,6 +6,10 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/broker"
 )
 
+type userListElement struct {
+	Username string `json:"username"`
+}
+
 func onHandleUserList(originClientID string) {
 	// a new list
 	var newUserList []userListElement
