@@ -59,7 +59,7 @@ func TestOnHandleWhoami(t *testing.T) {
 		t.FailNow()
 	}
 
-	if token := pahoClient.Subscribe("$SYS/auth/user/name", 0, func(client paho.Client, msg paho.Message) {
+	if token := pahoClient.Subscribe("$SYS/self/username", 0, func(client paho.Client, msg paho.Message) {
 		if string(msg.Payload()) == "admin" {
 			clientLock.Unlock()
 		} else {
@@ -72,7 +72,7 @@ func TestOnHandleWhoami(t *testing.T) {
 	}
 	time.Sleep(time.Second * 1)
 
-	if token := pahoClient.Publish("$SYS/auth/user/whoami", 0, true, ""); token.Wait() && token.Error() != nil {
+	if token := pahoClient.Publish("$SYS/self/username/get", 0, true, ""); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
