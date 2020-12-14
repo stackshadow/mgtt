@@ -39,7 +39,7 @@ func TESTCreatePahoOpts() (*paho.ClientOptions, error) {
 	opts.SetClientID(clientIDUUID.String())
 	opts.SetUsername("dummy")
 	opts.SetPassword("dummy")
-	opts.AddBroker("tcp://127.0.0.1:1237")
+	opts.AddBroker("tcp://127.0.0.1:1238")
 	opts.SetAutoReconnect(true)
 	return opts, nil
 }
@@ -63,7 +63,7 @@ func TestRetained(t *testing.T) {
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1237",
+			URL:        "tcp://127.0.0.1:1238",
 			DBFilename: "test1.db",
 		},
 	)
@@ -110,7 +110,6 @@ func TestRetained(t *testing.T) {
 			t.FailNow()
 			return
 		}
-		pahoClient.Disconnect(200)
 		subscribeLock.Unlock()
 	}); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
@@ -119,4 +118,5 @@ func TestRetained(t *testing.T) {
 
 	subscribeLock.Lock()
 	time.Sleep(time.Second * 1)
+	pahoClient.Disconnect(200)
 }
