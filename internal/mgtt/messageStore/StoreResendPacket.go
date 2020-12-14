@@ -1,28 +1,23 @@
 package messagestore
 
 import (
-	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 )
 
-type StoreResendPacketOptions struct {
-	ClientID string
-	OriginID uint16
-	ResendAt time.Time
-	Packet   *packets.PublishPacket
-}
+// PacketInfo represent the struct which will be stored in the bolt-db
+type PacketInfo struct {
+	ResendAt time.Time `json:"r"` //
 
-type packetInfo struct {
-	ClientID   string    `json:"c,omitempty"`
-	OriginID   uint16    `json:"o,omitempty"`
-	ResendAt   time.Time `json:"t"`
-	PacketData []byte    `json:"p"` // this should not be set from outside, it will be overwritten
+	// tis comes from the packet
+	Topic     string `json:"t,omitempty"`
+	MessageID uint16 `json:"i,omitempty"`
+	Qos       byte   `json:"q,omitempty"`
+	Payload   []byte `json:"d,omitempty"`
 }
 
 // StoreResendPacket will store an `packet` to resend it after `delay`
@@ -30,14 +25,7 @@ type packetInfo struct {
 // If IDStart is already used, a new free id will returned in IDUsed
 //
 // if IDStart is free, IDUsed = IDStart
-func (store *Store) StoreResendPacket(bucket string, lastUsedID *uint16, options *StoreResendPacketOptions) (err error) {
-
-	var newPacketInfo packetInfo
-
-	// store already known infos
-	newPacketInfo.ClientID = options.ClientID
-	newPacketInfo.OriginID = options.Packet.MessageID
-	newPacketInfo.ResendAt = options.ResendAt
+func (store *Store) StoreResendPacket(bucket string, info *PacketInfo) (err error) {
 
 	// save it to the db
 	err = store.db.Update(func(tx *bolt.Tx) error {
@@ -52,28 +40,20 @@ func (store *Store) StoreResendPacket(bucket string, lastUsedID *uint16, options
 		// try to find a free ID
 		newIDBytes := make([]byte, 2)
 		for {
-			// create id from uint16
-			binary.LittleEndian.PutUint16(newIDBytes, *lastUsedID)
+			// convert to le-uint16
+			binary.LittleEndian.PutUint16(newIDBytes, info.MessageID)
 
 			existingPacket := b.Get(newIDBytes)
 			if existingPacket == nil {
 				break
 			}
 
-			*lastUsedID++
+			info.MessageID++
 		}
-
-		// okay, found a free ID, we store it to the packet
-		options.Packet.MessageID = *lastUsedID
-
-		// convert packet to bytes
-		writer := bytes.NewBuffer([]byte{})
-		options.Packet.Write(writer)
-		newPacketInfo.PacketData = writer.Bytes()
 
 		// create json-byte-array
 		var payload []byte
-		payload, err = json.Marshal(newPacketInfo)
+		payload, err = json.Marshal(info)
 
 		// save it to DB
 		err = b.Put(newIDBytes, payload)
@@ -83,13 +63,15 @@ func (store *Store) StoreResendPacket(bucket string, lastUsedID *uint16, options
 
 	if err != nil {
 		log.Error().
-			Uint16("mid", options.Packet.MessageID).
+			Uint16("mid", info.MessageID).
+			Str("topic", info.Topic).
 			Str("bucket", bucket).
 			Err(err).
 			Msg("Can not store packet")
 	} else {
 		log.Debug().
-			Uint16("mid", options.Packet.MessageID).
+			Uint16("mid", info.MessageID).
+			Str("topic", info.Topic).
 			Str("bucket", bucket).
 			Msg("Packet stored")
 	}

@@ -4,8 +4,6 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
 func Test_Store(t *testing.T) {
@@ -21,52 +19,52 @@ func Test_Store(t *testing.T) {
 		t.Error(err)
 	}
 
-	// store an packet
-	newControlPacket := packets.NewControlPacket(packets.Publish)
-	newPacket := newControlPacket.(*packets.PublishPacket)
-	newPacket.TopicName = "Integrationtest"
-
-	var newMessageID uint16 = 0
-	option := StoreResendPacketOptions{
+	option := PacketInfo{
 		ResendAt: time.Now().Add(time.Minute * 1),
-		Packet:   newPacket,
+		Topic:    "Integrationtest",
 	}
 
-	err = store.StoreResendPacket("integrtest", &newMessageID, &option)
-	if newMessageID != 0 || err != nil {
+	err = store.StoreResendPacket("integrtest", &option)
+	if option.MessageID != 0 || err != nil {
+		t.Error("newMessageID != 0")
 		t.FailNow()
 	}
 
 	// try again
-	newMessageID = 0
-	err = store.StoreResendPacket("integrtest", &newMessageID, &option)
-	if newMessageID != 1 || err != nil {
+	option.MessageID = 0
+	err = store.StoreResendPacket("integrtest", &option)
+	if option.MessageID != 1 || err != nil {
+		t.Error("newMessageID != 1")
 		t.FailNow()
 	}
 
 	// try again
-	newMessageID = 5
-	err = store.StoreResendPacket("integrtest", &newMessageID, &option)
-	if newMessageID != 5 || err != nil {
+	option.MessageID = 5
+	err = store.StoreResendPacket("integrtest", &option)
+	if option.MessageID != 5 || err != nil {
+		t.Error("newMessageID != 5")
 		t.FailNow()
 	}
 
 	// try again
-	newMessageID = 0
-	err = store.StoreResendPacket("integrtest", &newMessageID, &option)
-	if newMessageID != 2 || err != nil {
+	option.MessageID = 0
+	err = store.StoreResendPacket("integrtest", &option)
+	if option.MessageID != 2 || err != nil {
+		t.Error("newMessageID != 2")
 		t.FailNow()
 	}
 
 	// iterate, there should be two packages
 	var counter int
-	store.IterateResendPackets("integrtest", func(storedInfo *StoreResendPacketOptions) {
+	store.IterateResendPackets("integrtest", func(storedInfo *PacketInfo) {
 		counter++
-		if storedInfo.Packet.TopicName != "Integrationtest" {
+		if storedInfo.Topic != "Integrationtest" {
+			t.Error("storedInfo.Topic != 'Integrationtest'")
 			t.FailNow()
 		}
 	})
 	if counter != 4 {
+		t.Error("counter != 4")
 		t.FailNow()
 	}
 

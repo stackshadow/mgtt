@@ -1,16 +1,14 @@
 package messagestore
 
 import (
-	"bytes"
 	"encoding/binary"
 	"encoding/json"
 
 	"github.com/boltdb/bolt"
-	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
 // GetPacketByID return the package by id
-func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (storedInfo *StoreResendPacketOptions, err error) {
+func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (storedInfo *PacketInfo, err error) {
 
 	err = store.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
@@ -19,33 +17,35 @@ func (store *Store) GetPacketByID(bucket string, brokerMessageID uint16) (stored
 			return nil
 		}
 
+		// convert to le-uint16
 		brokerMessageIDBytes := make([]byte, 2)
 		binary.LittleEndian.PutUint16(brokerMessageIDBytes, brokerMessageID)
 
 		v := b.Get(brokerMessageIDBytes)
 
 		// parse json
-		var info packetInfo
-		err = json.Unmarshal(v, &info)
+		err = json.Unmarshal(v, storedInfo)
 		if err != nil {
 			return err
 		}
 
 		// load the packet
-		publishPacketData := bytes.NewBuffer(info.PacketData)
-		publishPacketGeneric, err := packets.ReadPacket(publishPacketData)
-		if err != nil {
-			return err
-		}
-		publishPacket := publishPacketGeneric.(*packets.PublishPacket)
+		/*
+			publishPacketData := bytes.NewBuffer(info.PacketData)
+			publishPacketGeneric, err := packets.ReadPacket(publishPacketData)
+			if err != nil {
+				return err
+			}
+			publishPacket := publishPacketGeneric.(*packets.PublishPacket)
 
-		//
-		storedInfo = &StoreResendPacketOptions{
-			ClientID: info.ClientID,
-			OriginID: info.OriginID,
-			ResendAt: info.ResendAt,
-			Packet:   publishPacket,
-		}
+			//
+			storedInfo = &StoreResendPacketOptions{
+				ClientID: info.ClientID,
+				OriginID: info.OriginID,
+				ResendAt: info.ResendAt,
+				Packet:   publishPacket,
+			}
+		*/
 
 		return nil
 	})
