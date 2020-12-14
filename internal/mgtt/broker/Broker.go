@@ -22,4 +22,14 @@ type Broker struct {
 
 	// an boltDB to store retained messages
 	retainedMessages *messagestore.Store
+
+	// myid -> originalID
+	pubrecs map[uint16]Qos2
+}
+
+// Qos2 store infos for QoS2-Packets
+type Qos2 struct {
+	originalClientID string
+	originalID       uint16
+	receivedPubRec   bool
 }

@@ -1,8 +1,6 @@
 package broker
 
 import (
-	"errors"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
@@ -10,30 +8,26 @@ import (
 
 func (broker *Broker) handlePubrecPacket(connectedClient *client.MgttClient, packet *packets.PubrecPacket) (err error) {
 
-	// okay, we try to find the package in our "resend"-storage
-	// find the package
-	storedInfo, err := broker.retainedMessages.GetPacketByID("resend", packet.MessageID)
-	if err != nil {
-		return err
-	}
+	// we need to store the info that we get pubrec
+	if qosinfo, exist := broker.pubrecs[packet.MessageID]; exist {
+		log.Debug().
+			Uint16("pid", packet.MessageID).
+			Uint16("opid", qosinfo.originalID).
+			Msg("Get pubrec and set received to true")
 
-	// cool, we look for the client
-	if storedInfo.ClientID != "" {
+		qosinfo.receivedPubRec = true
+		broker.pubrecs[packet.MessageID] = qosinfo
 
-		client, clientExist := broker.clients[storedInfo.ClientID]
-		if clientExist == false {
-			err = errors.New("Client '" + storedInfo.ClientID + "' not exist anymore.")
-		}
+		// remove it from resend-request
+		broker.retainedMessages.DeletePacketWithID("resend", packet.MessageID)
 
-		// send pubcomp
-		client.SendPubcomp(storedInfo.OriginID)
+		// request pubrel
+		connectedClient.SendPubrel(packet.MessageID)
 	} else {
-		log.Info().Msg("No client stored, this should not happen, but we proceeed")
+		log.Error().
+			Uint16("pid", packet.MessageID).
+			Msg("Not found in the pubrec-list")
 	}
-
-	connectedClient.SendPubrel(packet.MessageID)
-
-	// err = broker.retainedMessages.DeletePacketWithID("unreleased", pubrecPacket.MessageID)
 
 	return
 }

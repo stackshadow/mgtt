@@ -12,6 +12,7 @@ func (broker *Broker) Publish(topic string, payload []byte, retain bool, QoS byt
 	pub.TopicName = topic
 	pub.Payload = payload
 	pub.Qos = QoS
+
 	broker.lastID++
 
 	for _, client := range broker.clients {

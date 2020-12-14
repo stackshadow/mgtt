@@ -11,7 +11,7 @@ import (
 
 func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
-	var packetID uint16 = packet.MessageID
+	var originalPacketID uint16 = packet.MessageID
 
 	//  QoS1 - Store package only if its not duplicated
 	if packet.Dup == false {
@@ -19,16 +19,22 @@ func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet 
 		// we need a new ID
 		broker.lastIDLock.Lock()
 
-		options := messagestore.StoreResendPacketOptions{
-			ClientID: client.ID(),
-			ResendAt: time.Now().Add(time.Minute * 1),
-			Packet:   packet,
+		options := messagestore.PacketInfo{
+			ResendAt:  time.Now().Add(time.Minute * 1),
+			Topic:     packet.TopicName,
+			MessageID: broker.lastID,
+			Qos:       packet.Qos,
+			Payload:   packet.Payload,
 		}
 
 		//
-		err = broker.retainedMessages.StoreResendPacket("resend", &broker.lastID, &options)
+		err = broker.retainedMessages.StoreResendPacket("resend", &options)
 
+		broker.lastID = options.MessageID
 		broker.lastIDLock.Unlock()
+
+		// and we will send the packet with our messageID :)
+		packet.MessageID = options.MessageID
 	}
 
 	// Publish to all clients
@@ -38,19 +44,35 @@ func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet 
 		// publish packet to all subscribers
 		messagedelivered, err = broker.PublishPacket(packet, false)
 
-		// no message delivered
-		if messagedelivered == true {
-			broker.retainedMessages.DeletePacketWithID("resend", packet.MessageID)
-		} else {
+		// message not delivered and no error occured -> client is not interested
+		if messagedelivered == false && err == nil {
 			log.Info().
 				Str("topic", packet.TopicName).
 				Uint16("mid", packet.MessageID).
 				Msg("Nobody is interested in this message")
-
 		}
 
 	}
 
-	client.SendPuback(packetID)
+	// we handle the packet, so we can ack it
+	if packet.Qos == 1 {
+		client.SendPuback(originalPacketID)
+	}
+	if packet.Qos == 2 {
+
+		// store it in the list
+		broker.pubrecs[packet.MessageID] = Qos2{
+			originalClientID: client.ID(),
+			originalID:       originalPacketID,
+			receivedPubRec:   false,
+		}
+		log.Info().
+			Str("topic", packet.TopicName).
+			Uint16("mid", packet.MessageID).
+			Msg("Store to pubrec")
+
+		client.SendPubrec(originalPacketID)
+	}
+
 	return
 }

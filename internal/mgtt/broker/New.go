@@ -12,6 +12,7 @@ func New() (broker *Broker, err error) {
 	broker = &Broker{
 		clients:      make(map[string]*client.MgttClient),
 		clientEvents: make(chan *Event, 10),
+		pubrecs:      make(map[uint16]Qos2),
 	}
 
 	// remember the current broker

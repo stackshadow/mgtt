@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
 	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
@@ -24,20 +25,26 @@ func (broker *Broker) loopHandleResendPackets() {
 
 			// check if we need to resend messages that are not replyed with PUBACK
 			log.Debug().Msg("Check if packets need to be resended")
-			broker.retainedMessages.IterateResendPackets("resend", func(storedInfo *messagestore.StoreResendPacketOptions) {
+			broker.retainedMessages.IterateResendPackets("resend", func(storedInfo *messagestore.PacketInfo) {
 
 				// check if time is up
 				if time.Now().After(storedInfo.ResendAt) == true {
 
-					storedInfo.Packet.Dup = true     // this is an duplicate packet
-					storedInfo.Packet.Retain = false // resend, not retain ;)
+					// we create a new publish packet
+					pubPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+					pubPacket.MessageID = storedInfo.MessageID
+					pubPacket.Retain = false
+					pubPacket.Dup = true // this is an duplicate packet
+					pubPacket.TopicName = storedInfo.Topic
+					pubPacket.Payload = storedInfo.Payload
+					pubPacket.Qos = storedInfo.Qos
 
 					log.Debug().
-						Uint16("packet-mid", storedInfo.Packet.MessageID).
-						Str("topic", storedInfo.Packet.TopicName).
+						Uint16("packet-mid", pubPacket.MessageID).
+						Str("topic", pubPacket.TopicName).
 						Msg("Resend packet")
 
-					normalClose, err := broker.loopHandleBrokerPacket(retryClient, storedInfo.Packet)
+					normalClose, err := broker.loopHandleBrokerPacket(retryClient, pubPacket)
 					if err != nil || normalClose {
 						return
 					}

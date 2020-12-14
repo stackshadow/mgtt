@@ -40,7 +40,7 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 	case 1:
 		err = broker.handlePublishPacketQoS1(client, packet)
 	case 2:
-		err = broker.handlePublishPacketQoS2(client, packet)
+		err = broker.handlePublishPacketQoS1(client, packet)
 	}
 
 	return

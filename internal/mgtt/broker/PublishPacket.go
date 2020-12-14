@@ -6,9 +6,12 @@ import (
 )
 
 // PublishPacket publish a packet to all subscribers
+//
+// err will return the last occured error of an subscriber
 func (broker *Broker) PublishPacket(packet *packets.PublishPacket, once bool) (messagedelivered bool, err error) {
 
 	var published bool
+	var publishError error
 
 	// [MQTT-3.3.1-9]
 	// MUST set the RETAIN flag to 0 when a PUBLISH Packet is sent to a Client
@@ -20,13 +23,17 @@ func (broker *Broker) PublishPacket(packet *packets.PublishPacket, once bool) (m
 		clientID := client.ID()
 		userName := client.Username()
 		if plugin.CallOnSendToSubscriberRequest(clientID, userName, packet.TopicName) == true {
-			published, err = client.Publish(packet)
+			published, publishError = client.Publish(packet)
 			if once == true {
 				if published == true {
 					return true, nil
 				}
 			}
+
 			messagedelivered = messagedelivered || published
+			if publishError != nil {
+				err = publishError
+			}
 		}
 	}
 
