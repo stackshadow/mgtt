@@ -25,6 +25,7 @@ func (broker *Broker) loopHandleBrokerPacket(eventClient *client.MgttClient, eve
 		return
 	case *packets.DisconnectPacket:
 		err = broker.handleDisConnectPacket(eventClient)
+		normalClose = true
 		return
 	}
 

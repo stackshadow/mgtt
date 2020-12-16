@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// MatchRoute compare an route with an topic
 func MatchRoute(route string, topic string) (match bool) {
 
 	routeArray := strings.Split(route, "/")
@@ -15,6 +16,7 @@ func MatchRoute(route string, topic string) (match bool) {
 	return Match(routeArray, topicArray)
 }
 
+// Match compare an selector route with an given topic
 func Match(route []string, topic []string) bool {
 	if len(route) == 0 {
 		return len(topic) == 0
@@ -34,6 +36,11 @@ func Match(route []string, topic []string) bool {
 	return false
 }
 
+// Publish an publish-packet
+//
+// published returned true if the message could be send
+//
+// err is returned if something is wrong with the connection
 func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (published bool, err error) {
 
 	topic := pubpacket.TopicName
