@@ -7,6 +7,6 @@ import (
 
 func (broker *Broker) handlePingreqPacket(connectedClient *client.MgttClient, packet *packets.PingreqPacket) (err error) {
 
-	err = connectedClient.SendPingresp()
+	connectedClient.SendPingresp()
 	return
 }

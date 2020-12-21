@@ -38,18 +38,20 @@ func Match(route []string, topic []string) bool {
 
 // Publish an publish-packet
 //
-// published returned true if the message could be send
+// this function check if the topic in the `packet` matches the client-topic-filter
 //
-// err is returned if something is wrong with the connection
-func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (published bool, err error) {
+// - return true if the message could be send
+//
+// - err is returned if something is wrong with the connection
+func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool, err error) {
 
-	topic := pubpacket.TopicName
+	topic := packet.TopicName
 	topicArray := strings.Split(topic, "/")
 	topicMatched := false
 
 	// check if one of our subscription matched
 	// this prevents multiple sending of packet to a single client
-	for _, subscriptionTopic := range c.subscriptionTopics {
+	for _, subscriptionTopic := range client.subscriptionTopics {
 		subscriptionTopicArray := strings.Split(subscriptionTopic, "/")
 
 		// [MQTT-3.3.2-3]
@@ -64,12 +66,13 @@ func (c *MgttClient) Publish(pubpacket *packets.PublishPacket) (published bool, 
 
 	if topicMatched == true {
 		log.Info().
-			Str("clientid", c.ID()).
-			Uint16("mid", pubpacket.MessageID).
-			Str("topic", pubpacket.TopicName).
+			Str("clientid", client.ID()).
+			Uint16("mid", packet.MessageID).
+			Str("topic", packet.TopicName).
 			Msg("Publish message to client")
 
-		err = pubpacket.Write(c.connection)
+		client.sendPackets <- packet
+
 		published = true
 	}
 

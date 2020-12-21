@@ -18,6 +18,7 @@ type MgttClient struct {
 	subscriptionTopics []string
 
 	recvPackets chan packets.ControlPacket
+	sendPackets chan packets.ControlPacket // send-buffer to avoid double-write
 }
 
 // New create a new MgttClient with id of "unknown"
@@ -27,6 +28,7 @@ func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
 		id:          "unknown",
 		connection:  connection,
 		recvPackets: make(chan packets.ControlPacket, 10),
+		sendPackets: make(chan packets.ControlPacket, 10),
 	}
 
 	// setup timeout

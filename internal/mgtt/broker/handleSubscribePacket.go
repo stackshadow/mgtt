@@ -23,7 +23,7 @@ func (broker *Broker) handleSubscribePacket(connectedClient *client.MgttClient, 
 	}
 
 	// thats all, respond
-	connectedClient.SendSuback(packet, topicResuls)
+	connectedClient.SendSuback(packet.MessageID, topicResuls)
 
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client

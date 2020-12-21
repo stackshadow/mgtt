@@ -25,16 +25,16 @@ const (
 func (client *MgttClient) SendConnack(ReturnCode byte) (err error) {
 
 	// construct the package
-	conAck := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
-	conAck.ReturnCode = ReturnCode
+	packet := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
+	packet.ReturnCode = ReturnCode
 
 	log.Debug().
 		Str("cid", client.ID()).
 		Uint8("return code", ReturnCode).
 		Msg("Send CONACK")
 
-	// send it
-	err = conAck.Write(client.connection)
+	// queue packet
+	client.sendPackets <- packet
 
 	return
 }

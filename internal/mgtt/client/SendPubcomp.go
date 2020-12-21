@@ -9,16 +9,16 @@ import (
 func (client *MgttClient) SendPubcomp(MessageID uint16) (err error) {
 
 	// construct the package
-	pubcomp := packets.NewControlPacket(packets.Pubcomp).(*packets.PubcompPacket)
-	pubcomp.MessageID = MessageID
+	packet := packets.NewControlPacket(packets.Pubcomp).(*packets.PubcompPacket)
+	packet.MessageID = MessageID
 
 	log.Debug().
 		Str("cid", client.ID()).
 		Uint16("mid", MessageID).
 		Msg("Send PUBCOMP")
 
-	// send it
-	err = pubcomp.Write(client.connection)
+	// queue packet
+	client.sendPackets <- packet
 
 	return
 }

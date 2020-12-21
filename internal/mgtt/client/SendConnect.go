@@ -6,21 +6,21 @@ import (
 )
 
 // SendConnect will send an CON-Package to the remote
-func (client *MgttClient) SendConnect(username, password, clientid string) (err error) {
+func (client *MgttClient) SendConnect(username, password, clientid string) {
 
 	// construct the package
-	connect := packets.NewControlPacket(packets.Connect).(*packets.ConnectPacket)
-	connect.Username = username
-	connect.Password = []byte(password)
-	connect.ClientIdentifier = clientid
+	packet := packets.NewControlPacket(packets.Connect).(*packets.ConnectPacket)
+	packet.Username = username
+	packet.Password = []byte(password)
+	packet.ClientIdentifier = clientid
 
 	log.Debug().
 		Str("cid", clientid).
 		Str("username", username).
 		Msg("Send CONNECKT")
 
-	// send it
-	err = connect.Write(client.connection)
+	// queue packet
+	client.sendPackets <- packet
 
 	return
 }

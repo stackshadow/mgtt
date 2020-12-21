@@ -9,16 +9,16 @@ import (
 func (client *MgttClient) SendPuback(MessageID uint16) (err error) {
 
 	// construct the package
-	puback := packets.NewControlPacket(packets.Puback).(*packets.PubackPacket)
-	puback.MessageID = MessageID
+	packet := packets.NewControlPacket(packets.Puback).(*packets.PubackPacket)
+	packet.MessageID = MessageID
 
 	log.Debug().
 		Str("cid", client.ID()).
 		Uint16("mid", MessageID).
 		Msg("Send PUBACK")
 
-	// send it
-	err = puback.Write(client.connection)
+	// queue packet
+	client.sendPackets <- packet
 
 	return
 }

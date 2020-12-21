@@ -22,12 +22,12 @@ const (
 )
 
 // SendSuback will send an SUBACK-Package
-func (client *MgttClient) SendSuback(packet *packets.SubscribePacket, ReturnCodes []byte) (err error) {
+func (client *MgttClient) SendSuback(MessageID uint16, ReturnCodes []byte) (err error) {
 
 	// construct the package
-	suback := packets.NewControlPacket(packets.Suback).(*packets.SubackPacket)
-	suback.MessageID = packet.MessageID
-	suback.ReturnCodes = ReturnCodes
+	packet := packets.NewControlPacket(packets.Suback).(*packets.SubackPacket)
+	packet.MessageID = MessageID
+	packet.ReturnCodes = ReturnCodes
 
 	log.Debug().
 		Str("cid", client.ID()).
@@ -35,8 +35,8 @@ func (client *MgttClient) SendSuback(packet *packets.SubscribePacket, ReturnCode
 		Bytes("return code", ReturnCodes).
 		Msg("Send PUBCOMP")
 
-	// send it
-	err = suback.Write(client.connection)
+	// queue packet
+	client.sendPackets <- packet
 
 	return
 }

@@ -6,17 +6,17 @@ import (
 )
 
 // SendPingreq will send an PINGREQ-Package
-func (client *MgttClient) SendPingreq() (err error) {
+func (client *MgttClient) SendPingreq() {
 
 	// construct the package
-	pingReq := packets.NewControlPacket(packets.Pingreq).(*packets.PingreqPacket)
+	packet := packets.NewControlPacket(packets.Pingreq).(*packets.PingreqPacket)
 
 	log.Debug().
 		Str("cid", client.ID()).
 		Msg("Send PINGREQ")
 
-	// send it
-	err = pingReq.Write(client.connection)
+	// queue packet
+	client.sendPackets <- packet
 
 	return
 }
