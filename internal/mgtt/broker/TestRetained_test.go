@@ -119,4 +119,7 @@ func TestRetained(t *testing.T) {
 	subscribeLock.Lock()
 	time.Sleep(time.Second * 1)
 	pahoClient.Disconnect(200)
+
+	server.ServeClose()
+	time.Sleep(time.Second * 3)
 }

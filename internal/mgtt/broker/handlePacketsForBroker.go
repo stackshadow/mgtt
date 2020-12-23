@@ -11,7 +11,7 @@ import (
 // Communicate will handle incoming messages
 //
 // - this is a BLOCKING function
-func (broker *Broker) loopHandleBrokerPacket(eventClient *client.MgttClient, eventPacket packets.ControlPacket) (normalClose bool, err error) {
+func (broker *Broker) handlePacketsForBroker(eventClient *client.MgttClient, eventPacket packets.ControlPacket) (normalClose bool, err error) {
 
 	log.Debug().
 		Uint16("mid", eventPacket.Details().MessageID).

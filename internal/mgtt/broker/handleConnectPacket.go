@@ -4,20 +4,17 @@ import (
 	"errors"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
-	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
 func (broker *Broker) handleConnectPacket(connectedClient *client.MgttClient, packet *packets.ConnectPacket) (err error) {
 
-	// set the client id
-	connectedClient.IDSet(packet.ClientIdentifier)
-
 	// MQTT-3.1.0-2
 	// Check if the client is already connected
 	if err == nil { // prevent multiple return
-		if _, exists := broker.clients[connectedClient.ID()]; exists == true {
+		if exists := clientlist.Exist(packet.ClientIdentifier); exists == true {
 			err = errors.New("Protocol violation. Client already exist")
 		}
 	}
@@ -34,6 +31,9 @@ func (broker *Broker) handleConnectPacket(connectedClient *client.MgttClient, pa
 	// add client to the list
 	if err == nil { // prevent multiple return
 
+		// Move the client to the newID
+		clientlist.Move(connectedClient.ID(), packet.ClientIdentifier)
+
 		// store the username
 		connectedClient.UsernameSet(packet.Username)
 
@@ -42,10 +42,6 @@ func (broker *Broker) handleConnectPacket(connectedClient *client.MgttClient, pa
 
 		// reset timeout
 		connectedClient.ResetTimeout()
-
-		// add client to the list
-		log.Info().Str("clientid", connectedClient.ID()).Msg("Add new client to client-list")
-		broker.clients[connectedClient.ID()] = connectedClient
 
 		// send CONACK
 		err = connectedClient.SendConnack(client.ConnackAccepted)

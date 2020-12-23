@@ -1,6 +1,9 @@
 package broker
 
-import "github.com/eclipse/paho.mqtt.golang/packets"
+import (
+	"github.com/eclipse/paho.mqtt.golang/packets"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
+)
 
 // Publish will publish a message to all clients
 func (broker *Broker) Publish(topic string, payload []byte, retain bool, QoS byte) (err error) {
@@ -15,9 +18,6 @@ func (broker *Broker) Publish(topic string, payload []byte, retain bool, QoS byt
 
 	broker.lastID++
 
-	for _, client := range broker.clients {
-		client.Publish(pub)
-	}
-
+	_, err = clientlist.PublishToAllClients(pub, false)
 	return
 }

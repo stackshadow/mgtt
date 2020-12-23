@@ -10,6 +10,9 @@ func (client *MgttClient) Close() (err error) {
 
 	err = client.connection.Close()
 
+	// close the loop
+	client.packetSendLoopExit <- true
+
 	client.Connected = false
 	return
 }

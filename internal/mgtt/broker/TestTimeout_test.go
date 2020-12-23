@@ -55,4 +55,6 @@ func TestTimeout(t *testing.T) {
 		t.FailNow()
 	}
 
+	server.ServeClose()
+	time.Sleep(time.Second * 3)
 }

@@ -10,7 +10,9 @@
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/mgtt/main.go",
-      "env": {},
+      "env": {
+        "CERT_DNS": "localhost"
+      },
       "args": ["--terminal", "-v", "serve", "--url", "tcp://0.0.0.0:8883"]
     },
     {
@@ -18,7 +20,7 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/main.go",
+      "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
       "args": ["--terminal", "-v", "create-cert", "--self-signed"]
     },
@@ -27,16 +29,25 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/main.go",
-      "env": {},
-      "args": ["--terminal", "-v", "serve", "--url", "tcp://0.0.0.0:8883",  "--self-signed"]
+      "program": "${workspaceFolder}/cmd/mgtt/main.go",
+      "env": { "CERT_DNS": "localhost,mqtt.boatup.de", "PLUGINS": "" },
+      "args": [
+        "--terminal",
+        "-v",
+        "--plugins",
+        "",
+        "serve",
+        "--url",
+        "tcp://0.0.0.0:8883",
+        "--self-signed"
+      ]
     },
     {
       "name": "Create CA",
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/main.go",
+      "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
       "args": ["--terminal", "-v", "create-ca"]
     },
@@ -45,16 +56,16 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/main.go",
+      "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-cert" ]
+      "args": ["--terminal", "-v", "create-cert"]
     },
     {
       "name": "Client - Cert",
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/main.go",
+      "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
       "args": [
         "--terminal",

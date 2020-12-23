@@ -1,9 +1,9 @@
 package broker
 
 import (
+	"net"
 	"sync"
 
-	"gitlab.com/mgtt/internal/mgtt/client"
 	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
 )
 
@@ -11,7 +11,9 @@ var ConnectTimeout int64 = 30
 
 // Broker represents a broker
 type Broker struct {
-	clients map[string]*client.MgttClient
+
+	// listener
+	serverListener net.Listener
 
 	// clientEvents are raw incoming events qos=0 qos=1 qos=2
 	clientEvents chan *Event
@@ -25,6 +27,9 @@ type Broker struct {
 
 	// myid -> originalID
 	pubrecs map[uint16]Qos2
+
+	// loop signals
+	loopHandleResendPacketsExit chan bool
 }
 
 // Qos2 store infos for QoS2-Packets

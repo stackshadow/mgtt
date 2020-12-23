@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -18,15 +19,24 @@ type MgttClient struct {
 	subscriptionTopics []string
 
 	recvPackets chan packets.ControlPacket
+	sendPackets chan packets.ControlPacket // send-buffer to avoid double-write
+
+	// loop signals
+	packetSendLoopExit chan bool
 }
 
 // New create a new MgttClient with id of "unknown"
 func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
 
+	// create a new client with an new random-id
+	guid := xid.New()
+
 	newClient = &MgttClient{
-		id:          "unknown",
-		connection:  connection,
-		recvPackets: make(chan packets.ControlPacket, 10),
+		id:                 guid.String(),
+		connection:         connection,
+		recvPackets:        make(chan packets.ControlPacket, 10),
+		sendPackets:        make(chan packets.ControlPacket, 10),
+		packetSendLoopExit: make(chan bool),
 	}
 
 	// setup timeout
@@ -34,6 +44,9 @@ func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
 		log.Debug().Int64("timeout", secondsTimeout).Msg("Set deadline for client")
 		connection.SetDeadline(time.Now().Add(time.Second * time.Duration(secondsTimeout)))
 	}
+
+	// start the write-loop
+	go newClient.packetSendLoop()
 
 	return
 }

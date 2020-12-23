@@ -9,16 +9,13 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
-
-	"gitlab.com/mgtt/internal/mgtt/client"
-	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
 // Serve will create a new broker and wait for clients
-func (broker *Broker) Serve(config Config) (err error) {
+func (b *Broker) Serve(config Config) (err error) {
 
 	// retainedMessages-db
-	broker.retainedMessages, err = messagestore.Open(config.DBFilename)
+	b.retainedMessages, err = messagestore.Open(config.DBFilename)
 	if err != nil {
 		return
 	}
@@ -30,11 +27,10 @@ func (broker *Broker) Serve(config Config) (err error) {
 	pub.TopicName = "$SYS/broker/version"
 	pub.Payload = []byte(config.Version)
 	pub.Qos = 0
-	broker.retainedMessages.StorePacketWithTopic("retained", pub.TopicName, pub)
+	b.retainedMessages.StorePacketWithTopic("retained", pub.TopicName, pub)
 
 	var serverURL *url.URL
 	serverURL, err = url.Parse(config.URL)
-	var serverListener net.Listener
 
 	// check schema
 	if serverURL.Scheme != "tcp" {
@@ -51,10 +47,10 @@ func (broker *Broker) Serve(config Config) (err error) {
 		var TLSConfig *tls.Config
 		TLSConfig, err = getTLSConfig(config)
 		if err == nil {
-			serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), TLSConfig)
+			b.serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), TLSConfig)
 		}
 	} else {
-		serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
+		b.serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
 	}
 
 	// check if an error occured
@@ -77,58 +73,24 @@ func (broker *Broker) Serve(config Config) (err error) {
 	}
 
 	// retry
-	go broker.loopHandleResendPackets()
+	go b.loopHandleResendPackets()
 
 	for {
 
 		// wait for a new client
 		log.Info().Msg("Wait for new client")
 		var newConnection net.Conn
-		newConnection, err = serverListener.Accept()
+		newConnection, err = b.serverListener.Accept()
 		if err != nil {
 			log.Error().Err(err).Msg("Accept()")
+			break
 		}
 
-		// create a new client
+		// handle a new client
 		if err == nil {
-
-			go func() {
-				newClient := client.New(newConnection, ConnectTimeout)
-				log.Info().Msg("New client connected")
-
-				plugin.CallRemoteAddr(newClient.RemoteAddr())
-
-				// run communicate
-				newClient.Communicate()
-
-				// do communication
-				var normalClose bool
-				for {
-
-					// get packet from the client-buffer
-					recvdPacket := newClient.GetPacket()
-
-					// if we get a nil-packet, client-connection is closed
-					if recvdPacket == nil {
-						err = nil
-						break
-					}
-
-					normalClose, err = broker.loopHandleBrokerPacket(newClient, recvdPacket)
-					if err != nil || normalClose {
-						break
-					}
-				}
-
-				if err != nil {
-					log.Error().Err(err).Send()
-				}
-				broker.handleDisConnectPacket(newClient)
-				newClient.Close()
-
-			}()
-
+			go handleNewClient(newConnection)
 		}
 	}
 
+	return
 }
