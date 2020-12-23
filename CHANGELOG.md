@@ -1,3 +1,11 @@
+## v0.14.0
+- [clientlist] Add new package clientlist that holds all our connected clients
+- [broker] Add Stop of server
+- [broker] Rework broker-loops
+- [client] Remove receiver-loop
+- [client] Add sender-loop
+- Fix all tests
+
 ## v0.13.0
 
 ### REFACTOR
