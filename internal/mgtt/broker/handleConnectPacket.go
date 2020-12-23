@@ -43,6 +43,18 @@ func (broker *Broker) handleConnectPacket(connectedClient *client.MgttClient, pa
 		// reset timeout
 		connectedClient.ResetTimeout()
 
+		// Las will message ?
+		if packet.WillFlag == true {
+			// we create a new publish packet
+			pubPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+			pubPacket.Retain = packet.WillRetain
+			pubPacket.TopicName = packet.WillTopic
+			pubPacket.Payload = packet.WillMessage
+			pubPacket.Qos = packet.WillQos
+
+			connectedClient.LastWillSet(pubPacket)
+		}
+
 		// send CONACK
 		err = connectedClient.SendConnack(client.ConnackAccepted)
 

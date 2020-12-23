@@ -48,6 +48,11 @@ func handleNewClient(newConnection net.Conn) {
 			log.Error().Err(err).Send()
 		}
 
+		// last-Will-message
+		if lastWillPacket := newClient.LastWillGet(); lastWillPacket != nil {
+			Current.handlePublishPacket(newClient, lastWillPacket)
+		}
+
 		// Remove the client from the list
 		clientlist.Remove(newClient.ID())
 

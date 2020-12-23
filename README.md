@@ -35,7 +35,7 @@ And now i found out, that for QoS-2 the "specification" not suit my needs:
 - [x] QoS 2 messages
 - [x] Retained messages stored on [boltdb](https://github.com/boltdb/bolt) on disk
 - [x] Automatic resending of failed packets
-- [ ] Will messages
+- [x] Will message
 - [x] Plugins
 - [x] TLS/SSL
 - [x] Disconnect
