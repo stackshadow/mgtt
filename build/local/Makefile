@@ -27,22 +27,24 @@ mgtt/mgtt:
 	cd mgtt && \
 	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt .
 
+# command line mmdc
+mmdc: docs/assets/node_modules/.bin/mmdc
 docs/assets/node_modules/.bin/mmdc:
 	cd docs && \
 	yarn add -s @mermaid-js/mermaid-cli
 
+# images
 docs/assets/QoS2.png: mmdc
 	cd docs/assets && \
 	./node_modules/.bin/mmdc -p puppeteer-config.json -i QoS2.mmd -o QoS2.png
 
-mmdc: docs/assets/node_modules/.bin/mmdc
-images: docs/assets/QoS2.png
-docs: images
+
+assets: docs/assets/QoS2.png
+docs: assets
 
 
 
 tests:
-	cd mgtt ;\
 	go test -timeout 30s -parallel 1 -coverprofile=coverage.out  ./... ;\
 	go tool cover -html=coverage.out -o coverage.html
 

@@ -3,6 +3,7 @@ package broker
 import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/internal/mgtt/client"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
@@ -23,21 +24,20 @@ func (broker *Broker) handleSubscribePacket(connectedClient *client.MgttClient, 
 	}
 
 	// thats all, respond
-	connectedClient.SendSuback(packet, topicResuls)
+	connectedClient.SendSuback(packet.MessageID, topicResuls)
 
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client
 	if err == nil { // prevent multiple return
 		broker.retainedMessages.IteratePackets("retained", func(retainedPacket *packets.PublishPacket) {
-			for _, client := range broker.clients {
 
-				// [MQTT-3.3.1-8]
-				// When sending a PUBLISH Packet to a Client the Server MUST set the RETAIN flag to 1
-				// if a message is sent as a result of a new subscription being made by a Client.
-				retainedPacket.Retain = true
+			// [MQTT-3.3.1-8]
+			// When sending a PUBLISH Packet to a Client the Server MUST set the RETAIN flag to 1
+			// if a message is sent as a result of a new subscription being made by a Client.
+			retainedPacket.Retain = true
 
-				client.Publish(retainedPacket)
-			}
+			clientlist.PublishToAllClients(retainedPacket, false)
+
 		})
 	}
 

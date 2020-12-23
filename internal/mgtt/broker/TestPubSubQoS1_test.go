@@ -12,6 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var testserver *Broker
+
 func ServeForTests(t *testing.T) {
 
 	// setup logger
@@ -24,8 +26,8 @@ func ServeForTests(t *testing.T) {
 
 	// ############################################### the broker
 	os.Remove("test1.db")
-	server, _ := New()
-	go server.Serve(
+	testserver, _ = New()
+	go testserver.Serve(
 		Config{
 			URL:        "tcp://127.0.0.1:1237",
 			DBFilename: "test1.db",
@@ -106,4 +108,7 @@ func TestPubSubQoS1(t *testing.T) {
 
 	pahoClientPub.Disconnect(500)
 	pahoClientSub.Disconnect(500)
+
+	testserver.ServeClose()
+	time.Sleep(time.Second * 3)
 }

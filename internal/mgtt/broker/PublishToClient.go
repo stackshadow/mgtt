@@ -5,18 +5,14 @@ import (
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/internal/mgtt/client"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
 // PublishToClient publish an message to an specific client ( and only to this ! )
 func (broker *Broker) PublishToClient(clientID string, topic string, payload []byte) (err error) {
 
 	// find the client
-	var client *client.MgttClient
-	for _, curClient := range broker.clients {
-		if curClient.ID() == clientID {
-			client = curClient
-		}
-	}
+	var client *client.MgttClient = clientlist.Get(clientID)
 
 	if client != nil {
 		// construct the package

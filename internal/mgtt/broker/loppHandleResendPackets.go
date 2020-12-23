@@ -17,11 +17,24 @@ func (broker *Broker) loopHandleResendPackets() {
 	retryClient.IDSet("resend")
 	retryClient.Connected = true
 
-	go func() {
-		for {
+	triggerTime := time.Now()
+	triggerTime = triggerTime.Add(time.Minute * 1)
 
-			// wait a bit
-			time.Sleep(time.Minute * 1)
+loop:
+	for {
+
+		select {
+		case <-broker.loopHandleResendPacketsExit:
+			log.Debug().Msg("STOP go-routine loopHandleResendPackets()")
+			break loop
+		default:
+
+			if time.Now().After(triggerTime) == false {
+				time.Sleep(time.Second * 1)
+				continue
+			}
+			triggerTime = time.Now()
+			triggerTime = triggerTime.Add(time.Minute * 1)
 
 			// check if we need to resend messages that are not replyed with PUBACK
 			log.Debug().Msg("Check if packets need to be resended")
@@ -44,8 +57,8 @@ func (broker *Broker) loopHandleResendPackets() {
 						Str("topic", pubPacket.TopicName).
 						Msg("Resend packet")
 
-					normalClose, err := broker.loopHandleBrokerPacket(retryClient, pubPacket)
-					if err != nil || normalClose {
+					err := broker.handlePublishPacket(retryClient, pubPacket)
+					if err != nil {
 						return
 					}
 
@@ -57,5 +70,6 @@ func (broker *Broker) loopHandleResendPackets() {
 			})
 
 		}
-	}()
+	}
+
 }

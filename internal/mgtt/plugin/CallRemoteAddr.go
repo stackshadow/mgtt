@@ -1,7 +1,7 @@
 package plugin
 
-// CallRemoteAddr will call the OnPublishRecvRequest-Function on all plugins
-func CallRemoteAddr(remoteAddr string) {
+// CallOnNewClient will call the OnNewClient-Function on all plugins
+func CallOnNewClient(remoteAddr string) {
 
 	for _, plugin := range pluginList {
 		if plugin.OnNewClient != nil {
