@@ -16,6 +16,9 @@ type MgttClient struct {
 	connection net.Conn
 	Connected  bool
 
+	// The last will of this client
+	lastWillPacket *packets.PublishPacket
+
 	subscriptionTopics []string
 
 	recvPackets chan packets.ControlPacket
