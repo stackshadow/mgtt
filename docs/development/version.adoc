@@ -1,0 +1,11 @@
+= Version number
+
+If you publish a new version, you need to change the `.env`-File and change the `VERSION=X.XX.X` 
+
+After you change the version, you need to update the current-version for mqtt
+
+[source,bash]
+----
+make -f ./build/local/Makefile currentversion
+----
+
