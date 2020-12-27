@@ -8,7 +8,7 @@ RUN pacman --noconfirm -Syu && \
 RUN pacman --noconfirm -Syy busybox make go && \
     pacman --noconfirm -Scc
 
-RUN pacman --noconfirm -Syy python python-pip && \
+RUN pacman --noconfirm -Syy grep python python-pip && \
     pacman --noconfirm -Scc
 
 RUN pip install --user anybadge
