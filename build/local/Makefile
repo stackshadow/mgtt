@@ -48,11 +48,17 @@ tests:
 	go test -timeout 30s -parallel 1 -coverprofile=coverage.out  ./... ;\
 	go tool cover -html=coverage.out -o coverage.html
 
+anybadge: ${HOME}/.local/bin/anybadge
+${HOME}/.local/bin/anybadge:
+	pip install --user anybadge
+
 gocyclo: ~/go/bin/gocyclo
 ~/go/bin/gocyclo:
 	go get github.com/fzipp/gocyclo/cmd/gocyclo
-cyclic: gocyclo
-		
+cyclic: gocyclo anybadge
+	VALUE=$$(~/go/bin/gocyclo -avg -ignore "_test|Godeps|vendor/" . | grep Average |  cut -d ' ' -f 2); \
+	${HOME}/.local/bin/anybadge -l gocyclo -v $$VALUE -f gocyclo.svg  10=green 15=yellow 18=orange 20=red
+
 
 clean:
 	@rm -fv coverage.*

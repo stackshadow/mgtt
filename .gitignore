@@ -12,3 +12,4 @@ coverage.*
 integrationtest*.yml
 acl.yml
 auth.yml
+gocyclo.svg

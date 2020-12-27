@@ -8,3 +8,4 @@ deployments/
 vendor/
 docs/
 
+gocyclo.svg

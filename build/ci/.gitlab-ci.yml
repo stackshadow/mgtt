@@ -1,6 +1,7 @@
 
 stages:
   - build_docker
+  - test
   - release
 
 # global variables
@@ -18,6 +19,16 @@ build docker image:
       export VERSION=${CI_COMMIT_SHORT_SHA}
       docker-compose -f deployments/docker-compose/docker-compose.yml build --pull
       docker-compose -f deployments/docker-compose/docker-compose.yml push
+
+badges:
+  stage: test
+  image: stackshadow/anybadge:latest
+  script:
+    - make -f ./build/local/Makefile cyclic
+  artifacts:
+    paths:
+      - gocyclo.svg
+
 
 release:
   stage: release
