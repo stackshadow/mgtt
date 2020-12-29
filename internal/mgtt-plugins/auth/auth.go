@@ -1,6 +1,11 @@
 package auth
 
-import "gitlab.com/mgtt/internal/mgtt/plugin"
+import (
+	"os"
+
+	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/internal/mgtt/plugin"
+)
 
 // LocalInit will init the auth-plugin and register it
 func LocalInit(ConfigPath string) {
@@ -18,6 +23,28 @@ func LocalInit(ConfigPath string) {
 // OnInit open the config file and watch for changes
 func OnInit(ConfigPath string) {
 	loadConfig(ConfigPath + "auth.yml")
+
+	newUserName := os.Getenv("AUTH_USERNAME")
+	newUserPass := os.Getenv("AUTH_PASSWORD")
+	os.Unsetenv("AUTH_PASSWORD")
+
+	var err error
+
+	if newUserName != "" {
+		err = passwordAdd(newUserName, newUserPass)
+		if err == nil {
+			log.Debug().Str("username", newUserName).Msg("Added new Username")
+			err = saveConfig(filename)
+		}
+		if err == nil {
+			log.Debug().Str("filename", filename).Msg("Config saved")
+		}
+	}
+
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
 	go watchConfig()
 }
 
