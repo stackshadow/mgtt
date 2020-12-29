@@ -13,7 +13,13 @@
       "env": {
         "CERT_DNS": "localhost"
       },
-      "args": ["--terminal", "-v", "serve", "--url", "tcp://0.0.0.0:8883"]
+      "args": [
+        "--terminal",
+        "-v",
+        "serve",
+        "--url",
+        "tcp://0.0.0.0:8883"
+      ]
     },
     {
       "name": "Create Self Signed Certificate",
@@ -22,7 +28,12 @@
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-cert", "--self-signed"]
+      "args": [
+        "--terminal",
+        "-v",
+        "create-cert",
+        "--self-signed"
+      ]
     },
     {
       "name": "serve - self signed",
@@ -30,7 +41,12 @@
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/mgtt/main.go",
-      "env": { "CERT_DNS": "localhost,mqtt.boatup.de", "PLUGINS": "" },
+      "env": {
+        "CERT_DNS": "localhost,mqtt.boatup.de",
+        "PLUGINS": "auth",
+        "AUTH_USERNAME": "admin",
+        "AUTH_PASSWORD": "admin",
+      },
       "args": [
         "--terminal",
         "-v",
@@ -49,7 +65,11 @@
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-ca"]
+      "args": [
+        "--terminal",
+        "-v",
+        "create-ca"
+      ]
     },
     {
       "name": "Server - Cert",
@@ -58,7 +78,11 @@
       "mode": "debug",
       "program": "${workspaceFolder}/cmd/mgtt/main.go",
       "env": {},
-      "args": ["--terminal", "-v", "create-cert"]
+      "args": [
+        "--terminal",
+        "-v",
+        "create-cert"
+      ]
     },
     {
       "name": "Client - Cert",
