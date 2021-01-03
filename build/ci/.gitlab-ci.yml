@@ -24,13 +24,14 @@ badges:
   stage: test
   image: stackshadow/anybadge:latest
   script:
-    - make -f ./build/local/Makefile cyclic
+    - make -f ./build/local/Makefile badges
   artifacts:
     paths:
       - gocyclo.svg
+      - lastbuild.svg
 
 
-release:
+release (manual):
   stage: release
   image: linuxserver/docker-compose:latest
   script:
