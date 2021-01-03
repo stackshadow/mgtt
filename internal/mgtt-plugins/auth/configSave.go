@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func saveConfig(filenameToLoad string) (err error) {
+func configSave(filenameToLoad string) (err error) {
 	var confidData []byte
 	confidData, err = yaml.Marshal(config)
 	if err == nil {

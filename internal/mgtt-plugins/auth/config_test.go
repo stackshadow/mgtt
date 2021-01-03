@@ -7,7 +7,7 @@ import (
 
 func TestConfigFile(t *testing.T) {
 
-	loadConfig("integrationtest.yml")
+	configLoad("integrationtest.yml")
 
 	// add a new user
 	passwordAdd("testuser", "testpassword")

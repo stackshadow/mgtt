@@ -13,14 +13,14 @@ func onHandlePasswordSet(originClientID string, topic string, payload string) {
 
 	err := passwordAdd(username, payload)
 	if err == nil {
-		err = saveConfig(filename)
+		err = configSave(filename)
 	}
 
 	if err == nil {
 		if broker.Current != nil {
 			broker.Current.PublishToClient(
 				originClientID,
-				fmt.Sprintf("$SYS/auth/user/%s/password/set/ok", username),
+				fmt.Sprintf("$SYS/auth/user/%s/password/set/success", username),
 				[]byte("true"))
 		}
 	}

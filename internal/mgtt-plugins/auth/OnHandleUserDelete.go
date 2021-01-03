@@ -12,7 +12,7 @@ func onHandleUserDelete(originClientID string, topic string) {
 	username := topicArray[3]
 
 	delete(config.BcryptedPassword, username)
-	err := saveConfig(filename)
+	err := configSave(filename)
 
 	if err == nil {
 		if broker.Current != nil {
