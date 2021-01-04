@@ -11,14 +11,14 @@ import (
 
 // CmdServe represents the flag which create certs
 type CmdServe struct {
-	URL        string `help:"Set the url where the broker is listening"  env:"URL" default:"tcp://0.0.0.0:8883"`
-	TLS        bool   `help:"Enable TLS"  env:"TLS" default:"true"`
-	CAFile     string `help:"The ca to use for TLS. Set it to an empty string if you would like to use an self-signed-certificate"  env:"CA" default:"tls/ca.crt"`
-	CertFile   string `help:"The certificate to use for TLS"  env:"CERT" default:"tls/server.crt"`
-	KeyFile    string `help:"The private key to use for TLS"  env:"KEY" default:"tls/server.key"`
-	DBFilename string `help:"Filename for retained message-db"  env:"DBFILENAME" default:"messages.db"`
+	URL        string `help:"Set the url where the broker is listening" env:"URL" default:"tcp://0.0.0.0:8883"`
+	TLS        bool   `help:"Enable TLS" env:"TLS" default:"true"`
+	CAFile     string `help:"The ca to use for TLS. Set it to an empty string if you would like to use an self-signed-certificate" env:"CA" default:"tls/ca.crt"`
+	CertFile   string `help:"The certificate to use for TLS" env:"CERT" default:"tls/server.crt"`
+	KeyFile    string `help:"The private key to use for TLS" env:"KEY" default:"tls/server.key"`
+	DBFilename string `help:"Filename for retained message-db" env:"DBFILENAME" default:"messages.db"`
 
-	SelfSigned bool `help:"Use self-signed-certificate and ignore CAFile" default:"false"`
+	SelfSigned bool `help:"Use self-signed-certificate and ignore CAFile" env:"SELFSIGNED" default:"false"`
 }
 
 // Run will run the command
