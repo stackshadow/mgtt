@@ -25,7 +25,7 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 		)
 
 	// list all users
-	case topic == "$SYS/auth/users/list":
+	case topic == "$SYS/auth/users/list/get":
 		// topic matched, we handled it
 		handled = true
 		go onHandleUserList(originClientID)
