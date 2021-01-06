@@ -12,6 +12,8 @@ import (
 )
 
 // Serve will create a new broker and wait for clients
+//
+// - this create also an retained message with topic "$SYS/broker/version" that contains the version
 func (b *Broker) Serve(config Config) (err error) {
 
 	// retainedMessages-db

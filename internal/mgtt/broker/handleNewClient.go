@@ -56,5 +56,8 @@ func handleNewClient(newConnection net.Conn) {
 		// Remove the client from the list
 		clientlist.Remove(newClient.ID())
 
+		// inform our plugins
+		plugin.CallOnDisconnected(newClient.ID())
+
 	}
 }
