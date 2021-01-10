@@ -48,14 +48,36 @@ tests:
 	go test -timeout 30s -parallel 1 -coverprofile=coverage.out  ./... ;\
 	go tool cover -html=coverage.out -o coverage.html
 
-gocyclo: ~/go/bin/gocyclo
-~/go/bin/gocyclo:
+${HOME}/.local/bin/anybadge:
+	pip install --user anybadge
+${HOME}/go/bin/gocyclo: ${HOME}/.local/bin/anybadge
 	go get github.com/fzipp/gocyclo/cmd/gocyclo
-cyclic: gocyclo
-		
+
+./gocyclo.txt: ${HOME}/go/bin/gocyclo
+	${HOME}/go/bin/gocyclo -avg -ignore "_test|Godeps|vendor/" . | grep Average |  cut -d ' ' -f 2 > $@
+
+./gocyclo.svg: ./gocyclo.txt ${HOME}/.local/bin/anybadge
+	${HOME}/.local/bin/anybadge -l "Cyclomatic complexity" -v $$(cat ./gocyclo.txt) -f $@  10=green 15=yellow 18=orange 20=red
+
+./lastbuild.svg: ${HOME}/.local/bin/anybadge
+	${HOME}/.local/bin/anybadge -l "Last build" -v $$(date +%d.%m.%Y) -f $@ -c gray
+
+badges: ./gocyclo.svg ./lastbuild.svg
+
+gocyto: ~/go/bin/gocyto
+~/go/bin/gocyto:
+	go get github.com/protolambda/gocyto
+callgraph: gocyto
+	MACHINE=$$(uname -m); \
+	if [ $$MACHINE == "x86_64" ]; then \
+		export GOARCH="amd64"; \
+	fi; \
+	echo $$GOARCH ;\
+	~/go/bin/gocyto ...
 
 clean:
 	@rm -fv coverage.*
 	@rm -fv *.pem
 	@rm -fv mgtt/mgtt
+	@rm -fv gocyclo.txt gocyclo.svg lastbuild.svg
 	@find . -name "*.db" -print -delete

@@ -18,6 +18,9 @@ type V1 struct {
 	// OnConnected will called after connection is established from an subscriber on the broker
 	OnConnected func(clientID string)
 
+	// OnDisconnected called, when a client leaves our list of clients
+	OnDisconnected func(clientID string)
+
 	// OnConnack will called after a conack was received
 	OnConnack func(clientID string)
 

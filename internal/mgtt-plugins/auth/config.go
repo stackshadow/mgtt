@@ -21,6 +21,7 @@ const (
 type pluginConfig struct {
 	New              []pluginConfigNewUser `yaml:"new,omitempty"`
 	BcryptedPassword map[string]string     `yaml:"bcryptedpassword"`
+	groups           map[string][]string   `yaml:"groups"`
 	Anonym           bool                  `yaml:"anonym"`
 }
 
@@ -33,4 +34,5 @@ var mutex sync.Mutex
 var filename string
 var config *pluginConfig = &pluginConfig{
 	BcryptedPassword: make(map[string]string),
+	groups:           make(map[string][]string),
 }

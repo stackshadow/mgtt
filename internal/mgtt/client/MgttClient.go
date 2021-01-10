@@ -21,26 +21,22 @@ type MgttClient struct {
 
 	subscriptionTopics []string
 
-	recvPackets chan packets.ControlPacket
 	sendPackets chan packets.ControlPacket // send-buffer to avoid double-write
 
 	// loop signals
 	packetSendLoopExit chan bool
 }
 
-// New create a new MgttClient with id of "unknown"
-func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
+// Init create a new MgttClient with id of "unknown"
+func (c *MgttClient) Init(connection net.Conn, secondsTimeout int64) {
 
 	// create a new client with an new random-id
 	guid := xid.New()
 
-	newClient = &MgttClient{
-		id:                 guid.String(),
-		connection:         connection,
-		recvPackets:        make(chan packets.ControlPacket, 10),
-		sendPackets:        make(chan packets.ControlPacket, 10),
-		packetSendLoopExit: make(chan bool),
-	}
+	c.id = guid.String()
+	c.connection = connection
+	c.sendPackets = make(chan packets.ControlPacket, 10)
+	c.packetSendLoopExit = make(chan bool)
 
 	// setup timeout
 	if secondsTimeout > 0 {
@@ -49,7 +45,7 @@ func New(connection net.Conn, secondsTimeout int64) (newClient *MgttClient) {
 	}
 
 	// start the write-loop
-	go newClient.packetSendLoop()
+	go c.packetSendLoop()
 
 	return
 }

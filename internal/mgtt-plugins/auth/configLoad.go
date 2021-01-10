@@ -7,8 +7,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// loadConfig will load an file
-func loadConfig(filenameToLoad string) (err error) {
+// configLoad will load an file
+func configLoad(filenameToLoad string) (err error) {
 
 	mutex.Lock()
 	defer mutex.Unlock()
@@ -22,7 +22,7 @@ func loadConfig(filenameToLoad string) (err error) {
 		log.Warn().Str("filename", filenameToLoad).Err(err).Msg("Error opening config file")
 		log.Info().Str("filename", filenameToLoad).Msg("Creating default file")
 
-		saveConfig(filenameToLoad)
+		configSave(filenameToLoad)
 	}
 
 	err = yaml.Unmarshal(fileData, config)
@@ -40,7 +40,7 @@ func loadConfig(filenameToLoad string) (err error) {
 		config.New = []pluginConfigNewUser{}
 
 		if newUserExist == true {
-			saveConfig(filenameToLoad)
+			configSave(filenameToLoad)
 		}
 	}
 

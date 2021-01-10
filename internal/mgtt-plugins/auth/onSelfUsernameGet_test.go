@@ -13,7 +13,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/broker"
 )
 
-func TestOnHandleWhoami(t *testing.T) {
+func TestOnSelfUsernameGet(t *testing.T) {
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})

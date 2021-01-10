@@ -1,18 +1,20 @@
-package broker
+package clientlist
 
 import (
 	"errors"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
-	"gitlab.com/mgtt/internal/mgtt/client"
-	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
 // PublishToClient publish an message to an specific client ( and only to this ! )
-func (broker *Broker) PublishToClient(clientID string, topic string, payload []byte) (err error) {
+//
+// - if plugins are active, all plugins must accept this
+//
+// - the topic must match an subscription of the client
+func PublishToClient(clientID string, topic string, payload []byte) (err error) {
 
 	// find the client
-	var client *client.MgttClient = clientlist.Get(clientID)
+	client := list[clientID]
 
 	if client != nil {
 		// construct the package

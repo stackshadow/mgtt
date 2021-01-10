@@ -1,12 +1,10 @@
 package clientlist
 
-import "gitlab.com/mgtt/internal/mgtt/client"
-
-var list map[string]*client.MgttClient
+var list map[string]Client = make(map[string]Client)
 
 // Init will init the list of clients
 func Init() {
 	if list == nil {
-		list = make(map[string]*client.MgttClient)
+		list = make(map[string]Client)
 	}
 }

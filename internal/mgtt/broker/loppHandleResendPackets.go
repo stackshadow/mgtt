@@ -12,8 +12,10 @@ import (
 
 func (broker *Broker) loopHandleResendPackets() {
 
+	var retryClient *client.MgttClient = &client.MgttClient{}
+
 	netserver, _ := net.Pipe()
-	retryClient := client.New(netserver, 0)
+	retryClient.Init(netserver, 0)
 	retryClient.IDSet("resend")
 	retryClient.Connected = true
 

@@ -35,5 +35,14 @@ services:
         order: stop-first
     restart: always
 
+  test:
+    build:
+      context: ${PWD}
+      dockerfile: ./build/docker/test.Dockerfile
+      network: host
+      shm_size: '2gb'
+      target: base
+    image: stackshadow/anybadge:latest
+
 volumes:
   data:

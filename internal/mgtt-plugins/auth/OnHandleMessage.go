@@ -1,7 +1,8 @@
 package auth
 
 import (
-	"gitlab.com/mgtt/internal/mgtt/broker"
+	"strings"
+
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
@@ -16,31 +17,41 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 
 	// who is currently logged in
 	case topic == "$SYS/self/username/get":
-		// topic matched, we handled it
 		handled = true
-		broker.Current.PublishToClient(
-			originClientID,
-			"$SYS/self/username",
-			[]byte(broker.Current.UserNameOfClient(originClientID)),
-		)
+		go onSelfUsernameGet(originClientID)
+
+	// who is currently logged in
+	case topic == "$SYS/self/groups/get":
+		handled = true
+		go onSelfGroupsGet(originClientID)
 
 	// list all users
-	case topic == "$SYS/auth/users/list":
-		// topic matched, we handled it
+	case topic == "$SYS/auth/users/list/get":
 		handled = true
-		go onHandleUserList(originClientID)
+		go onAuthUsersListGet(originClientID)
 
-	// set a new password
-	case client.MatchRoute("$SYS/auth/user/+/password/set", topic):
-		// topic matched, we handled it
-		handled = true
-		go onHandlePasswordSet(originClientID, topic, string(payload))
+	case client.MatchRoute("$SYS/auth/user/#", topic):
+		topicArray := strings.Split(topic, "/")
+		username := topicArray[3]
 
-	// delete a user
-	case client.MatchRoute("$SYS/auth/user/+/delete", topic):
-		// topic matched, we handled it
-		handled = true
-		go onHandleUserDelete(originClientID, topic)
+		switch {
+
+		// get a user to edit-it
+		case client.MatchRoute("$SYS/auth/user/+/get", topic):
+			handled = true
+			go onAuthUserGet(originClientID, username)
+
+		// set a new password
+		case client.MatchRoute("$SYS/auth/user/+/password/set", topic):
+			handled = true
+			go onAuthUserPasswordSet(originClientID, username, string(payload))
+
+		// delete a user
+		case client.MatchRoute("$SYS/auth/user/+/delete", topic):
+			handled = true
+			go onAuthUserDelete(originClientID, username)
+
+		}
 
 	}
 

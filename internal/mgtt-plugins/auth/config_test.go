@@ -7,12 +7,26 @@ import (
 
 func TestConfigFile(t *testing.T) {
 
-	loadConfig("integrationtest.yml")
+	configLoad("integrationtest.yml")
 
 	// add a new user
 	passwordAdd("testuser", "testpassword")
 
 	if passwordCheck("testuser", "testpassword") == false {
+		t.FailNow()
+	}
+
+	os.Remove(filename)
+}
+
+func TestEnvironment(t *testing.T) {
+
+	os.Setenv("AUTH_USERNAME", "envuser")
+	os.Setenv("AUTH_PASSWORD", "envpw")
+
+	OnInit("integrationtest.yml")
+
+	if passwordCheck("envuser", "envpw") == false {
 		t.FailNow()
 	}
 

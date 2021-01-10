@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestOnHandleUserDelete(t *testing.T) {
+func TestOnAuthUserDelete(t *testing.T) {
 
 	os.Remove("./integrationtest_auth.yml")
 	LocalInit("integrationtest_")

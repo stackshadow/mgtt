@@ -1,6 +1,7 @@
 
 stages:
   - build_docker
+  - test
   - release
 
 # global variables
@@ -19,7 +20,18 @@ build docker image:
       docker-compose -f deployments/docker-compose/docker-compose.yml build --pull
       docker-compose -f deployments/docker-compose/docker-compose.yml push
 
-release:
+badges:
+  stage: test
+  image: stackshadow/anybadge:latest
+  script:
+    - make -f ./build/local/Makefile badges
+  artifacts:
+    paths:
+      - gocyclo.svg
+      - lastbuild.svg
+
+
+release (manual):
   stage: release
   image: linuxserver/docker-compose:latest
   script:

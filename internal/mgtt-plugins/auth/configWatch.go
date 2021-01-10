@@ -7,8 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// watchConfig will watch for changes of the config file and reload it when it changes
-func watchConfig() (err error) {
+// configWatch will watch for changes of the config file and reload it when it changes
+func configWatch() (err error) {
 	w := watcher.New()
 	w.SetMaxEvents(1)
 	w.FilterOps(watcher.Write)
@@ -19,7 +19,7 @@ func watchConfig() (err error) {
 			select {
 			case event := <-w.Event:
 				log.Info().Str("filename", event.Path).Str("event", event.String()).Msg("File change detected")
-				loadConfig(filename)
+				configLoad(filename)
 
 			case err := <-w.Error:
 				log.Error().Err(err).Send()
