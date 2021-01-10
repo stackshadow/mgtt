@@ -3,7 +3,9 @@ package auth
 import (
 	"encoding/json"
 
+	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/broker"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
 type userListElement struct {
@@ -11,6 +13,7 @@ type userListElement struct {
 }
 
 func onHandleUserList(originClientID string) {
+	var err error
 	// a new list
 	var newUserList []userListElement
 
@@ -25,7 +28,11 @@ func onHandleUserList(originClientID string) {
 	jsonData, err := json.Marshal(newUserList)
 	if err == nil {
 		if broker.Current != nil {
-			broker.Current.PublishToClient(originClientID, "$SYS/auth/users/list/json", jsonData)
+			err = clientlist.PublishToClient(originClientID, "$SYS/auth/users/list/json", jsonData)
 		}
+	}
+
+	if err != nil {
+		log.Error().Err(err).Send()
 	}
 }
