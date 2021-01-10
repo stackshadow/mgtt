@@ -1,7 +1,8 @@
 package auth
 
 import (
-	"gitlab.com/mgtt/internal/mgtt/broker"
+	"strings"
+
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
@@ -18,17 +19,25 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 	case topic == "$SYS/self/username/get":
 		// topic matched, we handled it
 		handled = true
-		broker.Current.PublishToClient(
-			originClientID,
-			"$SYS/self/username",
-			[]byte(broker.Current.UserNameOfClient(originClientID)),
-		)
+		go onSelfUsernameGet(originClientID)
+
+		// who is currently logged in
+	case topic == "$SYS/self/groups/get":
+		handled = true
+		go onSelfGroupsGet(originClientID)
 
 	// list all users
 	case topic == "$SYS/auth/users/list/get":
 		// topic matched, we handled it
 		handled = true
 		go onHandleUserList(originClientID)
+
+	// get a user to edit-it
+	case client.MatchRoute("$SYS/auth/user/+/get", topic):
+		topicArray := strings.Split(topic, "/")
+		username := topicArray[3]
+		handled = true
+		go onHandleUserGet(originClientID, username)
 
 	// set a new password
 	case client.MatchRoute("$SYS/auth/user/+/password/set", topic):
