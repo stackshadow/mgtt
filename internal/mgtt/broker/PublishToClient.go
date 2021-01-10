@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
-	"gitlab.com/mgtt/internal/mgtt/client"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
@@ -12,7 +11,7 @@ import (
 func (broker *Broker) PublishToClient(clientID string, topic string, payload []byte) (err error) {
 
 	// find the client
-	var client *client.MgttClient = clientlist.Get(clientID)
+	var client clientlist.Client = clientlist.Get(clientID)
 
 	if client != nil {
 		// construct the package

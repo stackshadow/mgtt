@@ -4,10 +4,9 @@ import (
 	"errors"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func Add(existingClient *client.MgttClient) (err error) {
+func Add(existingClient Client) (err error) {
 
 	if _, clientExist := list[existingClient.ID()]; clientExist == true {
 		err = errors.New("Client already exist")

@@ -14,8 +14,9 @@ func handleNewClient(newConnection net.Conn) {
 
 	var err error
 	var recvdPacket packets.ControlPacket
+	var newClient *client.MgttClient = &client.MgttClient{}
 
-	newClient := client.New(newConnection, ConnectTimeout)
+	newClient.Init(newConnection, ConnectTimeout)
 	err = clientlist.Add(newClient)
 
 	if err == nil {
