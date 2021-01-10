@@ -53,12 +53,19 @@ ${HOME}/.local/bin/anybadge:
 ${HOME}/go/bin/gocyclo: ${HOME}/.local/bin/anybadge
 	go get github.com/fzipp/gocyclo/cmd/gocyclo
 
+###################### Badge: Coverage ######################
+./coverage.txt:
+	go tool cover -func coverage.out | grep total: | awk '{print $$3}' | sed 's/%//g' > $@
+./coverage.svg: ./coverage.txt
+	${HOME}/.local/bin/anybadge -l "Coverage" -v $$(cat ./coverage.txt) -f $@ 70=green 50=yellow 30=orange 0=red
+
+###################### Badge: Cyclomatic complexity ######################
 ./gocyclo.txt: ${HOME}/go/bin/gocyclo
 	${HOME}/go/bin/gocyclo -avg -ignore "_test|Godeps|vendor/" . | grep Average |  cut -d ' ' -f 2 > $@
-
 ./gocyclo.svg: ./gocyclo.txt ${HOME}/.local/bin/anybadge
 	${HOME}/.local/bin/anybadge -l "Cyclomatic complexity" -v $$(cat ./gocyclo.txt) -f $@  10=green 15=yellow 18=orange 20=red
 
+###################### Badge: Last build ######################
 ./lastbuild.svg: ${HOME}/.local/bin/anybadge
 	${HOME}/.local/bin/anybadge -l "Last build" -v $$(date +%d.%m.%Y) -f $@ -c gray
 
