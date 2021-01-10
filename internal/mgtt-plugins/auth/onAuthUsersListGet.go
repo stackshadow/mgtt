@@ -12,7 +12,7 @@ type userListElement struct {
 	Username string `json:"username"`
 }
 
-func onHandleUserList(originClientID string) {
+func onAuthUsersListGet(originClientID string) {
 	var err error
 	// a new list
 	var newUserList []userListElement

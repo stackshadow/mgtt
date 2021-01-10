@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestOnHandlePasswordSet(t *testing.T) {
+func TestOnAuthUserPasswordSet(t *testing.T) {
 	os.Remove("./integrationtest_auth.yml")
 	LocalInit("integrationtest_")
 

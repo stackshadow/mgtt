@@ -14,7 +14,7 @@ type userElement struct {
 	Groups   []string `json:"groups,omitempty"`
 }
 
-func onHandleUserGet(originClientID string, username string) {
+func onAuthUserGet(originClientID string, username string) {
 	var err error
 
 	// check if the user exist

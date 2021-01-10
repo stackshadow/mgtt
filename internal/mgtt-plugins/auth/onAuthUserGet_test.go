@@ -53,7 +53,7 @@ func (c connTester) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 
-func TestOnHandleUserGet(t *testing.T) {
+func TestOnAuthUserGet(t *testing.T) {
 	os.Remove("./integrationtest_auth.yml")
 	LocalInit("integrationtest_")
 

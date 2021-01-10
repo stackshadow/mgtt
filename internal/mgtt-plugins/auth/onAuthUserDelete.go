@@ -2,17 +2,13 @@ package auth
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
-func onHandleUserDelete(originClientID string, topic string) {
+func onAuthUserDelete(originClientID string, username string) {
 	var err error
-
-	topicArray := strings.Split(topic, "/")
-	username := topicArray[3]
 
 	delete(config.BcryptedPassword, username)
 	configSave(filename)
