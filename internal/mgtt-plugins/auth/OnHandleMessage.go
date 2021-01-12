@@ -41,6 +41,11 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 			handled = true
 			go onAuthUserGet(originClientID, username)
 
+		// set a user
+		case client.MatchRoute("$SYS/auth/user/+/set", topic):
+			handled = true
+			go onAuthUserSet(originClientID, payload)
+
 		// set a new password
 		case client.MatchRoute("$SYS/auth/user/+/password/set", topic):
 			handled = true
