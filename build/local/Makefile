@@ -44,9 +44,11 @@ docs: assets
 
 
 
-tests:
-	go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./... ;\
+./coverage.out:
+	go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./...
+./coverage.html: ./coverage.out
 	go tool cover -html=coverage.out -o coverage.html
+tests: ./coverage.html
 
 ${HOME}/.local/bin/anybadge:
 	pip install --user anybadge
@@ -54,7 +56,7 @@ ${HOME}/go/bin/gocyclo: ${HOME}/.local/bin/anybadge
 	go get github.com/fzipp/gocyclo/cmd/gocyclo
 
 ###################### Badge: Coverage ######################
-./coverage.txt:
+./coverage.txt: ./coverage.out
 	go tool cover -func coverage.out | grep total: | awk '{print $$3}' | sed 's/%//g' > $@
 ./coverage.svg: ./coverage.txt
 	${HOME}/.local/bin/anybadge -l "Coverage" -v $$(cat ./coverage.txt) -f $@ 70=green 50=yellow 30=orange 0=red
@@ -69,7 +71,7 @@ ${HOME}/go/bin/gocyclo: ${HOME}/.local/bin/anybadge
 ./lastbuild.svg: ${HOME}/.local/bin/anybadge
 	${HOME}/.local/bin/anybadge -l "Last build" -v $$(date +%d.%m.%Y) -f $@ -c gray
 
-badges: ./gocyclo.svg ./lastbuild.svg
+badges: ./coverage.svg ./gocyclo.svg ./lastbuild.svg
 
 gocyto: ~/go/bin/gocyto
 ~/go/bin/gocyto:

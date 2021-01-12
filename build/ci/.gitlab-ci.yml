@@ -2,6 +2,7 @@
 stages:
   - build_docker
   - test
+  - posttest
   - release
 
 # global variables
@@ -20,8 +21,17 @@ build docker image:
       docker-compose -f deployments/docker-compose/docker-compose.yml build --pull
       docker-compose -f deployments/docker-compose/docker-compose.yml push
 
-badges:
+tests:
   stage: test
+  image: golang:1.15.6
+  script:
+    - go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./...
+  artifacts:
+    paths:
+      - coverage.out
+
+badges:
+  stage: posttest
   image: stackshadow/anybadge:latest
   script:
     - make -f ./build/local/Makefile badges
@@ -29,7 +39,6 @@ badges:
     paths:
       - gocyclo.svg
       - lastbuild.svg
-
 
 release (manual):
   stage: release
