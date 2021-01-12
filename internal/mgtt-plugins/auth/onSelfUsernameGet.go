@@ -11,7 +11,7 @@ func onSelfUsernameGet(originClientID string) {
 
 	err = clientlist.PublishToClient(
 		originClientID,
-		"$SYS/self/username",
+		"$SYS/self/username/string",
 		[]byte(broker.Current.UserNameOfClient(originClientID)),
 	)
 
