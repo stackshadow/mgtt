@@ -10,12 +10,12 @@ import (
 func onAuthUserDelete(originClientID string, username string) {
 	var err error
 
-	delete(config.BcryptedPassword, username)
+	delete(config.Users, username)
 	configSave(filename)
 
 	err = clientlist.PublishToClient(
 		originClientID,
-		fmt.Sprintf("$SYS/auth/user/%s/delete/ok", username),
+		fmt.Sprintf("$SYS/auth/user/%s/delete/success", username),
 		[]byte("true"))
 
 	if err != nil {
