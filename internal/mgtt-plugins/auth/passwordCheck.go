@@ -13,14 +13,14 @@ func passwordCheck(username string, password string) (isOkay bool) {
 		return true
 	}
 
-	base64Data, exist := config.BcryptedPassword[username]
-	if exist == true {
-		basswordBytes, err := base64.StdEncoding.DecodeString(base64Data)
-		if err == nil {
-			errCompare := bcrypt.CompareHashAndPassword(basswordBytes, []byte(password))
-			if errCompare == nil {
-				isOkay = true
-			}
+	// get user
+	var user = config.Users[username]
+
+	basswordBytes, err := base64.StdEncoding.DecodeString(user.Password)
+	if err == nil {
+		errCompare := bcrypt.CompareHashAndPassword(basswordBytes, []byte(password))
+		if errCompare == nil {
+			isOkay = true
 		}
 	}
 

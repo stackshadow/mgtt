@@ -1,7 +1,10 @@
 package auth
 
 import (
+	"encoding/base64"
 	"sync"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -19,20 +22,27 @@ const (
 )
 
 type pluginConfig struct {
-	New              []pluginConfigNewUser `yaml:"new,omitempty"`
-	BcryptedPassword map[string]string     `yaml:"bcryptedpassword"`
-	groups           map[string][]string   `yaml:"groups"`
-	Anonym           bool                  `yaml:"anonym"`
+	New    []pluginConfigUser          `yaml:"new,omitempty"`
+	Anonym bool                        `yaml:"anonym"`
+	Users  map[string]pluginConfigUser `yaml:"users"`
 }
 
-type pluginConfigNewUser struct {
-	Username string `yaml:"username,omitempty"`
-	Password string `yaml:"password,omitempty"`
+type pluginConfigUser struct {
+	Username string   `yaml:"username,omitempty"`
+	Password string   `yaml:"password"`
+	Groups   []string `yaml:"groups"`
+}
+
+// PasswordSet will conver tthe password-field to bcrypted-password
+func (user *pluginConfigUser) PasswordSet(newPassword string) (err error) {
+	var bcryptedData []byte
+	bcryptedData, err = bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	user.Password = base64.StdEncoding.EncodeToString(bcryptedData)
+	return
 }
 
 var mutex sync.Mutex
 var filename string
 var config *pluginConfig = &pluginConfig{
-	BcryptedPassword: make(map[string]string),
-	groups:           make(map[string][]string),
+	Users: make(map[string]pluginConfigUser),
 }

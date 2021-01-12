@@ -10,16 +10,19 @@ import (
 
 func onSelfGroupsGet(originClientID string) {
 	var err error
-	userName := broker.Current.UserNameOfClient(originClientID)
+	var userGroups []string
+	var userName = broker.Current.UserNameOfClient(originClientID)
 
-	userGroups, exist := config.groups[userName]
-	if exist == false {
+	// check if the user exist
+	if user, exist := config.Users[userName]; exist == true {
+		userGroups = user.Groups
+	} else {
 		userGroups = append(userGroups, "anonym")
 	}
 
 	var userGroupsBytes []byte
 	userGroupsBytes, err = json.Marshal(userGroups)
-	if err != nil {
+	if err == nil {
 		err = clientlist.PublishToClient(
 			originClientID,
 			"$SYS/self/groups/json",

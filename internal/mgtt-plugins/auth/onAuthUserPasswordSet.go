@@ -11,7 +11,7 @@ func onAuthUserPasswordSet(originClientID string, username string, password stri
 
 	var err error
 
-	err = passwordAdd(username, password)
+	err = userSet(username, &password, nil)
 	if err == nil {
 		err = configSave(filename)
 	}

@@ -32,12 +32,11 @@ func configLoad(filenameToLoad string) (err error) {
 		for _, newUser := range config.New {
 			if newUser.Username != "" && newUser.Password != "" {
 				newUsername := newUser.Username
-				newPassword := newUser.Password
-				err = passwordAdd(newUsername, newPassword)
+				err = userSet(newUsername, &newUser.Password, &newUser.Groups)
 				newUserExist = true
 			}
 		}
-		config.New = []pluginConfigNewUser{}
+		config.New = []pluginConfigUser{}
 
 		if newUserExist == true {
 			configSave(filenameToLoad)

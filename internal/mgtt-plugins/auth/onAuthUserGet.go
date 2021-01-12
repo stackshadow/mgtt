@@ -18,12 +18,10 @@ func onAuthUserGet(originClientID string, username string) {
 	var err error
 
 	// check if the user exist
-	if _, exist := config.BcryptedPassword[username]; exist {
+	if user, exist := config.Users[username]; exist {
 
-		var user = userElement{
-			Username: username,
-			Groups:   config.groups[username],
-		}
+		// remove the password, nobody should now about it
+		user.Password = ""
 
 		// create a json and send it
 		var jsonData []byte
