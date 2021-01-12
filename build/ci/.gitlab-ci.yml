@@ -1,7 +1,7 @@
 
 stages:
-  - build_docker
   - test
+  - build_docker
   - posttest
   - release
 
@@ -10,6 +10,16 @@ stages:
 
   
 ################################################ build and test ################################################
+tests:
+  stage: test
+  image: golang:1.15.6
+  script:
+    - go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./...
+  artifacts:
+    paths:
+      - coverage.out
+
+
 build docker image:
   stage: build_docker
   image: linuxserver/docker-compose:latest
@@ -20,15 +30,6 @@ build docker image:
       export VERSION=${CI_COMMIT_SHORT_SHA}
       docker-compose -f deployments/docker-compose/docker-compose.yml build --pull
       docker-compose -f deployments/docker-compose/docker-compose.yml push
-
-tests:
-  stage: test
-  image: golang:1.15.6
-  script:
-    - go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./...
-  artifacts:
-    paths:
-      - coverage.out
 
 badges:
   stage: posttest
