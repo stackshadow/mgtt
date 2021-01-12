@@ -3,18 +3,22 @@ package auth
 import (
 	"os"
 	"testing"
-	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func TestOnAuthUsersListGet(t *testing.T) {
+	// setup logger
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	os.Remove("./integrationtest_auth.yml")
-	LocalInit("integrationtest_")
+	os.Remove("./TestOnAuthUsersListGet_auth.yml")
+
+	LocalInit("TestOnAuthUsersListGet_")
 
 	// delete user
 	OnHandleMessage("integrationtest", "$SYS/auth/users/list", []byte(""))
-	time.Sleep(time.Millisecond * 500)
 
-	os.Remove("./integrationtest_auth.yml")
-
+	os.Remove("./TestOnAuthUsersListGet_auth.yml")
 }

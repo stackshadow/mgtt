@@ -4,13 +4,12 @@ import (
 	"os"
 	"sync"
 	"testing"
-	"time"
 
-	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/google/uuid"
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/internal/mgtt/broker"
+	"gitlab.com/mgtt/internal/mgtt/client"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
 func TestOnSelfUsernameGet(t *testing.T) {
@@ -20,64 +19,63 @@ func TestOnSelfUsernameGet(t *testing.T) {
 
 	// ############################################### setup auth-password ###############################################
 
-	os.Remove("./integrationtest_auth.yml")
-	LocalInit("integrationtest_")
+	os.Remove("./TestOnSelfUsernameGet_auth.yml")
+	LocalInit("TestOnSelfUsernameGet_")
 
-	OnHandleMessage("integrationtest", "$SYS/auth/user/admin/password/set", []byte("admin"))
-	time.Sleep(time.Millisecond * 500)
-
-	// create a plugin that unlocks the connection of a client
-	var clientLock sync.Mutex
-
-	// ############################################### the broker ###############################################
-
-	os.Remove("test1.db")
-	server, _ := broker.New()
-	go server.Serve(
-		broker.Config{
-			URL:        "tcp://127.0.0.1:1212",
-			DBFilename: "test1.db",
-		},
-	)
-	time.Sleep(time.Second * 1)
-
-	// ############################################### client ###############################################
-	pahoOpts := paho.NewClientOptions()
-
-	clientIDUUID, _ := uuid.NewRandom()
-	pahoOpts.SetClientID(clientIDUUID.String())
-	pahoOpts.SetUsername("admin")
-	pahoOpts.SetPassword("admin")
-	pahoOpts.AddBroker("tcp://127.0.0.1:1212")
-	pahoOpts.SetAutoReconnect(true)
-
-	pahoClient := paho.NewClient(pahoOpts)
-
-	clientLock.Lock()
-	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
-		t.Error(token.Error())
-		t.FailNow()
+	// create a dummy client
+	var testClient *client.MgttClient = &client.MgttClient{}
+	netserver := connTester{
+		packetSendLoopExit: make(chan byte),
 	}
+	testClient.Init(netserver, 0)
+	testClient.IDSet("TestOnSelfUsernameGet")
+	testClient.UsernameSet("admin")
+	testClient.Connected = true
+	testClient.SubScriptionAdd("$SYS/auth/user/admin/password/set/success")
+	testClient.SubScriptionAdd("$SYS/self/username/string")
+	clientlist.Add(testClient)
 
-	if token := pahoClient.Subscribe("$SYS/self/username", 0, func(client paho.Client, msg paho.Message) {
-		if string(msg.Payload()) == "admin" {
-			clientLock.Unlock()
-		} else {
-			t.Error("Payload not contain username")
+	var requestLock sync.Mutex
+	var respondLock sync.Mutex
+	requestLock.Lock()
+	respondLock.Lock()
+
+	go func() {
+		requestLock.Lock()
+		respondPacket, _ := testClient.PacketRead()
+		switch respPacket := respondPacket.(type) {
+		case *packets.PublishPacket:
+			if respPacket.TopicName == "$SYS/auth/user/admin/password/set/success" {
+				respondLock.Unlock()
+			} else {
+				t.FailNow()
+			}
+		default:
+			t.FailNow()
 		}
 
-	}); token.Wait() && token.Error() != nil {
-		t.Error(token.Error())
-		t.FailNow()
-	}
-	time.Sleep(time.Second * 1)
+		requestLock.Lock()
+		respondPacket, _ = testClient.PacketRead()
+		switch respPacket := respondPacket.(type) {
+		case *packets.PublishPacket:
+			if respPacket.TopicName == "$SYS/self/username/string" &&
+				string(respPacket.Payload) == string(respPacket.Payload) {
+				respondLock.Unlock()
+			} else {
+				t.FailNow()
+			}
+		default:
+			t.FailNow()
+		}
+	}()
 
-	if token := pahoClient.Publish("$SYS/self/username/get", 0, true, ""); token.Wait() && token.Error() != nil {
-		t.Error(token.Error())
-		t.FailNow()
-	}
-	time.Sleep(time.Second * 1)
-	pahoClient.Disconnect(200)
+	requestLock.Unlock()
+	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/auth/user/admin/password/set", []byte("passwordadmintest"))
+	respondLock.Lock()
 
-	clientLock.Lock()
+	requestLock.Unlock()
+	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/self/username/get", []byte(""))
+	respondLock.Lock()
+
+	os.Remove("./TestOnSelfUsernameGet_auth.yml")
 }
