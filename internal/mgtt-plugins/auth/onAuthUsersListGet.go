@@ -20,6 +20,7 @@ func onAuthUsersListGet(originClientID string) {
 	// fill the list
 	for username, userinfo := range config.Users {
 		userinfo.Username = username
+		userinfo.Password = ""
 		newUserList = append(newUserList, userinfo)
 	}
 
