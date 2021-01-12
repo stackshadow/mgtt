@@ -38,6 +38,7 @@ badges:
     - make -f ./build/local/Makefile badges
   artifacts:
     paths:
+      - coverage.svg
       - gocyclo.svg
       - lastbuild.svg
 
