@@ -15,13 +15,13 @@ type userListElement struct {
 func onAuthUsersListGet(originClientID string) {
 	var err error
 	// a new list
-	var newUserList []userListElement
+	var newUserList []pluginConfigUser
 
 	// fill the list
-	for username := range config.BcryptedPassword {
-		newUserList = append(newUserList, userListElement{
-			Username: username,
-		})
+	for username, userinfo := range config.Users {
+		userinfo.Username = username
+		userinfo.Password = ""
+		newUserList = append(newUserList, userinfo)
 	}
 
 	// create a json and send it

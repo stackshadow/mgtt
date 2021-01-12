@@ -12,13 +12,15 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
-func TestOnAuthUserDelete(t *testing.T) {
+func TestOnSelfUsernameGet(t *testing.T) {
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	os.Remove("./TestOnAuthUserDelete_auth.yml")
-	LocalInit("TestOnAuthUserDelete_")
+	// ############################################### setup auth-password ###############################################
+
+	os.Remove("./TestOnSelfUsernameGet_auth.yml")
+	LocalInit("TestOnSelfUsernameGet_")
 
 	// create a dummy client
 	var testClient *client.MgttClient = &client.MgttClient{}
@@ -26,10 +28,11 @@ func TestOnAuthUserDelete(t *testing.T) {
 		packetSendLoopExit: make(chan byte),
 	}
 	testClient.Init(netserver, 0)
-	testClient.IDSet("TestOnAuthUserDelete")
+	testClient.IDSet("TestOnSelfUsernameGet")
+	testClient.UsernameSet("admin")
 	testClient.Connected = true
-	testClient.SubScriptionAdd("$SYS/auth/user/deleteme/set/success")
-	testClient.SubScriptionAdd("$SYS/auth/user/deleteme/delete/success")
+	testClient.SubScriptionAdd("$SYS/auth/user/admin/set/success")
+	testClient.SubScriptionAdd("$SYS/self/user/json")
 	clientlist.Add(testClient)
 
 	var requestLock sync.Mutex
@@ -37,13 +40,12 @@ func TestOnAuthUserDelete(t *testing.T) {
 	requestLock.Lock()
 	respondLock.Lock()
 
-	// add the user, it should now exist
 	go func() {
 		requestLock.Lock()
 		respondPacket, _ := testClient.PacketRead()
 		switch respPacket := respondPacket.(type) {
 		case *packets.PublishPacket:
-			if respPacket.TopicName == "$SYS/auth/user/deleteme/set/success" {
+			if respPacket.TopicName == "$SYS/auth/user/admin/set/success" {
 				respondLock.Unlock()
 			} else {
 				t.FailNow()
@@ -56,9 +58,11 @@ func TestOnAuthUserDelete(t *testing.T) {
 		respondPacket, _ = testClient.PacketRead()
 		switch respPacket := respondPacket.(type) {
 		case *packets.PublishPacket:
-			if respPacket.TopicName == "$SYS/auth/user/deleteme/delete/success" {
+			if respPacket.TopicName == "$SYS/self/user/json" &&
+				string(respPacket.Payload) == "{\"username\":\"admin\",\"groups\":null}" {
 				respondLock.Unlock()
 			} else {
+				t.Logf(string(respPacket.Payload))
 				t.FailNow()
 			}
 		default:
@@ -67,12 +71,12 @@ func TestOnAuthUserDelete(t *testing.T) {
 	}()
 
 	requestLock.Unlock()
-	OnHandleMessage("TestOnAuthUserDelete", "$SYS/auth/user/deleteme/set", []byte("{ \"password\": \"admin\" }"))
+	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/auth/user/admin/set", []byte("{ \"password\": \"admin\" }"))
 	respondLock.Lock()
 
 	requestLock.Unlock()
-	OnHandleMessage("TestOnAuthUserDelete", "$SYS/auth/user/deleteme/delete", []byte(""))
+	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/self/user/get", []byte(""))
 	respondLock.Lock()
 
-	os.Remove("./TestOnAuthUserDelete_auth.yml")
+	os.Remove("./TestOnSelfUsernameGet_auth.yml")
 }

@@ -16,14 +16,9 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 	switch {
 
 	// who is currently logged in
-	case topic == "$SYS/self/username/get":
+	case topic == "$SYS/self/user/get":
 		handled = true
-		go onSelfUsernameGet(originClientID)
-
-	// who is currently logged in
-	case topic == "$SYS/self/groups/get":
-		handled = true
-		go onSelfGroupsGet(originClientID)
+		go onSelfUserGet(originClientID)
 
 	// list all users
 	case topic == "$SYS/auth/users/list/get":
@@ -41,10 +36,10 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 			handled = true
 			go onAuthUserGet(originClientID, username)
 
-		// set a new password
-		case client.MatchRoute("$SYS/auth/user/+/password/set", topic):
+		// set a user
+		case client.MatchRoute("$SYS/auth/user/+/set", topic):
 			handled = true
-			go onAuthUserPasswordSet(originClientID, username, string(payload))
+			go onAuthUserSet(originClientID, username, payload)
 
 		// delete a user
 		case client.MatchRoute("$SYS/auth/user/+/delete", topic):

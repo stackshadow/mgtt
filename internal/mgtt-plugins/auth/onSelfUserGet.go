@@ -2,21 +2,20 @@ package auth
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
-func onAuthUserGet(originClientID string, username string) {
+func onSelfUserGet(originClientID string) {
 	var err error
+	var username = clientlist.Get(originClientID).Username()
 
 	// check if the user exist
 	if user, exist := config.Users[username]; exist {
 
-		// remove the password, nobody should now about it
-		user.Username = ""
-		user.Password = ""
+		user.Username = username // only here we send the username
+		user.Password = ""       // remove the password, nobody should now about it
 
 		// create a json and send it
 		var jsonData []byte
@@ -24,7 +23,7 @@ func onAuthUserGet(originClientID string, username string) {
 		if err == nil {
 			err = clientlist.PublishToClient(
 				originClientID,
-				fmt.Sprintf("$SYS/auth/user/%s/json", username),
+				"$SYS/self/user/json",
 				jsonData,
 			)
 		}
@@ -32,7 +31,7 @@ func onAuthUserGet(originClientID string, username string) {
 	} else {
 		err = clientlist.PublishToClient(
 			originClientID,
-			fmt.Sprintf("$SYS/auth/user/%s/error", username),
+			"$SYS/self/user/error",
 			[]byte("User dont exist"),
 		)
 	}

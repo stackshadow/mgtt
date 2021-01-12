@@ -10,9 +10,10 @@ func TestConfigFile(t *testing.T) {
 	configLoad("integrationtest.yml")
 
 	// add a new user
-	passwordAdd("testuser", "testpassword")
+	var userPassword = "testpassword"
+	userSet("testuser", &userPassword, nil)
 
-	if passwordCheck("testuser", "testpassword") == false {
+	if passwordCheck("testuser", userPassword) == false {
 		t.FailNow()
 	}
 

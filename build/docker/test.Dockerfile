@@ -2,7 +2,7 @@ FROM archlinux/base as base
 
 
 RUN pacman --noconfirm -Syu && \
-    pacman --noconfirm -Syy glibc archlinux-keyring && \
+    pacman --noconfirm -Syy glibc archlinux-keyring gawk && \
     pacman --noconfirm -Scc
 
 RUN pacman --noconfirm -Syy busybox make go && \
