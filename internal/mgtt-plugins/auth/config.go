@@ -28,9 +28,9 @@ type pluginConfig struct {
 }
 
 type pluginConfigUser struct {
-	Username string   `yaml:"username,omitempty"`
-	Password string   `yaml:"password"`
-	Groups   []string `yaml:"groups"`
+	Username string   `yaml:"username,omitempty" json:"username,omitempty"`
+	Password string   `yaml:"password" json:"password,omitempty"`
+	Groups   []string `yaml:"groups" json:"groups"`
 }
 
 // PasswordSet will conver tthe password-field to bcrypted-password
