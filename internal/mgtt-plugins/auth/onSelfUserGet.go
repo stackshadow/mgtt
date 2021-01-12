@@ -14,8 +14,8 @@ func onSelfUserGet(originClientID string) {
 	// check if the user exist
 	if user, exist := config.Users[username]; exist {
 
-		// remove the password, nobody should now about it
-		user.Password = ""
+		user.Username = username // only here we send the username
+		user.Password = ""       // remove the password, nobody should now about it
 
 		// create a json and send it
 		var jsonData []byte

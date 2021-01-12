@@ -9,7 +9,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
-func onAuthUserSet(originClientID string, payload []byte) {
+func onAuthUserSet(originClientID string, username string, payload []byte) {
 
 	var err error
 	var newUserInfo pluginConfigUser
@@ -18,7 +18,7 @@ func onAuthUserSet(originClientID string, payload []byte) {
 
 	err = json.Unmarshal(payload, &newUserInfo)
 
-	if err == nil && newUserInfo.Username == "" {
+	if err == nil && username == "" {
 		err = errors.New("Empty username")
 	}
 
@@ -34,7 +34,7 @@ func onAuthUserSet(originClientID string, payload []byte) {
 
 	// save
 	if err == nil {
-		userSet(newUserInfo.Username, newUserPassword, newUserGroups)
+		userSet(username, newUserPassword, newUserGroups)
 		err = configSave(filename)
 	}
 
@@ -42,7 +42,7 @@ func onAuthUserSet(originClientID string, payload []byte) {
 
 		err = clientlist.PublishToClient(
 			originClientID,
-			fmt.Sprintf("$SYS/auth/user/%s/set/success", newUserInfo.Username),
+			fmt.Sprintf("$SYS/auth/user/%s/set/success", username),
 			[]byte("true"))
 	}
 

@@ -39,7 +39,7 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 		// set a user
 		case client.MatchRoute("$SYS/auth/user/+/set", topic):
 			handled = true
-			go onAuthUserSet(originClientID, payload)
+			go onAuthUserSet(originClientID, username, payload)
 
 		// delete a user
 		case client.MatchRoute("$SYS/auth/user/+/delete", topic):

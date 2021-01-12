@@ -8,12 +8,6 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
-type userElement struct {
-	Username string   `json:"username"`
-	Password string   `json:"password,omitempty"`
-	Groups   []string `json:"groups,omitempty"`
-}
-
 func onAuthUserGet(originClientID string, username string) {
 	var err error
 
@@ -21,6 +15,7 @@ func onAuthUserGet(originClientID string, username string) {
 	if user, exist := config.Users[username]; exist {
 
 		// remove the password, nobody should now about it
+		user.Username = ""
 		user.Password = ""
 
 		// create a json and send it

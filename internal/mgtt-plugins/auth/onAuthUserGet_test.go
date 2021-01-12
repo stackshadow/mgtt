@@ -74,7 +74,7 @@ func TestOnAuthUserGet(t *testing.T) {
 	testClient.Connected = true
 	testClient.SubScriptionAdd("$SYS/auth/user/admin/error")
 	testClient.SubScriptionAdd("$SYS/auth/user/admin/json")
-	testClient.SubScriptionAdd("$SYS/auth/user/admin/password/set/success")
+	testClient.SubScriptionAdd("$SYS/auth/user/admin/set/success")
 	clientlist.Add(testClient)
 
 	var requestLock sync.Mutex
@@ -100,7 +100,7 @@ func TestOnAuthUserGet(t *testing.T) {
 		respondPacket, _ = testClient.PacketRead()
 		switch respPacket := respondPacket.(type) {
 		case *packets.PublishPacket:
-			if respPacket.TopicName == "$SYS/auth/user/admin/password/set/success" {
+			if respPacket.TopicName == "$SYS/auth/user/admin/set/success" {
 				respondLock.Unlock()
 			} else {
 				t.FailNow()
@@ -130,7 +130,7 @@ func TestOnAuthUserGet(t *testing.T) {
 	respondLock.Lock()
 
 	requestLock.Unlock()
-	OnHandleMessage("TestOnAuthUserGet", "$SYS/auth/user/admin/password/set", []byte("admin"))
+	OnHandleMessage("TestOnAuthUserGet", "$SYS/auth/user/admin/set", []byte("{ \"password\": \"admin\" }"))
 	respondLock.Lock()
 
 	requestLock.Unlock()

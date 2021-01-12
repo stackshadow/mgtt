@@ -31,8 +31,8 @@ func TestOnSelfUsernameGet(t *testing.T) {
 	testClient.IDSet("TestOnSelfUsernameGet")
 	testClient.UsernameSet("admin")
 	testClient.Connected = true
-	testClient.SubScriptionAdd("$SYS/auth/user/admin/password/set/success")
-	testClient.SubScriptionAdd("$SYS/self/username/string")
+	testClient.SubScriptionAdd("$SYS/auth/user/admin/set/success")
+	testClient.SubScriptionAdd("$SYS/self/user/json")
 	clientlist.Add(testClient)
 
 	var requestLock sync.Mutex
@@ -45,7 +45,7 @@ func TestOnSelfUsernameGet(t *testing.T) {
 		respondPacket, _ := testClient.PacketRead()
 		switch respPacket := respondPacket.(type) {
 		case *packets.PublishPacket:
-			if respPacket.TopicName == "$SYS/auth/user/admin/password/set/success" {
+			if respPacket.TopicName == "$SYS/auth/user/admin/set/success" {
 				respondLock.Unlock()
 			} else {
 				t.FailNow()
@@ -58,10 +58,11 @@ func TestOnSelfUsernameGet(t *testing.T) {
 		respondPacket, _ = testClient.PacketRead()
 		switch respPacket := respondPacket.(type) {
 		case *packets.PublishPacket:
-			if respPacket.TopicName == "$SYS/self/username/string" &&
-				string(respPacket.Payload) == string(respPacket.Payload) {
+			if respPacket.TopicName == "$SYS/self/user/json" &&
+				string(respPacket.Payload) == "{\"username\":\"admin\",\"groups\":null}" {
 				respondLock.Unlock()
 			} else {
+				t.Logf(string(respPacket.Payload))
 				t.FailNow()
 			}
 		default:
@@ -70,11 +71,11 @@ func TestOnSelfUsernameGet(t *testing.T) {
 	}()
 
 	requestLock.Unlock()
-	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/auth/user/admin/password/set", []byte("passwordadmintest"))
+	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/auth/user/admin/set", []byte("{ \"password\": \"admin\" }"))
 	respondLock.Lock()
 
 	requestLock.Unlock()
-	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/self/username/get", []byte(""))
+	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/self/user/get", []byte(""))
 	respondLock.Lock()
 
 	os.Remove("./TestOnSelfUsernameGet_auth.yml")

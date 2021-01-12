@@ -26,9 +26,9 @@ func TestOnAuthUserDelete(t *testing.T) {
 		packetSendLoopExit: make(chan byte),
 	}
 	testClient.Init(netserver, 0)
-	testClient.IDSet("integrationtest")
+	testClient.IDSet("TestOnAuthUserDelete")
 	testClient.Connected = true
-	testClient.SubScriptionAdd("$SYS/auth/user/deleteme/password/set/success")
+	testClient.SubScriptionAdd("$SYS/auth/user/deleteme/set/success")
 	testClient.SubScriptionAdd("$SYS/auth/user/deleteme/delete/success")
 	clientlist.Add(testClient)
 
@@ -43,7 +43,7 @@ func TestOnAuthUserDelete(t *testing.T) {
 		respondPacket, _ := testClient.PacketRead()
 		switch respPacket := respondPacket.(type) {
 		case *packets.PublishPacket:
-			if respPacket.TopicName == "$SYS/auth/user/deleteme/password/set/success" {
+			if respPacket.TopicName == "$SYS/auth/user/deleteme/set/success" {
 				respondLock.Unlock()
 			} else {
 				t.FailNow()
@@ -67,11 +67,11 @@ func TestOnAuthUserDelete(t *testing.T) {
 	}()
 
 	requestLock.Unlock()
-	OnHandleMessage("integrationtest", "$SYS/auth/user/deleteme/password/set", []byte("admin"))
+	OnHandleMessage("TestOnAuthUserDelete", "$SYS/auth/user/deleteme/set", []byte("{ \"password\": \"admin\" }"))
 	respondLock.Lock()
 
 	requestLock.Unlock()
-	OnHandleMessage("integrationtest", "$SYS/auth/user/deleteme/delete", []byte("admin"))
+	OnHandleMessage("TestOnAuthUserDelete", "$SYS/auth/user/deleteme/delete", []byte(""))
 	respondLock.Lock()
 
 	os.Remove("./TestOnAuthUserDelete_auth.yml")
