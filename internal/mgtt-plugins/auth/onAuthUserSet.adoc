@@ -1,0 +1,29 @@
+[cols="5,1,1,1,3", options="header", width="100%"] 
+.onAuthUserSet
+|===
+| Topic
+| Payload type
+| Payload example
+| Direction
+| Description
+
+| $SYS/auth/user/<username>/set
+| json
+a|
+```json
+{ 
+    username: "<username>",
+    password: "newpassword",
+    groups: [ "admin", "tester" ]
+} 
+```
+| publish
+| Request to store an user
+
+| $SYS/auth/user/<username>/set/success
+| bool
+| true
+| subscribe
+| Username successfully saved
+
+|===

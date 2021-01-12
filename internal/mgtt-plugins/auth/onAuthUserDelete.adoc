@@ -1,0 +1,22 @@
+[cols="5,1,1,1,3", options="header", width="100%"] 
+.onAuthUserDelete
+|===
+| Topic
+| Payload type
+| Payload example
+| Direction
+| Description
+
+| $SYS/auth/user/<username>/delete
+| -
+| -
+| publish
+| Delete an user
+
+| $SYS/auth/user/<username>/delete/success
+| bool
+| true
+| subscribe
+| If the user was correctly deleted
+
+|===

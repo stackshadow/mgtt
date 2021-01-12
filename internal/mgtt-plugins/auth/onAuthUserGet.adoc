@@ -1,0 +1,36 @@
+[cols="5,1,1,1,3", options="header", width="100%"] 
+.onAuthUserGet
+|===
+| Topic
+| Payload type
+| Payload example
+| Direction
+| Description
+
+| $SYS/auth/user/<username>/get
+| -
+| -
+| publish
+| Request user-infos
+
+
+| $SYS/auth/user/<username>/json
+| json
+a|
+```json
+{ 
+    username: "<username>",
+    groups: [ "admin", "tester" ]
+} 
+```
+| subscribe
+| Contains the user-info
+
+
+| $SYS/auth/user/<username>/error
+| string
+| "User dont exist"
+| subscribe
+| If an error occured
+
+|===
