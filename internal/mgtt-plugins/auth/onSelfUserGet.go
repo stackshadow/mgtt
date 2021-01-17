@@ -12,10 +12,7 @@ func onSelfUserGet(originClientID string) {
 	var username = clientlist.Get(originClientID).Username()
 
 	// check if the user exist
-	if user, exist := config.Users[username]; exist {
-
-		user.Username = username // only here we send the username
-		user.Password = ""       // remove the password, nobody should now about it
+	if user, exist := configUserGet(username); exist {
 
 		// create a json and send it
 		var jsonData []byte
