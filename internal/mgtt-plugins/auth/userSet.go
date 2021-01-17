@@ -6,16 +6,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// passwordAdd will add a new user with an password
+// userSet will set passwords/group for an user and return the new user-Object
 //
 // if the user already exist, we override the password
-func userSet(username string, password *string, groups *[]string) (err error) {
-
-	// get or create user
-	var user pluginConfigUser
+func userSet(username string, password *string, groups *[]string) (user pluginConfigUser, err error) {
 
 	// get user
 	user = config.Users[username]
+
+	// we remove the username if it exist in the object
+	user.Username = ""
 
 	// password
 	if password != nil {
