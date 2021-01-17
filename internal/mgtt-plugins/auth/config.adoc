@@ -1,0 +1,27 @@
+
+You can create a new user inside the config-file.
+
+Just add this to you config file
+
+```yaml
+
+# set this to true to allow anonymouse login beside the username-password
+anonym: false
+
+# This will create a new user and bcrypt the password
+new:
+  - username: ANewUser
+    password: cleartextpassword
+    groups:
+      - auth
+      - debugging
+
+# These are the user ( with bcrypted password )
+users:
+  john:
+    password: JDJhJDEwJFhNNU5BMWhQOUVTQ0pUdktobUtKcnU5YmNCaXphRThqTS5vTDZPa2d4UXVyZ1dZNHNBVlJX
+    groups:
+    - auth
+    - debugging
+
+```
