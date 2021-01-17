@@ -1,59 +1,17 @@
 package auth
 
 import (
-	"net"
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mocked"
 )
-
-type connTester struct {
-	packetSendLoopExit chan byte
-}
-
-func (c connTester) Read(b []byte) (n int, err error) {
-	bytes := <-c.packetSendLoopExit
-	b[0] = bytes
-	return 1, nil
-}
-func (c connTester) Write(b []byte) (n int, err error) {
-	for _, singleByte := range b {
-		c.packetSendLoopExit <- singleByte
-	}
-
-	return 1, nil
-}
-
-func (c connTester) Close() error {
-	return nil
-}
-
-func (c connTester) LocalAddr() (add net.Addr) {
-	return
-}
-
-func (c connTester) RemoteAddr() (add net.Addr) {
-	return
-}
-
-func (c connTester) SetDeadline(t time.Time) error {
-	return nil
-}
-
-func (c connTester) SetReadDeadline(t time.Time) error {
-	return nil
-}
-
-func (c connTester) SetWriteDeadline(t time.Time) error {
-	return nil
-}
 
 func TestOnAuthUserGet(t *testing.T) {
 	// setup logger
@@ -65,9 +23,7 @@ func TestOnAuthUserGet(t *testing.T) {
 
 	// create a dummy client
 	var testClient *client.MgttClient = &client.MgttClient{}
-	netserver := connTester{
-		packetSendLoopExit: make(chan byte),
-	}
+	var netserver mocked.Con = mocked.ConNew()
 	testClient.Init(netserver, 0)
 	testClient.IDSet("TestOnAuthUserGet")
 	testClient.UsernameSet("admin")

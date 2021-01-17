@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mocked"
 )
 
 func TestOnSelfUsernameGet(t *testing.T) {
@@ -24,9 +25,7 @@ func TestOnSelfUsernameGet(t *testing.T) {
 
 	// create a dummy client
 	var testClient *client.MgttClient = &client.MgttClient{}
-	netserver := connTester{
-		packetSendLoopExit: make(chan byte),
-	}
+	var netserver mocked.Con = mocked.ConNew()
 	testClient.Init(netserver, 0)
 	testClient.IDSet("TestOnSelfUsernameGet")
 	testClient.UsernameSet("admin")
