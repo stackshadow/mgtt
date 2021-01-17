@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/internal/mgtt/broker"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
@@ -27,9 +26,7 @@ func onAuthUsersListGet(originClientID string) {
 	// create a json and send it
 	jsonData, err := json.Marshal(newUserList)
 	if err == nil {
-		if broker.Current != nil {
-			err = clientlist.PublishToClient(originClientID, "$SYS/auth/users/list/json", jsonData)
-		}
+		err = clientlist.PublishToClient(originClientID, "$SYS/auth/users/list/json", jsonData)
 	}
 
 	if err != nil {
