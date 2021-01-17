@@ -15,7 +15,7 @@ func onAuthUserGet(originClientID string, username string) {
 	if user, exist := config.Users[username]; exist {
 
 		// remove the password, nobody should now about it
-		user.Username = ""
+		user.Username = username
 		user.Password = ""
 
 		// create a json and send it
