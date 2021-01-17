@@ -18,6 +18,7 @@ func onAuthUserSet(originClientID string, username string, payload []byte) {
 
 	err = json.Unmarshal(payload, &newUserInfo)
 
+	// username
 	if err == nil && username == "" {
 		err = errors.New("Empty username")
 	}
@@ -33,17 +34,22 @@ func onAuthUserSet(originClientID string, username string, payload []byte) {
 	}
 
 	// save
+	var changedUser pluginConfigUser
 	if err == nil {
-		userSet(username, newUserPassword, newUserGroups)
+		changedUser, _ = userSet(username, newUserPassword, newUserGroups)
 		err = configSave(filename)
 	}
 
 	if err == nil {
 
+		// create a json and send it
+		var jsonData []byte
+		jsonData, err = json.Marshal(changedUser)
+
 		err = clientlist.PublishToClient(
 			originClientID,
 			fmt.Sprintf("$SYS/auth/user/%s/set/success", username),
-			[]byte("true"))
+			jsonData)
 	}
 
 	if err != nil {
