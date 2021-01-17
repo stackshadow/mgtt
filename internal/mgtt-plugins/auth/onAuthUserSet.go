@@ -29,7 +29,7 @@ func onAuthUserSet(originClientID string, username string, payload []byte) {
 	}
 
 	// save groups
-	if err == nil && len(newUserInfo.Groups) > 0 {
+	if err == nil {
 		newUserGroups = &newUserInfo.Groups
 	}
 
@@ -41,6 +41,8 @@ func onAuthUserSet(originClientID string, username string, payload []byte) {
 	}
 
 	if err == nil {
+
+		changedUser.Username = username
 
 		// create a json and send it
 		var jsonData []byte
