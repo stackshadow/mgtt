@@ -12,10 +12,7 @@ import (
 func userSet(username string, password *string, groups *[]string) (user pluginConfigUser, err error) {
 
 	// get user
-	user = config.Users[username]
-
-	// we remove the username if it exist in the object
-	user.Username = ""
+	user, _ = configUserGet(username)
 
 	// password
 	if password != nil {
@@ -33,5 +30,7 @@ func userSet(username string, password *string, groups *[]string) (user pluginCo
 	// save it to the config
 	config.Users[username] = user
 
+	// get user
+	user, _ = configUserGet(username)
 	return
 }
