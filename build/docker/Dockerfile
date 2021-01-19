@@ -74,7 +74,7 @@ FROM archlinux/base as healthcheck
 
 RUN pacman --noconfirm -Syy glibc busybox go && \
     pacman --noconfirm -Scc
-    
+
 COPY cmd/healthcheck/main.go cmd/healthcheck/go.mod cmd/healthcheck/go.sum /go/src/
 WORKDIR /go/src
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o healthcheck . && \
@@ -111,10 +111,6 @@ RUN mkdir -p /data && \
 ######################################################## The finale image ########################################################
 FROM scratch as prod
 
-# infos
-LABEL maintainer "stackshadow@evilbrain.de" \
-      githash "${GITHASH}"
-
 ENV LD_LIBRARY_PATH /usr/local/lib:/usr/lib:/lib:/usr/lib64:/lib64
 
 # copy new root
@@ -138,3 +134,4 @@ COPY --from=mgtt --chown=nobody:0 /data /data
 
 USER nobody
 CMD ["/mgtt", "--debug", "--terminal", "serve", "--db-filename=/data/messages.db", "--ca-file=/data/ca.crt", "--cert-file=/data/server.crt", "--key-file=/data/server.key", "--config-path=/data/" ]
+
