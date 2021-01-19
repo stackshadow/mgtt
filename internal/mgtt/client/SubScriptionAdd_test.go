@@ -74,4 +74,10 @@ func TestSubScriptionAdd(t *testing.T) {
 		t.FailNow()
 	}
 
+	// we remove an subscription
+	testClient.SubScriptionRemove("/test/users/#")
+	if len(testClient.subscriptionTopics) != 2 {
+		t.FailNow()
+	}
+
 }

@@ -41,6 +41,9 @@ func (broker *Broker) handlePacketsForBroker(eventClient *client.MgttClient, eve
 	case *packets.SubscribePacket:
 		err = broker.handleSubscribePacket(eventClient, recvPacket)
 
+	case *packets.UnsubscribePacket:
+		err = broker.handleUnSubscribePacket(eventClient, recvPacket)
+
 	case *packets.PingreqPacket:
 		err = broker.handlePingreqPacket(eventClient, recvPacket)
 
