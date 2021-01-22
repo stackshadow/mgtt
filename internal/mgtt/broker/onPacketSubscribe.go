@@ -7,7 +7,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
-func (broker *Broker) handleSubscribePacket(connectedClient *client.MgttClient, packet *packets.SubscribePacket) (err error) {
+func (broker *Broker) onPacketSubscribe(connectedClient *client.MgttClient, packet *packets.SubscribePacket) (err error) {
 
 	// PLUGINS: call CallOnSubscriptionRequest - check if subscription is accepted
 	var topicResuls []byte

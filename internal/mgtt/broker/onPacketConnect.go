@@ -9,7 +9,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
-func (broker *Broker) handleConnectPacket(connectedClient *client.MgttClient, packet *packets.ConnectPacket) (err error) {
+func (broker *Broker) onPacketConnect(connectedClient *client.MgttClient, packet *packets.ConnectPacket) (err error) {
 
 	// MQTT-3.1.0-2
 	// Check if the client is already connected

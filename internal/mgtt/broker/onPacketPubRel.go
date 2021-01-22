@@ -6,7 +6,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func (broker *Broker) handlePubrelPacket(connectedClient *client.MgttClient, packet *packets.PubrelPacket) (err error) {
+func (broker *Broker) onPacketPubRel(connectedClient *client.MgttClient, packet *packets.PubrelPacket) (err error) {
 
 	// pubrel contains the original packet ID, we try to find it
 	for _, pubrec := range broker.pubrecs {

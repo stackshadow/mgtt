@@ -9,7 +9,7 @@ import (
 	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
 )
 
-func (broker *Broker) handlePublishPacketQoS1(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
+func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	var originalPacketID uint16 = packet.MessageID
 

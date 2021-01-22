@@ -6,7 +6,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func (broker *Broker) handlePublishPacketQoS0(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
+func (broker *Broker) onPacketPublishQoS0(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	// Publish to all clients
 	var messagedelivered bool

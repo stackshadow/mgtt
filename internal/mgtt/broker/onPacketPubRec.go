@@ -6,7 +6,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func (broker *Broker) handlePubrecPacket(connectedClient *client.MgttClient, packet *packets.PubrecPacket) (err error) {
+func (broker *Broker) onPacketPubRec(connectedClient *client.MgttClient, packet *packets.PubrecPacket) (err error) {
 
 	// we need to store the info that we get pubrec
 	if qosinfo, exist := broker.pubrecs[packet.MessageID]; exist {

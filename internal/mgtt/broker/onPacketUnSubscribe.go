@@ -5,7 +5,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func (broker *Broker) handleUnSubscribePacket(connectedClient *client.MgttClient, packet *packets.UnsubscribePacket) (err error) {
+func (broker *Broker) onPacketUnSubscribe(connectedClient *client.MgttClient, packet *packets.UnsubscribePacket) (err error) {
 
 	// unsubscribe
 	connectedClient.SubScriptionsRemove(packet.Topics)

@@ -6,7 +6,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
-func (broker *Broker) handleConackPacket(connectedClient *client.MgttClient, packet *packets.ConnackPacket) (err error) {
+func (broker *Broker) onPacketConACK(connectedClient *client.MgttClient, packet *packets.ConnackPacket) (err error) {
 	connectedClient.Connected = true
 
 	// PLUGINS: call CallOnAcceptNewClient - check if we accept the client

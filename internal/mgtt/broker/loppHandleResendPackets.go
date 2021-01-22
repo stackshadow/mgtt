@@ -59,7 +59,7 @@ loop:
 						Str("topic", pubPacket.TopicName).
 						Msg("Resend packet")
 
-					err := broker.handlePublishPacket(retryClient, pubPacket)
+					err := broker.onPacketPublish(retryClient, pubPacket)
 					if err != nil {
 						return
 					}

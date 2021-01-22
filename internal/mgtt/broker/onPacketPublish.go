@@ -6,7 +6,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
-func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
+func (broker *Broker) onPacketPublish(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	// call plugin
 	acceptPublish := plugin.CallOnPublishRequest(client.ID(), client.Username(), packet.TopicName)
@@ -21,6 +21,7 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 	}
 
 	// RETAINED-Packet
+	// [MQTT-3.1.2.7] Retained messages do not form part of the Session state in the Server, they MUST NOT be deleted when the Session ends.
 	if err == nil && packet.Retain == true && packet.Dup == false { // prevent multiple return
 
 		// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
@@ -36,11 +37,11 @@ func (broker *Broker) handlePublishPacket(client *client.MgttClient, packet *pac
 
 	switch packet.Qos {
 	case 0:
-		err = broker.handlePublishPacketQoS0(client, packet)
+		err = broker.onPacketPublishQoS0(client, packet)
 	case 1:
-		err = broker.handlePublishPacketQoS1(client, packet)
+		err = broker.onPacketPublishQoS1(client, packet)
 	case 2:
-		err = broker.handlePublishPacketQoS1(client, packet)
+		err = broker.onPacketPublishQoS1(client, packet)
 	}
 
 	return

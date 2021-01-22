@@ -5,7 +5,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func (broker *Broker) handlePingreqPacket(connectedClient *client.MgttClient, packet *packets.PingreqPacket) (err error) {
+func (broker *Broker) onPacketPinReq(connectedClient *client.MgttClient, packet *packets.PingreqPacket) (err error) {
 
 	connectedClient.SendPingresp()
 	return
