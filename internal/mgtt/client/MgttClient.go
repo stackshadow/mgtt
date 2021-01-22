@@ -11,10 +11,11 @@ import (
 
 // MgttClient represents a mqtt-client
 type MgttClient struct {
-	id         string
-	username   string
-	connection net.Conn
-	Connected  bool
+	id           string
+	username     string
+	cleanSession bool
+	connection   net.Conn
+	Connected    bool
 
 	// The last will of this client
 	lastWillPacket *packets.PublishPacket

@@ -6,6 +6,7 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/internal/mgtt/client"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mgtt/persistance"
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
@@ -55,8 +56,25 @@ func (broker *Broker) onPacketConnect(connectedClient *client.MgttClient, packet
 			connectedClient.LastWillSet(pubPacket)
 		}
 
-		// send CONACK
-		err = connectedClient.SendConnack(client.ConnackAccepted)
+		// [MQTT-3.1.2-6] If CleanSession is set to 1, the Client and Server MUST discard any previous Session and start a new one.
+		// This Session lasts as long as the Network Connection.
+		// State data associated with this Session MUST NOT be reused in any subsequent Session.
+		var sessionExist bool = false
+		connectedClient.CleanSessionSet(packet.CleanSession)
+		if packet.CleanSession == true {
+			persistance.CleanSession(packet.ClientIdentifier)
+		} else {
+			sessionSubscriptions := persistance.SubscriptionsGet(packet.ClientIdentifier)
+			connectedClient.SubScriptionsAdd(sessionSubscriptions)
+			if len(sessionSubscriptions) > 0 {
+				sessionExist = true
+			}
+		}
+
+		// [MQTT-3.2.2-2]  If the Server accepts a connection with CleanSession set to 0, the value set in Session Present depends on
+		// whether the Server already has stored Session state for the supplied client ID.
+		// If the Server has stored Session state, it MUST set Session Present to 1 in the CONNACK packet.
+		err = connectedClient.SendConnack(client.ConnackAccepted, sessionExist)
 
 		// PLUGINS: call CallOnAcceptNewClient - check if we accept the client
 		if err == nil {
