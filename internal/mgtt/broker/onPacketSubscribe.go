@@ -18,6 +18,15 @@ func (broker *Broker) onPacketSubscribe(connectedClient *client.MgttClient, pack
 		if plugin.CallOnSubscriptionRequest(connectedClient.ID(), connectedClient.Username(), topic) == true {
 			topicResuls = append(topicResuls, qos)
 			connectedClient.SubScriptionAdd(topic)
+
+			// if clean session is false, we store the subscription
+			if connectedClient.CleanSessionGet() == false {
+				persistance.SubscriptionsSet(
+					connectedClient.ID(),
+					connectedClient.Subscriptions(),
+				)
+			}
+
 		} else {
 			topicResuls = append(topicResuls, client.SubackErr)
 		}
