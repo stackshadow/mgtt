@@ -29,20 +29,23 @@ func TestLastWill(t *testing.T) {
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1255",
+			URL:        "tcp://127.0.0.1:1234",
 			DBFilename: "TestLastWill_test.db",
 		},
 	)
 	time.Sleep(time.Second * 1)
 
 	// ###############################################  The client with will-message
-	clientIDUUID := uuid.New()
+	clientIDUUID, _ := uuid.NewRandom()
+	var pahoClientConnected sync.Mutex
+	pahoClientConnected.Lock()
 	pahoClientOpts := paho.NewClientOptions()
 	pahoClientOpts.SetClientID(clientIDUUID.String())
 	pahoClientOpts.SetUsername("dummy")
 	pahoClientOpts.SetPassword("dummy")
-	pahoClientOpts.AddBroker("tcp://127.0.0.1:1255")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1234")
 	pahoClientOpts.SetAutoReconnect(true)
+	pahoClientOpts.SetOnConnectHandler(func(c paho.Client) { pahoClientConnected.Unlock() })
 
 	pahoClientOpts.WillEnabled = true
 	pahoClientOpts.WillTopic = "lastwill/value"
@@ -56,22 +59,19 @@ func TestLastWill(t *testing.T) {
 		t.Error(token.Error())
 		t.FailNow()
 	}
+	pahoClientConnected.Lock() // wait for connected
 
 	// ###############################################  The client
-	pahoClientSubUUID := uuid.New()
-	pahoClientSubOpts := paho.NewClientOptions()
-	pahoClientSubOpts.SetClientID(pahoClientSubUUID.String())
-	pahoClientSubOpts.SetUsername("dummy")
-	pahoClientSubOpts.SetPassword("dummy")
-	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1255")
-	pahoClientSubOpts.SetAutoReconnect(true)
+	clientIDUUID, _ = uuid.NewRandom()
+	pahoClientOpts.SetClientID(clientIDUUID.String())
 
 	// connect and send an retained value
-	pahoClientSub := paho.NewClient(pahoClientSubOpts)
+	pahoClientSub := paho.NewClient(pahoClientOpts)
 	if token := pahoClientSub.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
+	pahoClientConnected.Lock() // wait for connected
 
 	var lastWillRecvd sync.Mutex
 	lastWillRecvd.Lock()
@@ -95,5 +95,4 @@ func TestLastWill(t *testing.T) {
 
 	// close the server
 	server.ServeClose()
-	time.Sleep(time.Second * 1)
 }

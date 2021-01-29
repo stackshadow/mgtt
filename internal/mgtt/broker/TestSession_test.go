@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 )
 
-func TestRetained(t *testing.T) {
+func TestSession(t *testing.T) {
 
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -24,13 +24,13 @@ func TestRetained(t *testing.T) {
 		Logger()
 
 	// ############################################### the broker
-	os.Remove("TestRetained_test.db")
-	defer os.Remove("TestRetained_test.db")
+	os.Remove("TestSession_test.db")
+	defer os.Remove("TestSession_test.db")
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1236",
-			DBFilename: "TestRetained_test.db",
+			URL:        "tcp://127.0.0.1:1237",
+			DBFilename: "TestSession_test.db",
 		},
 	)
 	time.Sleep(time.Second * 1)
@@ -43,9 +43,10 @@ func TestRetained(t *testing.T) {
 	pahoClientOpts.SetClientID(clientIDUUID.String())
 	pahoClientOpts.SetUsername("dummy")
 	pahoClientOpts.SetPassword("dummy")
-	pahoClientOpts.AddBroker("tcp://127.0.0.1:1236")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1237")
 	pahoClientOpts.SetAutoReconnect(true)
 	pahoClientOpts.SetOnConnectHandler(func(c paho.Client) { pahoClientConnected.Unlock() })
+	pahoClientOpts.SetCleanSession(false)
 
 	// connect
 	pahoClient := paho.NewClient(pahoClientOpts)
@@ -66,16 +67,23 @@ func TestRetained(t *testing.T) {
 	}
 	connected.Lock()
 
-	randomUUID := uuid.New()
-	if token := pahoClient.Publish("retained/value", 0, true, randomUUID.String()); token.Wait() && token.Error() != nil {
+	// we subscribe to several topics
+	if token := pahoClient.Subscribe("sensors/room1/#", 0, func(client paho.Client, msg paho.Message) {
+
+	}); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
+	}
+	if token := pahoClient.Subscribe("sensors/room2/#", 0, func(client paho.Client, msg paho.Message) {
+
+	}); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
 	pahoClient.Disconnect(200)
 
-	// ###############################################  Check for stored value
-	clientIDUUID, _ = uuid.NewRandom()
-	pahoClientOpts.SetClientID(clientIDUUID.String())
+	// ###############################################  Connect again
+	// connect
 	pahoClient = paho.NewClient(pahoClientOpts)
 	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
@@ -83,19 +91,26 @@ func TestRetained(t *testing.T) {
 	}
 	pahoClientConnected.Lock() // wait for connected
 
-	var subscribeLock sync.Mutex
-	subscribeLock.Lock()
-	if token := pahoClient.Subscribe("retained/#", 0, func(client paho.Client, msg paho.Message) {
-		if string(msg.Payload()) != randomUUID.String() {
-			t.FailNow()
-			return
-		}
-		subscribeLock.Unlock()
-	}); token.Wait() && token.Error() != nil {
+	var published sync.Mutex
+	pahoClient.AddRoute("sensors/room2/#", func(client paho.Client, msg paho.Message) {
+		published.Unlock()
+	})
+	published.Lock()
+
+	// ###############################################  Connect a publisher
+	pahoClientOpts.SetClientID("clientPublisher")
+	pahoClientPublish := paho.NewClient(pahoClientOpts)
+	if token := pahoClientPublish.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
-	subscribeLock.Lock()
+	pahoClientConnected.Lock() // wait for connected
+
+	if token := pahoClientPublish.Publish("sensors/room2/#", 0, true, "100%"); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
+	}
+	published.Lock()
 
 	pahoClient.Disconnect(200)
 	server.ServeClose()

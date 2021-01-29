@@ -28,7 +28,7 @@ func TestSubUnSub(t *testing.T) {
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1237",
+			URL:        "tcp://127.0.0.1:1238",
 			DBFilename: "TestSubUnSub_test.db",
 		},
 	)
@@ -41,12 +41,15 @@ func TestSubUnSub(t *testing.T) {
 
 	// connect
 	clientIDUUID, _ := uuid.NewRandom()
+	var pahoClientConnected sync.Mutex
+	pahoClientConnected.Lock()
 	pahoClientOpts := paho.NewClientOptions()
 	pahoClientOpts.SetClientID(clientIDUUID.String())
 	pahoClientOpts.SetUsername("dummy")
 	pahoClientOpts.SetPassword("dummy")
-	pahoClientOpts.AddBroker("tcp://127.0.0.1:1237")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1238")
 	pahoClientOpts.SetAutoReconnect(true)
+	pahoClientOpts.SetOnConnectHandler(func(c paho.Client) { pahoClientConnected.Unlock() })
 
 	// subscription-client
 	pahoClientSub := paho.NewClient(pahoClientOpts)
@@ -54,6 +57,8 @@ func TestSubUnSub(t *testing.T) {
 		t.Error(token.Error())
 		t.FailNow()
 	}
+	pahoClientConnected.Lock() // wait for connected
+
 	if token := pahoClientSub.Subscribe("home/room1/+", 0, func(client paho.Client, msg paho.Message) {
 		subscriptionReceived1.Unlock()
 		subscriptionReceived2 = true
@@ -71,6 +76,7 @@ func TestSubUnSub(t *testing.T) {
 		t.Error(token.Error())
 		t.FailNow()
 	}
+	pahoClientConnected.Lock() // wait for connected
 
 	// publish
 	if token := pahoClientPub.Publish("home/room1/light1", 1, true, "on"); token.Wait() && token.Error() != nil {

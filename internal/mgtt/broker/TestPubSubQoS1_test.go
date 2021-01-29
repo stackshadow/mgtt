@@ -12,9 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var testserver *Broker
-
-func ServeForTests(t *testing.T) {
+func TestPubSubQoS1(t *testing.T) {
 
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -27,20 +25,26 @@ func ServeForTests(t *testing.T) {
 	// ############################################### the broker
 	os.Remove("TestPubSubQoS1_test.db")
 	defer os.Remove("TestPubSubQoS1_test.db")
-	testserver, _ = New()
-	go testserver.Serve(
+	server, _ := New()
+	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1245",
+			URL:        "tcp://127.0.0.1:1235",
 			DBFilename: "TestPubSubQoS1_test.db",
 		},
 	)
-	time.Sleep(time.Millisecond * 500)
-}
+	time.Sleep(time.Second * 1)
 
-func TestPubSubQoS1(t *testing.T) {
-
-	// We serve the server
-	ServeForTests(t)
+	// ###############################################  The client with will-message
+	clientIDUUID := uuid.New()
+	var pahoClientConnected sync.Mutex
+	pahoClientConnected.Lock()
+	pahoClientOpts := paho.NewClientOptions()
+	pahoClientOpts.SetClientID(clientIDUUID.String())
+	pahoClientOpts.SetUsername("dummy")
+	pahoClientOpts.SetPassword("dummy")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1235")
+	pahoClientOpts.SetAutoReconnect(true)
+	pahoClientOpts.SetOnConnectHandler(func(c paho.Client) { pahoClientConnected.Unlock() })
 
 	// vars
 	var subscriptionReceivedQoS1 sync.Mutex
@@ -48,21 +52,14 @@ func TestPubSubQoS1(t *testing.T) {
 	subscriptionReceivedQoS1.Lock()
 	subscriptionReceivedQoS2.Lock()
 
-	// connect
-	clientIDUUID, _ := uuid.NewRandom()
-	pahoClientSubOpts := paho.NewClientOptions()
-	pahoClientSubOpts.SetClientID(clientIDUUID.String())
-	pahoClientSubOpts.SetUsername("dummy")
-	pahoClientSubOpts.SetPassword("dummy")
-	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1245")
-	pahoClientSubOpts.SetAutoReconnect(true)
-
 	// subscription-client
-	pahoClientSub := paho.NewClient(pahoClientSubOpts)
+	pahoClientSub := paho.NewClient(pahoClientOpts)
 	if token := pahoClientSub.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
+	pahoClientConnected.Lock() // wait for connected
+
 	if token := pahoClientSub.Subscribe("qos/1", 0, func(client paho.Client, msg paho.Message) {
 		subscriptionReceivedQoS1.Unlock()
 	}); token.Wait() && token.Error() != nil {
@@ -78,18 +75,13 @@ func TestPubSubQoS1(t *testing.T) {
 
 	// publishing-client
 	clientIDUUID, _ = uuid.NewRandom()
-	pahoClientPubOpts := paho.NewClientOptions()
-	pahoClientPubOpts.SetClientID(clientIDUUID.String())
-	pahoClientPubOpts.SetUsername("dummy")
-	pahoClientPubOpts.SetPassword("dummy")
-	pahoClientPubOpts.AddBroker("tcp://127.0.0.1:1245")
-	pahoClientPubOpts.SetAutoReconnect(true)
-
-	pahoClientPub := paho.NewClient(pahoClientPubOpts)
+	pahoClientOpts.SetClientID(clientIDUUID.String())
+	pahoClientPub := paho.NewClient(pahoClientOpts)
 	if token := pahoClientPub.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
+	pahoClientConnected.Lock() // wait for connected
 
 	// publish QoS1
 
@@ -110,6 +102,6 @@ func TestPubSubQoS1(t *testing.T) {
 	pahoClientPub.Disconnect(500)
 	pahoClientSub.Disconnect(500)
 
-	testserver.ServeClose()
+	server.ServeClose()
 	time.Sleep(time.Second * 3)
 }
