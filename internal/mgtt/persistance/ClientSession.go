@@ -76,7 +76,15 @@ func SubscriptionsSet(clientID string, subscriptions []string) {
 	})
 
 	if err != nil {
-		log.Error().Err(err).Send()
+		log.Error().
+			Str("cid", clientID).
+			Strs("subscriptions", subscriptions).
+			Err(err).Send()
+	} else {
+		log.Debug().
+			Str("cid", clientID).
+			Strs("subscriptions", subscriptions).
+			Msg("Subscriptions stored")
 	}
 }
 
