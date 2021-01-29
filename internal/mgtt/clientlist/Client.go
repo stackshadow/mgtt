@@ -33,7 +33,7 @@ type Client interface {
 	SubScriptionsAdd(topics []string)
 
 	//
-	SendConnack(ReturnCode byte) (err error)
+	SendConnack(ReturnCode byte, SessionPresent bool) (err error)
 	SendConnect(username, password, clientid string)
 	SendPingreq()
 	SendPingresp()

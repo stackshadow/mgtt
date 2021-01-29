@@ -41,4 +41,14 @@ func TestClientSession(t *testing.T) {
 	if subscriptions := SubscriptionsGet("id2"); len(subscriptions) != 3 {
 		t.FailNow()
 	}
+
+	// clean
+	CleanSession("id1")
+
+	if subscriptions := SubscriptionsGet("id1"); len(subscriptions) != 0 {
+		t.FailNow()
+	}
+	if subscriptions := SubscriptionsGet("id2"); len(subscriptions) != 3 {
+		t.FailNow()
+	}
 }

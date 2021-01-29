@@ -80,6 +80,7 @@ func SubscriptionsSet(clientID string, subscriptions []string) {
 	}
 }
 
+// CleanSession will remove the session of an clientID
 func CleanSession(clientID string) {
 	SubscriptionsSet(clientID, []string{})
 }

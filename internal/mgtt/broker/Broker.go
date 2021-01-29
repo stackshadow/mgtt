@@ -3,8 +3,6 @@ package broker
 import (
 	"net"
 	"sync"
-
-	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
 )
 
 var ConnectTimeout int64 = 30
@@ -23,7 +21,7 @@ type Broker struct {
 	lastIDLock sync.Mutex
 
 	// an boltDB to store retained messages
-	retainedMessages *messagestore.Store
+	// retainedMessages *messagestore.Store
 
 	// myid -> originalID
 	pubrecs map[uint16]Qos2

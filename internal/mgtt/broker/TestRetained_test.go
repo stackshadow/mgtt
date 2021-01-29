@@ -47,15 +47,20 @@ func TestRetained(t *testing.T) {
 
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.Logger.
+		Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+		With().
+		Caller().
+		Logger()
 
 	// ############################################### the broker
-	os.Remove("test1.db")
+	os.Remove("TestRetained_test.db")
+	defer os.Remove("TestRetained_test.db")
 	server, _ := New()
 	go server.Serve(
 		Config{
 			URL:        "tcp://127.0.0.1:1238",
-			DBFilename: "test1.db",
+			DBFilename: "TestRetained_test.db",
 		},
 	)
 	time.Sleep(time.Second * 1)

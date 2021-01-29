@@ -25,12 +25,13 @@ func ServeForTests(t *testing.T) {
 		Logger()
 
 	// ############################################### the broker
-	os.Remove("test1.db")
+	os.Remove("TestPubSubQoS1_test.db")
+	defer os.Remove("TestPubSubQoS1_test.db")
 	testserver, _ = New()
 	go testserver.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1237",
-			DBFilename: "test1.db",
+			URL:        "tcp://127.0.0.1:1245",
+			DBFilename: "TestPubSubQoS1_test.db",
 		},
 	)
 	time.Sleep(time.Millisecond * 500)
@@ -53,7 +54,7 @@ func TestPubSubQoS1(t *testing.T) {
 	pahoClientSubOpts.SetClientID(clientIDUUID.String())
 	pahoClientSubOpts.SetUsername("dummy")
 	pahoClientSubOpts.SetPassword("dummy")
-	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1237")
+	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1245")
 	pahoClientSubOpts.SetAutoReconnect(true)
 
 	// subscription-client
@@ -81,7 +82,7 @@ func TestPubSubQoS1(t *testing.T) {
 	pahoClientPubOpts.SetClientID(clientIDUUID.String())
 	pahoClientPubOpts.SetUsername("dummy")
 	pahoClientPubOpts.SetPassword("dummy")
-	pahoClientPubOpts.AddBroker("tcp://127.0.0.1:1237")
+	pahoClientPubOpts.AddBroker("tcp://127.0.0.1:1245")
 	pahoClientPubOpts.SetAutoReconnect(true)
 
 	pahoClientPub := paho.NewClient(pahoClientPubOpts)

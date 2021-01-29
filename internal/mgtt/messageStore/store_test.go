@@ -68,4 +68,5 @@ func Test_Store(t *testing.T) {
 		t.FailNow()
 	}
 
+	os.Remove("integrtest.db")
 }

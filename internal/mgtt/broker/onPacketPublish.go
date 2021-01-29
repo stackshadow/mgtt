@@ -3,6 +3,7 @@ package broker
 import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/internal/mgtt/client"
+	"gitlab.com/mgtt/internal/mgtt/persistance"
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
@@ -27,10 +28,22 @@ func (broker *Broker) onPacketPublish(client *client.MgttClient, packet *packets
 		// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
 		// [MQTT-3.3.1-11] A zero byte retained message MUST NOT be stored as a retained message on the Server.
 		if len(packet.Payload) == 0 {
-			err = broker.retainedMessages.DeletePacketWithTopic("retained", packet.TopicName)
+			persistance.PacketDelete(nil, &packet.TopicName, nil)
 		} else {
+
+			broker.lastIDLock.Lock()
+
 			// [MQTT-3.3.1-5]
-			err = broker.retainedMessages.StorePacketWithTopic("retained", packet.TopicName, packet)
+			err = persistance.PacketStore(
+				persistance.PacketInfo{
+					Topic:   packet.TopicName,
+					Payload: packet.Payload,
+					Qos:     packet.Qos,
+				},
+				&broker.lastID,
+			)
+
+			broker.lastIDLock.Unlock()
 		}
 
 	}

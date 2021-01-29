@@ -24,7 +24,7 @@ func (broker *Broker) onPacketConnect(connectedClient *client.MgttClient, packet
 	if err == nil { // prevent multiple return
 		accepted := plugin.CallOnAcceptNewClient(connectedClient.ID(), packet.Username, string(packet.Password))
 		if accepted == false {
-			err = connectedClient.SendConnack(client.ConnackUnauthorized)
+			err = connectedClient.SendConnack(client.ConnackUnauthorized, false)
 			err = errors.New("Client not accepted by plugin")
 		}
 	}
@@ -60,8 +60,9 @@ func (broker *Broker) onPacketConnect(connectedClient *client.MgttClient, packet
 		// This Session lasts as long as the Network Connection.
 		// State data associated with this Session MUST NOT be reused in any subsequent Session.
 		var sessionExist bool = false
-		connectedClient.CleanSessionSet(packet.CleanSession)
+
 		if packet.CleanSession == true {
+			connectedClient.CleanSessionSet(true)
 			persistance.CleanSession(packet.ClientIdentifier)
 		} else {
 			sessionSubscriptions := persistance.SubscriptionsGet(packet.ClientIdentifier)

@@ -4,10 +4,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
-	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
 )
 
 func (broker *Broker) loopHandleResendPackets() {
@@ -40,36 +38,38 @@ loop:
 
 			// check if we need to resend messages that are not replyed with PUBACK
 			log.Debug().Msg("Check if packets need to be resended")
-			broker.retainedMessages.IterateResendPackets("resend", func(storedInfo *messagestore.PacketInfo) {
+			/*
+				broker.retainedMessages.IterateResendPackets("resend", func(storedInfo *messagestore.PacketInfo) {
 
-				// check if time is up
-				if time.Now().After(storedInfo.ResendAt) == true {
+					// check if time is up
+					if time.Now().After(storedInfo.ResendAt) == true {
 
-					// we create a new publish packet
-					pubPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
-					pubPacket.MessageID = storedInfo.MessageID
-					pubPacket.Retain = false
-					pubPacket.Dup = true // this is an duplicate packet
-					pubPacket.TopicName = storedInfo.Topic
-					pubPacket.Payload = storedInfo.Payload
-					pubPacket.Qos = storedInfo.Qos
+						// we create a new publish packet
+						pubPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+						pubPacket.MessageID = storedInfo.MessageID
+						pubPacket.Retain = false
+						pubPacket.Dup = true // this is an duplicate packet
+						pubPacket.TopicName = storedInfo.Topic
+						pubPacket.Payload = storedInfo.Payload
+						pubPacket.Qos = storedInfo.Qos
 
-					log.Debug().
-						Uint16("packet-mid", pubPacket.MessageID).
-						Str("topic", pubPacket.TopicName).
-						Msg("Resend packet")
+						log.Debug().
+							Uint16("packet-mid", pubPacket.MessageID).
+							Str("topic", pubPacket.TopicName).
+							Msg("Resend packet")
 
-					err := broker.onPacketPublish(retryClient, pubPacket)
-					if err != nil {
-						return
+						err := broker.onPacketPublish(retryClient, pubPacket)
+						if err != nil {
+							return
+						}
+
+						// a small delay to not flood our clients
+						time.Sleep(time.Millisecond * 500)
+
 					}
 
-					// a small delay to not flood our clients
-					time.Sleep(time.Millisecond * 500)
-
-				}
-
-			})
+				})
+			*/
 
 		}
 	}

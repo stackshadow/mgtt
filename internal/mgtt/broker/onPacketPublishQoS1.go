@@ -6,7 +6,7 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
-	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
+	"gitlab.com/mgtt/internal/mgtt/persistance"
 )
 
 func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
@@ -19,22 +19,23 @@ func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *pac
 		// we need a new ID
 		broker.lastIDLock.Lock()
 
-		options := messagestore.PacketInfo{
-			ResendAt:  time.Now().Add(time.Minute * 1),
-			Topic:     packet.TopicName,
-			MessageID: broker.lastID,
-			Qos:       packet.Qos,
-			Payload:   packet.Payload,
-		}
+		err = persistance.PacketStore(
+			persistance.PacketInfo{
+				OriginClientID: client.ID(),
+				ResendAt:       time.Now().Add(time.Minute * 1),
 
-		//
-		err = broker.retainedMessages.StoreResendPacket("resend", &options)
+				Topic:     packet.TopicName,
+				MessageID: packet.MessageID,
+				Payload:   packet.Payload,
+				Qos:       packet.Qos,
+			},
+			&broker.lastID,
+		)
 
-		broker.lastID = options.MessageID
 		broker.lastIDLock.Unlock()
 
 		// and we will send the packet with our messageID :)
-		packet.MessageID = options.MessageID
+		packet.MessageID = broker.lastID
 	}
 
 	// Publish to all clients
@@ -44,12 +45,17 @@ func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *pac
 		// publish packet to all subscribers
 		messagedelivered, err = broker.PublishPacket(packet, false)
 
-		// message not delivered and no error occured -> client is not interested
+		// message not delivered and no error occured -> no client is interested
 		if messagedelivered == false && err == nil {
 			log.Info().
 				Str("topic", packet.TopicName).
 				Uint16("mid", packet.MessageID).
 				Msg("Nobody is interested in this message")
+
+			// on QOS2 we emulate that we get PUBCOMP
+			if packet.Qos == 2 {
+				persistance.PacketPubCompSet(originalPacketID, true)
+			}
 		}
 
 	}
@@ -59,18 +65,6 @@ func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *pac
 		client.SendPuback(originalPacketID)
 	}
 	if packet.Qos == 2 {
-
-		// store it in the list
-		broker.pubrecs[packet.MessageID] = Qos2{
-			originalClientID: client.ID(),
-			originalID:       originalPacketID,
-			receivedPubRec:   false,
-		}
-		log.Info().
-			Str("topic", packet.TopicName).
-			Uint16("mid", packet.MessageID).
-			Msg("Store to pubrec")
-
 		client.SendPubrec(originalPacketID)
 	}
 

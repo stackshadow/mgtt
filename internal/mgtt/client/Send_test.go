@@ -14,6 +14,7 @@ func TestSend(t *testing.T) {
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.Logger.With().Caller().Logger()
 
 	var testClient *MgttClient = &MgttClient{}
 	var netserver mocked.Con = mocked.ConNew()
@@ -23,7 +24,7 @@ func TestSend(t *testing.T) {
 	testClient.SubScriptionsAdd([]string{"/test/users/#", "/flat/sensors/#"})
 
 	// ConnackPacket
-	err := testClient.SendConnack(1)
+	err := testClient.SendConnack(1, false)
 	if err != nil {
 		t.FailNow()
 	}

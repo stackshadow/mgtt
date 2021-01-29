@@ -3,7 +3,7 @@ package broker
 import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/internal/mgtt/client"
-	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mgtt/persistance"
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
@@ -29,15 +29,8 @@ func (broker *Broker) onPacketSubscribe(connectedClient *client.MgttClient, pack
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client
 	if err == nil { // prevent multiple return
-		broker.retainedMessages.IteratePackets("retained", func(retainedPacket *packets.PublishPacket) {
-
-			// [MQTT-3.3.1-8]
-			// When sending a PUBLISH Packet to a Client the Server MUST set the RETAIN flag to 1
-			// if a message is sent as a result of a new subscription being made by a Client.
-			retainedPacket.Retain = true
-
-			clientlist.PublishToAllClients(retainedPacket, false)
-
+		persistance.PacketIterate(func(info persistance.PacketInfo, publishPacket *packets.PublishPacket) {
+			connectedClient.Publish(publishPacket)
 		})
 	}
 

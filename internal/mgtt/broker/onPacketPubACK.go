@@ -7,7 +7,8 @@ import (
 
 func (broker *Broker) onPacketPubACK(connectedClient *client.MgttClient, packet *packets.PubackPacket) (err error) {
 
-	broker.retainedMessages.DeletePacketWithID("resend", packet.MessageID)
+	// TODO
+	// broker.retainedMessages.DeletePacketWithID("resend", packet.MessageID)
 
 	return
 }

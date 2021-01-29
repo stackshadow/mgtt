@@ -24,12 +24,13 @@ func TestLastWill(t *testing.T) {
 		Logger()
 
 	// ############################################### the broker
-	os.Remove("test1.db")
+	os.Remove("TestLastWill_test.db")
+	defer os.Remove("TestLastWill_test.db")
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1238",
-			DBFilename: "test1.db",
+			URL:        "tcp://127.0.0.1:1255",
+			DBFilename: "TestLastWill_test.db",
 		},
 	)
 	time.Sleep(time.Second * 1)
@@ -40,7 +41,7 @@ func TestLastWill(t *testing.T) {
 	pahoClientOpts.SetClientID(clientIDUUID.String())
 	pahoClientOpts.SetUsername("dummy")
 	pahoClientOpts.SetPassword("dummy")
-	pahoClientOpts.AddBroker("tcp://127.0.0.1:1238")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1255")
 	pahoClientOpts.SetAutoReconnect(true)
 
 	pahoClientOpts.WillEnabled = true
@@ -62,7 +63,7 @@ func TestLastWill(t *testing.T) {
 	pahoClientSubOpts.SetClientID(pahoClientSubUUID.String())
 	pahoClientSubOpts.SetUsername("dummy")
 	pahoClientSubOpts.SetPassword("dummy")
-	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1238")
+	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1255")
 	pahoClientSubOpts.SetAutoReconnect(true)
 
 	// connect and send an retained value
@@ -94,5 +95,5 @@ func TestLastWill(t *testing.T) {
 
 	// close the server
 	server.ServeClose()
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 1)
 }

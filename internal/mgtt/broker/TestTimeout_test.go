@@ -31,12 +31,13 @@ func TestTimeout(t *testing.T) {
 	ConnectTimeout = 1
 
 	// the broker
-	os.Remove("test1.db")
+	os.Remove("TestTimeout_test.db")
+	defer os.Remove("TestTimeout_test.db")
 	server, _ := New()
 	go server.Serve(
 		Config{
 			URL:        "tcp://127.0.0.1:1240",
-			DBFilename: "test1.db",
+			DBFilename: "TestTimeout_test.db",
 		},
 	)
 	time.Sleep(time.Second * 2)

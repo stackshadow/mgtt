@@ -8,7 +8,7 @@ import (
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
-	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
+	"gitlab.com/mgtt/internal/mgtt/persistance"
 )
 
 // Serve will create a new broker and wait for clients
@@ -16,11 +16,7 @@ import (
 // - this create also an retained message with topic "$SYS/broker/version" that contains the version
 func (b *Broker) Serve(config Config) (err error) {
 
-	// retainedMessages-db
-	b.retainedMessages, err = messagestore.Open(config.DBFilename)
-	if err != nil {
-		return
-	}
+	err = persistance.Open(config.DBFilename)
 
 	//	store version information
 	pub := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
@@ -29,7 +25,14 @@ func (b *Broker) Serve(config Config) (err error) {
 	pub.TopicName = "$SYS/broker/version"
 	pub.Payload = []byte(config.Version)
 	pub.Qos = 0
-	b.retainedMessages.StorePacketWithTopic("retained", pub.TopicName, pub)
+	// b.retainedMessages.StorePacketWithTopic("retained", pub.TopicName, pub)
+	persistance.PacketStore(
+		persistance.PacketInfo{
+			Topic:   "$SYS/broker/version",
+			Payload: []byte(config.Version),
+		},
+		&b.lastID,
+	)
 
 	var serverURL *url.URL
 	serverURL, err = url.Parse(config.URL)
@@ -74,8 +77,8 @@ func (b *Broker) Serve(config Config) (err error) {
 			Msg("Listening")
 	}
 
-	// retry
-	go b.loopHandleResendPackets()
+	// retry TODO
+	// go b.loopHandleResendPackets()
 
 	for {
 

@@ -13,12 +13,26 @@ import (
 )
 
 func TestSubUnSub(t *testing.T) {
+
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.Logger.
+		Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+		With().
+		Caller().
+		Logger()
 
-	// We serve the server
-	ServeForTests(t)
+	// ############################################### the broker
+	os.Remove("TestSubUnSub_test.db")
+	defer os.Remove("TestSubUnSub_test.db")
+	server, _ := New()
+	go server.Serve(
+		Config{
+			URL:        "tcp://127.0.0.1:1237",
+			DBFilename: "TestSubUnSub_test.db",
+		},
+	)
+	time.Sleep(time.Second * 1)
 
 	// vars
 	var subscriptionReceived1 sync.Mutex
@@ -27,15 +41,15 @@ func TestSubUnSub(t *testing.T) {
 
 	// connect
 	clientIDUUID, _ := uuid.NewRandom()
-	pahoClientSubOpts := paho.NewClientOptions()
-	pahoClientSubOpts.SetClientID(clientIDUUID.String())
-	pahoClientSubOpts.SetUsername("dummy")
-	pahoClientSubOpts.SetPassword("dummy")
-	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1237")
-	pahoClientSubOpts.SetAutoReconnect(true)
+	pahoClientOpts := paho.NewClientOptions()
+	pahoClientOpts.SetClientID(clientIDUUID.String())
+	pahoClientOpts.SetUsername("dummy")
+	pahoClientOpts.SetPassword("dummy")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1237")
+	pahoClientOpts.SetAutoReconnect(true)
 
 	// subscription-client
-	pahoClientSub := paho.NewClient(pahoClientSubOpts)
+	pahoClientSub := paho.NewClient(pahoClientOpts)
 	if token := pahoClientSub.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
@@ -50,14 +64,9 @@ func TestSubUnSub(t *testing.T) {
 
 	// publishing-client
 	clientIDUUID, _ = uuid.NewRandom()
-	pahoClientPubOpts := paho.NewClientOptions()
-	pahoClientPubOpts.SetClientID(clientIDUUID.String())
-	pahoClientPubOpts.SetUsername("dummy")
-	pahoClientPubOpts.SetPassword("dummy")
-	pahoClientPubOpts.AddBroker("tcp://127.0.0.1:1237")
-	pahoClientPubOpts.SetAutoReconnect(true)
+	pahoClientOpts.SetClientID(clientIDUUID.String())
 
-	pahoClientPub := paho.NewClient(pahoClientPubOpts)
+	pahoClientPub := paho.NewClient(pahoClientOpts)
 	if token := pahoClientPub.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
@@ -84,6 +93,6 @@ func TestSubUnSub(t *testing.T) {
 	pahoClientPub.Disconnect(500)
 	pahoClientSub.Disconnect(500)
 
-	testserver.ServeClose()
+	server.ServeClose()
 	time.Sleep(time.Second * 1)
 }
