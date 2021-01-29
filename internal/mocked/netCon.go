@@ -29,7 +29,7 @@ func (c Con) Write(b []byte) (n int, err error) {
 		c.packetSendLoopExit <- singleByte
 	}
 
-	return 1, nil
+	return len(b), nil
 }
 
 func (c Con) Close() error {
