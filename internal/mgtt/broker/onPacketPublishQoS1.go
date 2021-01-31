@@ -1,8 +1,6 @@
 package broker
 
 import (
-	"time"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
@@ -11,51 +9,52 @@ import (
 
 func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
+	var ogiginalPacketID string = client.ID()
 	var originalPacketID uint16 = packet.MessageID
+	var packetInfo persistance.PacketInfo
+	var packetInfoExist bool = false
 
-	//  QoS1 - Store package only if its not duplicated
-	if packet.Dup == false {
+	// check if we already get this message ( e.g. LOST of PUBREC  )
+	packetInfoExist, packetInfo, _ = persistance.PacketExist("qos", persistance.PacketFindOpts{
+		OriginClientID:  &ogiginalPacketID,
+		OriginMessageID: &packet.MessageID,
+	})
 
-		// we need a new ID
-		broker.lastIDLock.Lock()
+	//  Store package - For retry-purpose
+	if packet.Dup == false && packetInfoExist == false {
 
-		err = persistance.PacketStore(
-			persistance.PacketInfo{
-				OriginClientID: client.ID(),
-				ResendAt:       time.Now().Add(time.Minute * 1),
+		packetInfo = persistance.PacketInfo{
+			OriginClientID:  client.ID(),
+			OriginMessageID: packet.MessageID,
 
-				Topic:     packet.TopicName,
-				MessageID: packet.MessageID,
-				Payload:   packet.Payload,
-				Qos:       packet.Qos,
-			},
-			&broker.lastID,
-		)
-
-		broker.lastIDLock.Unlock()
-
-		// and we will send the packet with our messageID :)
-		packet.MessageID = broker.lastID
+			Topic:   packet.TopicName,
+			Payload: packet.Payload,
+			Qos:     packet.Qos,
+		}
+		err = persistance.PacketStore("qos", &packetInfo)
 	}
 
+	// we get our own messageID
+	packet.MessageID = packetInfo.MessageID
+
 	// Publish to all clients
-	var messagedelivered bool
-	if err == nil {
+	if err == nil && packetInfoExist == false {
 
 		// publish packet to all subscribers
-		messagedelivered, err = broker.PublishPacket(packet, false)
+		var subscribed bool
+		_, subscribed, err = broker.PublishPacket(packet, packet.Qos == 2)
 
-		// message not delivered and no error occured -> no client is interested
-		if messagedelivered == false && err == nil {
+		// nobody subscribe to this
+		if subscribed == false {
 			log.Info().
 				Str("topic", packet.TopicName).
 				Uint16("mid", packet.MessageID).
 				Msg("Nobody is interested in this message")
 
-			// on QOS2 we emulate that we get PUBCOMP
-			if packet.Qos == 2 {
-				persistance.PacketPubCompSet(originalPacketID, true)
-			}
+			persistance.PacketDelete("qos", persistance.PacketFindOpts{
+				OriginClientID:  &ogiginalPacketID,
+				OriginMessageID: &packet.MessageID,
+			})
 		}
 
 	}

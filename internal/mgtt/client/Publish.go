@@ -40,10 +40,12 @@ func Match(route []string, topic []string) bool {
 //
 // this function check if the topic in the `packet` matches the client-topic-filter
 //
-// - return true if the message could be send
+// - return published=true if the message could be send
+//
+// - return subscribed=true if an sibscription match
 //
 // - err is returned if something is wrong with the connection
-func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool, err error) {
+func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool, subscribed bool, err error) {
 
 	topic := packet.TopicName
 	topicArray := strings.Split(topic, "/")
@@ -58,6 +60,7 @@ func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool
 		// The Topic Name in a PUBLISH Packet sent by a Server to a subscribing Client
 		// MUST match the Subscription’s Topic Filter
 		if Match(subscriptionTopicArray, topicArray) == true {
+			subscribed = true
 			topicMatched = true
 			break
 		}

@@ -25,7 +25,8 @@ type MgttClient struct {
 	sendPackets chan packets.ControlPacket // send-buffer to avoid double-write
 
 	// loop signals
-	packetSendLoopExit chan bool
+	packetSendLoopRunning bool // indicates i the send-loop is running
+	packetSendLoopExit    chan bool
 }
 
 // Init create a new MgttClient with id of "unknown"

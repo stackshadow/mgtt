@@ -26,7 +26,7 @@ type Client interface {
 
 	// packet handling
 	PacketRead() (packet packets.ControlPacket, err error) // reads a single packet from the connection
-	Publish(packet *packets.PublishPacket) (published bool, err error)
+	Publish(packet *packets.PublishPacket) (published bool, subscribed bool, err error)
 
 	// subscriptions
 	SubScriptionAdd(topic string)

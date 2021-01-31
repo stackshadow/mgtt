@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/persistance"
 )
@@ -18,20 +17,19 @@ func (b *Broker) Serve(config Config) (err error) {
 
 	err = persistance.Open(config.DBFilename)
 
-	//	store version information
-	pub := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
-	pub.MessageID = 0
-	pub.Retain = false
-	pub.TopicName = "$SYS/broker/version"
-	pub.Payload = []byte(config.Version)
-	pub.Qos = 0
-	// b.retainedMessages.StorePacketWithTopic("retained", pub.TopicName, pub)
-	persistance.PacketStore(
-		persistance.PacketInfo{
-			Topic:   "$SYS/broker/version",
+	// Delete Broker-version if exist
+	brokerVersionTopic := "$SYS/broker/version"
+	persistance.PacketDelete("retained",
+		persistance.PacketFindOpts{
+			Topic: &brokerVersionTopic,
+		},
+	)
+	// Set the broker-version
+	persistance.PacketStore("retained",
+		&persistance.PacketInfo{
+			Topic:   brokerVersionTopic,
 			Payload: []byte(config.Version),
 		},
-		&b.lastID,
 	)
 
 	var serverURL *url.URL

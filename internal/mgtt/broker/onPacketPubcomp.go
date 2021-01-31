@@ -14,7 +14,10 @@ func (broker *Broker) onPacketPubcomp(connectedClient *client.MgttClient, packet
 		Uint16("pid", packet.MessageID).
 		Msg("We remember that we get an pubcomp")
 
-	err = persistance.PacketPubCompSet(packet.MessageID, true)
+	// delete the packet
+	persistance.PacketDelete("qos", persistance.PacketFindOpts{
+		MessageID: &packet.MessageID,
+	})
 
 	delete(broker.pubrecs, packet.MessageID)
 	return

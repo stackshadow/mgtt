@@ -28,22 +28,28 @@ func (broker *Broker) onPacketPublish(client *client.MgttClient, packet *packets
 		// [MQTT-3.3.1-10] if payload is 0, an retained message MUST be removed
 		// [MQTT-3.3.1-11] A zero byte retained message MUST NOT be stored as a retained message on the Server.
 		if len(packet.Payload) == 0 {
-			persistance.PacketDelete(nil, &packet.TopicName, nil)
+			persistance.PacketDelete("retained",
+				persistance.PacketFindOpts{
+					Topic: &packet.TopicName,
+				},
+			)
 		} else {
 
-			broker.lastIDLock.Lock()
+			persistance.PacketDelete("retained",
+				persistance.PacketFindOpts{
+					Topic: &packet.TopicName,
+				},
+			)
 
 			// [MQTT-3.3.1-5]
-			err = persistance.PacketStore(
-				persistance.PacketInfo{
+			err = persistance.PacketStore("retained",
+				&persistance.PacketInfo{
 					Topic:   packet.TopicName,
 					Payload: packet.Payload,
 					Qos:     packet.Qos,
 				},
-				&broker.lastID,
 			)
 
-			broker.lastIDLock.Unlock()
 		}
 
 	}

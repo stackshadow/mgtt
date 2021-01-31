@@ -9,7 +9,7 @@ import (
 func (broker *Broker) onPacketPublishQoS0(client *client.MgttClient, packet *packets.PublishPacket) (err error) {
 
 	// Publish to all clients
-	var messagedelivered bool
+
 	if err == nil {
 
 		// [MQTT-3.3.1-9]
@@ -18,10 +18,11 @@ func (broker *Broker) onPacketPublishQoS0(client *client.MgttClient, packet *pac
 		packet.Retain = false
 
 		// publish packet to all subscribers
-		messagedelivered, err = broker.PublishPacket(packet, false)
+		var subscribed bool
+		_, subscribed, err = broker.PublishPacket(packet, false)
 
 		// no message delivered
-		if messagedelivered == false {
+		if subscribed == false {
 			log.Info().
 				Str("topic", packet.TopicName).
 				Uint16("mid", packet.MessageID).

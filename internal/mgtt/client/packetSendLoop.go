@@ -9,6 +9,8 @@ import (
 // If the connection is closed or an error occured, the loop will end
 func (c *MgttClient) packetSendLoop() {
 
+	c.packetSendLoopRunning = true
+
 loop:
 	for {
 
@@ -43,5 +45,6 @@ loop:
 
 	}
 
+	c.packetSendLoopRunning = false
 	return
 }

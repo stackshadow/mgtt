@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func TestPubSubQoS1(t *testing.T) {
+func TestPubSubQoS2(t *testing.T) {
 
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -41,10 +41,10 @@ func TestPubSubQoS1(t *testing.T) {
 		t.FailNow()
 	}
 	// vars
-	var subscriptionReceivedQoS1 sync.Mutex
+	var subscriptionReceivedQoS2 sync.Mutex
 
-	if token := pahoClientSub.Subscribe("qos/1", 0, func(client paho.Client, msg paho.Message) {
-		subscriptionReceivedQoS1.Unlock()
+	if token := pahoClientSub.Subscribe("qos/2", 0, func(client paho.Client, msg paho.Message) {
+		subscriptionReceivedQoS2.Unlock()
 	}); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
@@ -57,14 +57,14 @@ func TestPubSubQoS1(t *testing.T) {
 		t.FailNow()
 	}
 
-	// publish QoS1
-	subscriptionReceivedQoS1.Lock()
-	if token := pahoClientPub.Publish("qos/1", 1, true, "100%"); token.Wait() && token.Error() != nil {
+	// publish QoS2
+	subscriptionReceivedQoS2.Lock()
+	if token := pahoClientPub.Publish("qos/2", 2, true, "100%"); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
 	time.Sleep(time.Second * 1)
-	subscriptionReceivedQoS1.Lock()
+	subscriptionReceivedQoS2.Lock()
 
 	pahoClientPub.Disconnect(500)
 	pahoClientSub.Disconnect(500)

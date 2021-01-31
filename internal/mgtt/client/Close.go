@@ -1,17 +1,19 @@
 package client
 
+import "github.com/rs/zerolog/log"
+
 // Close will close an network connection
 func (client *MgttClient) Close() (err error) {
 
-	// resend-clients we don't close
-	if client.id == "resend" {
-		return nil
-	}
-
+	// close network-connection
 	err = client.connection.Close()
 
 	// close the loop
-	client.packetSendLoopExit <- true
+	if client.packetSendLoopRunning {
+		client.packetSendLoopExit <- true
+	} else {
+		log.Warn().Str("cid", client.id).Msg("packetSendLoop already closed")
+	}
 
 	client.Connected = false
 	return
