@@ -13,6 +13,7 @@ type PacketInfo struct {
 
 	// Original infos
 	OriginClientID  string `json:"oc"`
+	TargetClientID  string `json:"tc,omitempty"` // This is for retry of PUBREL
 	OriginMessageID uint16 `json:"om,omitempty"`
 
 	// tis comes from the packet
