@@ -3,6 +3,10 @@ package clientlist
 // RemoveAll will remove and disconnects all clients
 func RemoveAll() {
 
+	// find the client
+	listMutex.Lock()
+	defer listMutex.Unlock()
+
 	// prevent "fatal error: concurrent map iteration and map write"
 	var keys []string
 

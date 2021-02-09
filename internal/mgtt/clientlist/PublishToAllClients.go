@@ -7,6 +7,10 @@ import (
 
 // PublishToAllClients send an packet to all clients
 func PublishToAllClients(packet *packets.PublishPacket, once bool) (published bool, subscribed bool, err error) {
+	
+	// mutex
+	listMutex.Lock()
+	defer listMutex.Unlock()
 
 	for _, client := range list {
 
