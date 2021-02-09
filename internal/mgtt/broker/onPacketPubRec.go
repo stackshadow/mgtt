@@ -23,6 +23,7 @@ func (broker *Broker) onPacketPubRec(connectedClient *client.MgttClient, packet 
 
 	// store that we get pubrec
 	if packetInfoExist == true {
+		packetInfo.TargetClientID = connectedClient.ID()
 		packetInfo.PubRec = true
 		persistance.PacketStore("qos", &packetInfo)
 	}

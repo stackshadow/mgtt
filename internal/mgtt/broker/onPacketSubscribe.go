@@ -38,7 +38,17 @@ func (broker *Broker) onPacketSubscribe(connectedClient *client.MgttClient, pack
 	// [MQTT-3.3.1-6]
 	// check if an retained message exist and send it to the client
 	if err == nil { // prevent multiple return
-		persistance.PacketIterate("retained", func(info persistance.PacketInfo, publishPacket *packets.PublishPacket) {
+		persistance.PacketIterate("retained", func(info persistance.PacketInfo) {
+
+			// create a packet
+			publishPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+			publishPacket.MessageID = info.MessageID
+			publishPacket.Retain = false
+			publishPacket.Dup = info.OriginClientID != ""
+			publishPacket.TopicName = info.Topic
+			publishPacket.Payload = info.Payload
+			publishPacket.Qos = info.Qos
+
 			connectedClient.Publish(publishPacket)
 		})
 	}

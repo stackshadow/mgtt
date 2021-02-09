@@ -75,8 +75,8 @@ func (b *Broker) Serve(config Config) (err error) {
 			Msg("Listening")
 	}
 
-	// retry TODO
-	// go b.loopHandleResendPackets()
+	// retry
+	go b.loopHandleResendPackets()
 
 	for {
 

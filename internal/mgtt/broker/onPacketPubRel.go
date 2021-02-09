@@ -5,7 +5,8 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
-func (broker *Broker) onPacketPubRel(connectedClient *client.MgttClient, packet *packets.PubrelPacket) (err error) {
-	connectedClient.SendPubcomp(packet.MessageID)
+func (broker *Broker) onPacketPubRel(client *client.MgttClient, packet *packets.PubrelPacket) (err error) {
+
+	client.SendPubcomp(packet.MessageID)
 	return
 }
