@@ -76,7 +76,7 @@ ${HOME}/go/bin/gosec:
 
 ###################### Badge: gosec ######################
 ./gosec.txt: ${HOME}/go/bin/gosec
-	${HOME}/go/bin/gosec -no-fail ./... > $@
+	${HOME}/go/bin/gosec -no-fail -severity medium ./... > $@
 ./gosec.svg: ./gosec.txt ${HOME}/.local/bin/anybadge
 	value=$$(cat gosec.txt | grep Issues | cut -d':' -f2 | sed -e 's/\s*//') &&\
 	${HOME}/.local/bin/anybadge -l "gosec" -v $$value -f $@ 10=green 50=yellow 70=orange 100=red
