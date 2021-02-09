@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/boltdb/bolt"
-	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,7 +24,7 @@ func packetStoreDump(bucket string) {
 
 	log.Debug().Str("bucket", bucket).Msg("###################### DUMP of packet-store ######################")
 
-	PacketIterate(bucket, func(info PacketInfo, publishPacket *packets.PublishPacket) {
+	PacketIterate(bucket, func(info PacketInfo) {
 		info.dump(bucket, "")
 	})
 
