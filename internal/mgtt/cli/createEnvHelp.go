@@ -24,7 +24,7 @@ func (s *CreateEnvHelpFileFlag) Run() error {
 	programm := os.Args[0]
 	os.Args = []string{programm, "--help"}
 
-	file, err := os.OpenFile(s.OutputFile, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(s.OutputFile, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0600)
 	//file, err := os.OpenFile("_envvars.adoc", os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Error().Err(err).Msg("failed creating file")
