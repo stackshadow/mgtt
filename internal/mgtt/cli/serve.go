@@ -22,10 +22,10 @@ type CmdServe struct {
 }
 
 // Run will run the command
-func (c *CmdServe) Run(cliCurrent CLIType) (err error) {
+func (c *CmdServe) Run(params Parameter) (err error) {
 
 	// did we use TLS ?
-	if cliCurrent.Serve.TLS == true {
+	if params.Serve.TLS == true {
 
 		if c.SelfSigned == true {
 			c.CAFile = ""
@@ -33,20 +33,20 @@ func (c *CmdServe) Run(cliCurrent CLIType) (err error) {
 
 		// create ca
 		if c.CAFile != "" {
-			cliCurrent.CreateCA.CAFile = c.CAFile
-			cliCurrent.CreateCA.Run()
+			params.CreateCA.CAFile = c.CAFile
+			params.CreateCA.Run()
 		}
 
 		// create certificate if not exist
-		cliCurrent.CreateCert.CAFile = c.CAFile
-		cliCurrent.CreateCert.CertFile = c.CertFile
-		cliCurrent.CreateCert.KeyFile = c.KeyFile
-		cliCurrent.CreateCert.SelfSigned = c.SelfSigned
-		cliCurrent.CreateCert.Run()
+		params.CreateCert.CAFile = c.CAFile
+		params.CreateCert.CertFile = c.CertFile
+		params.CreateCert.KeyFile = c.KeyFile
+		params.CreateCert.SelfSigned = c.SelfSigned
+		params.CreateCert.Run()
 	}
 
 	// set the broker-connection-timeout
-	broker.ConnectTimeout = cliCurrent.ConnectTimeout
+	broker.ConnectTimeout = params.ConnectTimeout
 
 	// create the broker
 	newbroker, err := broker.New()
@@ -55,11 +55,11 @@ func (c *CmdServe) Run(cliCurrent CLIType) (err error) {
 	}
 
 	// register plugins
-	if strings.Contains(cliCurrent.Plugins, "auth") == true {
-		auth.LocalInit(cliCurrent.ConfigPath)
+	if strings.Contains(params.Plugins, "auth") == true {
+		auth.LocalInit(params.ConfigPath)
 	}
-	if strings.Contains(cliCurrent.Plugins, "acl") == true {
-		acl.LocalInit(cliCurrent.ConfigPath)
+	if strings.Contains(params.Plugins, "acl") == true {
+		acl.LocalInit(params.ConfigPath)
 	}
 
 	newBrokerConfig := broker.Config{

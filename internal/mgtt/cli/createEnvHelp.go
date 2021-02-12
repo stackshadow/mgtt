@@ -14,6 +14,7 @@ type CreateEnvHelpFileCommand struct {
 	HelpCreateEnv CreateEnvHelpFileFlag `kong:"cmd,name='help-create-env',help='Will create an ascidoc-file with an table of variables'"`
 }
 
+// CreateEnvHelpFileFlag ar parameter for the help-create-env-command
 type CreateEnvHelpFileFlag struct {
 	OutputFile string `kong:"help='The output where we write the help',default='docs/usage/_env.adoc'"`
 }
