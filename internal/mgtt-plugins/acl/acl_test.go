@@ -3,9 +3,19 @@ package acl
 import (
 	"os"
 	"testing"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func TestPublish(t *testing.T) {
+	// setup logger
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	log.Logger = log.Logger.
+		Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+		With().
+		Caller().
+		Logger()
 
 	os.Remove("./integrationtest_auth.yml")
 	LocalInit("integrationtest_")
