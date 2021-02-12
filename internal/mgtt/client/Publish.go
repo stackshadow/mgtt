@@ -7,43 +7,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// MatchRoute compare an route with an topic
-func MatchRoute(route string, topic string) (match bool) {
-
-	routeArray := strings.Split(route, "/")
-	topicArray := strings.Split(topic, "/")
-
-	return Match(routeArray, topicArray)
-}
-
-// Match compare an selector route with an given topic
-func Match(route []string, topic []string) bool {
-	if len(route) == 0 {
-		return len(topic) == 0
-	}
-
-	if len(topic) == 0 {
-		return route[0] == "#"
-	}
-
-	if route[0] == "#" {
-		return true
-	}
-
-	if (route[0] == "+") || (route[0] == topic[0]) {
-		return Match(route[1:], topic[1:])
-	}
-	return false
-}
-
 // Publish an publish-packet
 //
 // this function check if the topic in the `packet` matches the client-topic-filter
 //
-// - return true if the message could be send
+// - return published=true if the message could be send
+//
+// - return subscribed=true if an sibscription match
 //
 // - err is returned if something is wrong with the connection
-func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool, err error) {
+func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool, subscribed bool, err error) {
 
 	topic := packet.TopicName
 	topicArray := strings.Split(topic, "/")
@@ -58,6 +31,7 @@ func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool
 		// The Topic Name in a PUBLISH Packet sent by a Server to a subscribing Client
 		// MUST match the Subscription’s Topic Filter
 		if Match(subscriptionTopicArray, topicArray) == true {
+			subscribed = true
 			topicMatched = true
 			break
 		}

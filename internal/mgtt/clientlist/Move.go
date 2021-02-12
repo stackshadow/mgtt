@@ -6,6 +6,9 @@ import "errors"
 //
 // The client ID will also be set for the new client
 func Move(oldID, newID string) (err error) {
+	// mutex
+	listMutex.Lock()
+	defer listMutex.Unlock()
 
 	if currentClient, exist := list[oldID]; exist == true {
 
@@ -16,7 +19,7 @@ func Move(oldID, newID string) (err error) {
 		currentClient.IDSet(newID)
 
 		// and re-add it to the list if possible
-		err = Add(currentClient)
+		list[currentClient.ID()] = currentClient
 	} else {
 		err = errors.New("client don't exist")
 	}

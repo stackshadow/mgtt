@@ -14,7 +14,9 @@ import (
 func PublishToClient(clientID string, topic string, payload []byte) (err error) {
 
 	// find the client
+	listMutex.Lock()
 	client := list[clientID]
+	listMutex.Unlock()
 
 	if client != nil {
 		// construct the package

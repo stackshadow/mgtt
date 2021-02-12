@@ -12,11 +12,7 @@ func onAuthUserGet(originClientID string, username string) {
 	var err error
 
 	// check if the user exist
-	if user, exist := config.Users[username]; exist {
-
-		// remove the password, nobody should now about it
-		user.Username = ""
-		user.Password = ""
+	if user, exist := configUserGet(username); exist {
 
 		// create a json and send it
 		var jsonData []byte
@@ -30,6 +26,7 @@ func onAuthUserGet(originClientID string, username string) {
 		}
 
 	} else {
+		log.Error().Err(err).Send()
 		err = clientlist.PublishToClient(
 			originClientID,
 			fmt.Sprintf("$SYS/auth/user/%s/error", username),

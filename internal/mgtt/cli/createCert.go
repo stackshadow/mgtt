@@ -152,13 +152,13 @@ func (c *CmdCreateCert) Run() (err error) {
 	os.Mkdir(filepath.Dir(baseDirName), 0700)
 
 	// write file
-	err = ioutil.WriteFile(certificateFileName, certPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(certificateFileName, certPEM.Bytes(), 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write certificate")
 	}
 
 	// write file
-	err = ioutil.WriteFile(certificatePrivKeyFileName, certPrivKeyPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(certificatePrivKeyFileName, certPrivKeyPEM.Bytes(), 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write key")
 	}

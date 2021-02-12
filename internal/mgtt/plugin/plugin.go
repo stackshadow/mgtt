@@ -59,3 +59,9 @@ func Register(name string, newPlugin *V1) {
 	log.Info().Str("name", name).Msg("Registered new plugin")
 	pluginList[name] = newPlugin
 }
+
+// DeRegister will remove an plugin from the pluginlist
+func DeRegister(name string) {
+	log.Info().Str("name", name).Msg("DeRegister plugin")
+	delete(pluginList, name)
+}

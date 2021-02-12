@@ -7,106 +7,86 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/internal/mgtt/plugin"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 )
 
-/*
-	cmd := exec.Command(
-		"mosquitto_pub",
-		"-L",
-		"mqtts://admin:admin@127.0.0.1:1234/$SYS/broker/cr",
-		"-m",
-		"2",
-		"-d",
-		"-q",
-		"0",
-	)
-	stdoutStderr, err = cmd.CombinedOutput()
-	if err != nil {
-		t.Error(err)
-	}
-	fmt.Printf("%s\n", stdoutStderr)
-*/
-
-func TESTCreatePahoOpts() (*paho.ClientOptions, error) {
-	opts := paho.NewClientOptions()
-
-	clientIDUUID, _ := uuid.NewRandom()
-	opts.SetClientID(clientIDUUID.String())
-	opts.SetUsername("dummy")
-	opts.SetPassword("dummy")
-	opts.AddBroker("tcp://127.0.0.1:1238")
-	opts.SetAutoReconnect(true)
-	return opts, nil
-}
-
 func TestRetained(t *testing.T) {
 
 	// setup logger
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
-	// create a plugin that unlocks the connection of a client
-	var clientLock sync.Mutex
-	var clientLockPlugin plugin.V1
-	clientLockPlugin.OnConnected = func(clientID string) {
-		clientLock.Unlock()
-	}
-	plugin.Register("clientLock", &clientLockPlugin)
+	log.Logger = log.Logger.
+		Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+		With().
+		Caller().
+		Logger()
 
 	// ############################################### the broker
-	os.Remove("test1.db")
+	os.Remove("TestRetained_test.db")
+	defer os.Remove("TestRetained_test.db")
 	server, _ := New()
 	go server.Serve(
 		Config{
-			URL:        "tcp://127.0.0.1:1238",
-			DBFilename: "test1.db",
+			URL:        "tcp://127.0.0.1:1236",
+			DBFilename: "TestRetained_test.db",
 		},
 	)
 	time.Sleep(time.Second * 1)
 
 	// ###############################################  Write an retained value
-	pahoOpts, _ := TESTCreatePahoOpts()
-	somerandomvalue, _ := uuid.NewRandom()
+	clientIDUUID, _ := uuid.NewRandom()
+	var pahoClientConnected sync.Mutex
+	pahoClientConnected.Lock()
+	pahoClientOpts := paho.NewClientOptions()
+	pahoClientOpts.SetClientID(clientIDUUID.String())
+	pahoClientOpts.SetUsername("dummy")
+	pahoClientOpts.SetPassword("dummy")
+	pahoClientOpts.AddBroker("tcp://127.0.0.1:1236")
+	pahoClientOpts.SetAutoReconnect(true)
+	pahoClientOpts.SetOnConnectHandler(func(c paho.Client) { pahoClientConnected.Unlock() })
 
-	// connect and send an retained value
-	pahoClient := paho.NewClient(pahoOpts)
-
-	clientLock.Lock()
+	// connect
+	pahoClient := paho.NewClient(pahoClientOpts)
 	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
-	clientLock.Lock() // the plugin should unlock this
+	pahoClientConnected.Lock() // wait for connected
 
-	if token := pahoClient.Publish("retained/value", 0, true, somerandomvalue.String()); token.Wait() && token.Error() != nil {
+	// subscribe to check that we are connected
+	var connected sync.Mutex
+	connected.Lock()
+	if token := pahoClient.Subscribe("$SYS/broker/version", 0, func(client paho.Client, msg paho.Message) {
+		connected.Unlock()
+	}); token.Wait() && token.Error() != nil {
+		t.Error(token.Error())
+		t.FailNow()
+	}
+	connected.Lock()
+
+	randomUUID := uuid.New()
+	if token := pahoClient.Publish("retained/value", 0, true, randomUUID.String()); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
 	pahoClient.Disconnect(200)
-	time.Sleep(time.Second * 1)
 
 	// ###############################################  Check for stored value
-
-	// connect again and we should get the value
-	var subscribeLock sync.Mutex
-	pahoClient = paho.NewClient(pahoOpts)
-
-	clientLock.Unlock()
-	clientLock.Lock()
+	clientIDUUID, _ = uuid.NewRandom()
+	pahoClientOpts.SetClientID(clientIDUUID.String())
+	pahoClient = paho.NewClient(pahoClientOpts)
 	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())
 		t.FailNow()
 	}
-	clientLock.Lock() // the plugin should unlock this
+	pahoClientConnected.Lock() // wait for connected
 
+	var subscribeLock sync.Mutex
 	subscribeLock.Lock()
 	if token := pahoClient.Subscribe("retained/#", 0, func(client paho.Client, msg paho.Message) {
-		if string(msg.Payload()) != somerandomvalue.String() {
+		if string(msg.Payload()) != randomUUID.String() {
 			t.FailNow()
 			return
 		}
@@ -115,11 +95,8 @@ func TestRetained(t *testing.T) {
 		t.Error(token.Error())
 		t.FailNow()
 	}
-
 	subscribeLock.Lock()
-	time.Sleep(time.Second * 1)
-	pahoClient.Disconnect(200)
 
+	pahoClient.Disconnect(200)
 	server.ServeClose()
-	time.Sleep(time.Second * 3)
 }

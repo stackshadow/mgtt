@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mocked"
 )
 
 func TestOnAuthUserDelete(t *testing.T) {
@@ -22,9 +23,7 @@ func TestOnAuthUserDelete(t *testing.T) {
 
 	// create a dummy client
 	var testClient *client.MgttClient = &client.MgttClient{}
-	netserver := connTester{
-		packetSendLoopExit: make(chan byte),
-	}
+	var netserver mocked.Con = mocked.ConNew()
 	testClient.Init(netserver, 0)
 	testClient.IDSet("TestOnAuthUserDelete")
 	testClient.Connected = true

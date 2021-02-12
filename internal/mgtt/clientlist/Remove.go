@@ -4,6 +4,11 @@ import "github.com/rs/zerolog/log"
 
 // Remove will remove an client with the given clientID and disconnects it
 func Remove(clientID string) {
+
+	// find the client
+	listMutex.Lock()
+	defer listMutex.Unlock()
+
 	if client, exist := list[clientID]; exist == true {
 		client.Close()
 		delete(list, clientID)

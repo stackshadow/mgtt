@@ -5,14 +5,15 @@ services:
       context: ${PWD}
       dockerfile: ./build/docker/Dockerfile
       labels:
-        mgtt.version: "${VERSION:-local}"
+        name: "mgtt"
+        version: "${VERSION:-local}"
       network: host
-      shm_size: '2gb'
+      shm_size: "2gb"
       target: prod
 
-    image: stackshadow/mgtt:${VERSION:-local}
+    image: stackshadow/mgtt:${DOCKERTAG:-local}
     volumes:
-       - data:/data
+      - data:/data
     tmpfs:
       - /run
       - /tmp
@@ -40,7 +41,7 @@ services:
       context: ${PWD}
       dockerfile: ./build/docker/test.Dockerfile
       network: host
-      shm_size: '2gb'
+      shm_size: "2gb"
       target: base
     image: stackshadow/anybadge:latest
 

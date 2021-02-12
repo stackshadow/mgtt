@@ -22,11 +22,12 @@ const (
 )
 
 // SendConnack will send an CONACK-Package to the client
-func (client *MgttClient) SendConnack(ReturnCode byte) (err error) {
+func (client *MgttClient) SendConnack(ReturnCode byte, SessionPresent bool) (err error) {
 
 	// construct the package
 	packet := packets.NewControlPacket(packets.Connack).(*packets.ConnackPacket)
 	packet.ReturnCode = ReturnCode
+	packet.SessionPresent = SessionPresent
 
 	log.Debug().
 		Str("cid", client.ID()).

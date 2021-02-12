@@ -1,3 +1,5 @@
+=== User: Set
+
 [cols="5,1,1,1,3", options="header", width="100%"] 
 .onAuthUserSet
 |===
@@ -12,7 +14,6 @@
 a|
 ```json
 { 
-    username: "<username>",
     password: "newpassword",
     groups: [ "admin", "tester" ]
 } 
@@ -21,9 +22,20 @@ a|
 | Request to store an user
 
 | $SYS/auth/user/<username>/set/success
-| bool
-| true
+| json
+a|
+```json
+{ 
+    password: "newpassword",
+    groups: [ "admin", "tester" ]
+} 
+```
 | subscribe
 | Username successfully saved
 
 |===
+
+[NOTE]
+====
+As username, the username in the topic is used. If you set a username in the payload it will be ignored
+====

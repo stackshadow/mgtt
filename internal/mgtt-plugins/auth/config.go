@@ -15,8 +15,11 @@ const (
 
 # use this to create a new user
 #new:
-#  - username:
-#    password:
+#  - username: johndoe
+#    password: mysupersecretpassword
+#    groups:
+#      - auth
+#      - debugging
 
 `
 )

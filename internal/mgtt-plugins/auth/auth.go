@@ -38,7 +38,7 @@ func OnInit(ConfigPath string) {
 	var err error
 
 	if newUserName != "" {
-		err = userSet(newUserName, &newUserPass, nil)
+		_, err = userSet(newUserName, &newUserPass, nil)
 		if err == nil {
 			log.Debug().Str("username", newUserName).Msg("Added new Username")
 			err = configSave(filename)

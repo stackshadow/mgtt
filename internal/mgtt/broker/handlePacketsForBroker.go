@@ -21,10 +21,10 @@ func (broker *Broker) handlePacketsForBroker(eventClient *client.MgttClient, eve
 
 	switch recvPacket := eventPacket.(type) {
 	case *packets.ConnectPacket:
-		err = broker.handleConnectPacket(eventClient, recvPacket)
+		err = broker.onPacketConnect(eventClient, recvPacket)
 		return
 	case *packets.DisconnectPacket:
-		err = broker.handleDisConnectPacket(eventClient)
+		err = broker.onPacketDisConnect(eventClient)
 		normalClose = true
 		return
 	}
@@ -39,25 +39,28 @@ func (broker *Broker) handlePacketsForBroker(eventClient *client.MgttClient, eve
 	switch recvPacket := eventPacket.(type) {
 
 	case *packets.SubscribePacket:
-		err = broker.handleSubscribePacket(eventClient, recvPacket)
+		err = broker.onPacketSubscribe(eventClient, recvPacket)
+
+	case *packets.UnsubscribePacket:
+		err = broker.onPacketUnSubscribe(eventClient, recvPacket)
 
 	case *packets.PingreqPacket:
-		err = broker.handlePingreqPacket(eventClient, recvPacket)
+		err = broker.onPacketPinReq(eventClient, recvPacket)
 
 	case *packets.PublishPacket:
-		err = broker.handlePublishPacket(eventClient, recvPacket)
+		err = broker.onPacketPublish(eventClient, recvPacket)
 
 	case *packets.PubackPacket:
-		err = broker.handlePubacPacket(eventClient, recvPacket)
+		err = broker.onPacketPubACK(eventClient, recvPacket)
 
 	case *packets.PubrecPacket:
-		err = broker.handlePubrecPacket(eventClient, recvPacket)
+		err = broker.onPacketPubRec(eventClient, recvPacket)
 
 	case *packets.PubrelPacket:
-		err = broker.handlePubrelPacket(eventClient, recvPacket)
+		err = broker.onPacketPubRel(eventClient, recvPacket)
 
 	case *packets.PubcompPacket:
-		err = broker.handlePubcompPacket(eventClient, recvPacket)
+		err = broker.onPacketPubcomp(eventClient, recvPacket)
 
 	}
 

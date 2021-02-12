@@ -21,4 +21,5 @@ func onAuthUserDelete(originClientID string, username string) {
 	if err != nil {
 		log.Error().Err(err).Send()
 	}
+
 }

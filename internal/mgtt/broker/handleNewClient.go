@@ -51,7 +51,7 @@ func handleNewClient(newConnection net.Conn) {
 
 		// last-Will-message
 		if lastWillPacket := newClient.LastWillGet(); lastWillPacket != nil {
-			Current.handlePublishPacket(newClient, lastWillPacket)
+			Current.onPacketPublish(newClient, lastWillPacket)
 		}
 
 		// Remove the client from the list

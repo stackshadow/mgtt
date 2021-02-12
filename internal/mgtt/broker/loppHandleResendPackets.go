@@ -1,16 +1,18 @@
 package broker
 
 import (
+	"errors"
 	"net"
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
-	messagestore "gitlab.com/mgtt/internal/mgtt/messageStore"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mgtt/persistance"
 )
 
-func (broker *Broker) loopHandleResendPackets() {
+func (broker *Broker) loopHandleResendPackets() (err error) {
 
 	var retryClient *client.MgttClient = &client.MgttClient{}
 
@@ -25,6 +27,9 @@ func (broker *Broker) loopHandleResendPackets() {
 loop:
 	for {
 
+		// check if we need to resend messages that are not replyed with PUBACK
+		log.Debug().Msg("Check if packets need to be resended")
+
 		select {
 		case <-broker.loopHandleResendPacketsExit:
 			log.Debug().Msg("STOP go-routine loopHandleResendPackets()")
@@ -32,46 +37,52 @@ loop:
 		default:
 
 			if time.Now().After(triggerTime) == false {
-				time.Sleep(time.Second * 1)
+				time.Sleep(time.Minute * 1)
 				continue
 			}
 			triggerTime = time.Now()
 			triggerTime = triggerTime.Add(time.Minute * 1)
 
-			// check if we need to resend messages that are not replyed with PUBACK
-			log.Debug().Msg("Check if packets need to be resended")
-			broker.retainedMessages.IterateResendPackets("resend", func(storedInfo *messagestore.PacketInfo) {
-
+			persistance.PacketIterate("qos", func(info persistance.PacketInfo) {
 				// check if time is up
-				if time.Now().After(storedInfo.ResendAt) == true {
+				if time.Now().After(info.RetryAt) == true {
 
-					// we create a new publish packet
-					pubPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
-					pubPacket.MessageID = storedInfo.MessageID
-					pubPacket.Retain = false
-					pubPacket.Dup = true // this is an duplicate packet
-					pubPacket.TopicName = storedInfo.Topic
-					pubPacket.Payload = storedInfo.Payload
-					pubPacket.Qos = storedInfo.Qos
+					// set the time to the future
+					info.RetryAt = time.Now().Add(time.Minute)
+					persistance.PacketStore("qos", &info)
 
-					log.Debug().
-						Uint16("packet-mid", pubPacket.MessageID).
-						Str("topic", pubPacket.TopicName).
-						Msg("Resend packet")
+					if info.PubRec == false {
 
-					err := broker.handlePublishPacket(retryClient, pubPacket)
-					if err != nil {
-						return
+						// create a packet
+						pubPacket := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+						pubPacket.MessageID = info.MessageID
+						pubPacket.Retain = false
+						pubPacket.Dup = info.OriginClientID != ""
+						pubPacket.TopicName = info.Topic
+						pubPacket.Payload = info.Payload
+						pubPacket.Qos = info.Qos
+
+						// publish packet to all subscribers
+						switch info.Qos {
+						case 1:
+							_, _, err = broker.PublishPacket(pubPacket, false)
+						case 2:
+							_, _, err = broker.PublishPacket(pubPacket, true)
+						default:
+							err = errors.New("This QOS-Level is not supported")
+						}
+
+					} else {
+						clientlist.PubrelToClient(info.TargetClientID, info.MessageID)
 					}
-
-					// a small delay to not flood our clients
-					time.Sleep(time.Millisecond * 500)
-
 				}
 
 			})
 
 		}
+
+		time.Sleep(time.Minute * 1)
 	}
 
+	return
 }

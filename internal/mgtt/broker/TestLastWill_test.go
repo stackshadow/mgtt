@@ -9,7 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 )
 
@@ -24,51 +23,29 @@ func TestLastWill(t *testing.T) {
 		Logger()
 
 	// ############################################### the broker
-	os.Remove("test1.db")
+	os.Remove("TestLastWill_test.db")
+	defer os.Remove("TestLastWill_test.db")
 	server, _ := New()
-	go server.Serve(
-		Config{
-			URL:        "tcp://127.0.0.1:1238",
-			DBFilename: "test1.db",
-		},
-	)
+	serverConfig := Config{
+		URL:        "tcp://127.0.0.1:1234",
+		DBFilename: "TestLastWill_test.db",
+	}
+	go server.Serve(serverConfig)
 	time.Sleep(time.Second * 1)
 
 	// ###############################################  The client with will-message
-	clientIDUUID := uuid.New()
-	pahoClientOpts := paho.NewClientOptions()
-	pahoClientOpts.SetClientID(clientIDUUID.String())
-	pahoClientOpts.SetUsername("dummy")
-	pahoClientOpts.SetPassword("dummy")
-	pahoClientOpts.AddBroker("tcp://127.0.0.1:1238")
-	pahoClientOpts.SetAutoReconnect(true)
+	var pahoClientConnected bool = false
 
-	pahoClientOpts.WillEnabled = true
-	pahoClientOpts.WillTopic = "lastwill/value"
-	pahoClientOpts.WillRetained = true
-	pahoClientOpts.WillQos = 0
-	pahoClientOpts.WillPayload = []byte("value")
-
-	// connect and send an retained value
-	pahoClient := paho.NewClient(pahoClientOpts)
-	if token := pahoClient.Connect(); token.Wait() && token.Error() != nil {
-		t.Error(token.Error())
+	pahoClient, err := testConnectClient(serverConfig.URL, "", false, &pahoClientConnected)
+	if err != nil {
+		t.Error(err)
 		t.FailNow()
 	}
 
 	// ###############################################  The client
-	pahoClientSubUUID := uuid.New()
-	pahoClientSubOpts := paho.NewClientOptions()
-	pahoClientSubOpts.SetClientID(pahoClientSubUUID.String())
-	pahoClientSubOpts.SetUsername("dummy")
-	pahoClientSubOpts.SetPassword("dummy")
-	pahoClientSubOpts.AddBroker("tcp://127.0.0.1:1238")
-	pahoClientSubOpts.SetAutoReconnect(true)
-
-	// connect and send an retained value
-	pahoClientSub := paho.NewClient(pahoClientSubOpts)
-	if token := pahoClientSub.Connect(); token.Wait() && token.Error() != nil {
-		t.Error(token.Error())
+	pahoClientSub, err := testConnectClient(serverConfig.URL, "", false, &pahoClientConnected)
+	if err != nil {
+		t.Error(err)
 		t.FailNow()
 	}
 
@@ -86,13 +63,12 @@ func TestLastWill(t *testing.T) {
 	}
 
 	// disconnect first client and wait for last-will
-	pahoClient.Disconnect(200)
+	pahoClient.Disconnect(500)
 	lastWillRecvd.Lock()
 
 	// disconnect the last client
-	pahoClientSub.Disconnect(200)
+	pahoClientSub.Disconnect(500)
 
 	// close the server
 	server.ServeClose()
-	time.Sleep(time.Second * 3)
 }

@@ -6,7 +6,11 @@ import (
 )
 
 // PublishToAllClients send an packet to all clients
-func PublishToAllClients(packet *packets.PublishPacket, once bool) (published bool, err error) {
+func PublishToAllClients(packet *packets.PublishPacket, once bool) (published bool, subscribed bool, err error) {
+	
+	// mutex
+	listMutex.Lock()
+	defer listMutex.Unlock()
 
 	for _, client := range list {
 
@@ -14,14 +18,16 @@ func PublishToAllClients(packet *packets.PublishPacket, once bool) (published bo
 		userName := client.Username()
 		if plugin.CallOnSendToSubscriberRequest(clientID, userName, packet.TopicName) == true {
 
-			publishOk, publishErr := client.Publish(packet)
+			publishOk, subscriptionOK, publishErr := client.Publish(packet)
 			if once == true {
 				if publishOk == true {
-					return true, nil
+					return true, true, nil
 				}
 			}
 
 			published = published || publishOk
+			subscribed = subscribed || subscriptionOK
+
 			if publishErr != nil && err == nil {
 				err = publishErr
 			}

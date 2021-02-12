@@ -11,10 +11,11 @@ import (
 
 // MgttClient represents a mqtt-client
 type MgttClient struct {
-	id         string
-	username   string
-	connection net.Conn
-	Connected  bool
+	id           string
+	username     string
+	cleanSession bool
+	connection   net.Conn
+	Connected    bool
 
 	// The last will of this client
 	lastWillPacket *packets.PublishPacket
@@ -24,7 +25,8 @@ type MgttClient struct {
 	sendPackets chan packets.ControlPacket // send-buffer to avoid double-write
 
 	// loop signals
-	packetSendLoopExit chan bool
+	packetSendLoopRunning bool // indicates i the send-loop is running
+	packetSendLoopExit    chan bool
 }
 
 // Init create a new MgttClient with id of "unknown"

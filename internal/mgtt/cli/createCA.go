@@ -104,13 +104,13 @@ func (c *CmdCreateCA) Run() (err error) {
 	os.Mkdir(filepath.Dir(baseDirName), 0700)
 
 	// write file
-	err = ioutil.WriteFile(caCertFileName, caPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(caCertFileName, caPEM.Bytes(), 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write certificate")
 	}
 
 	// write file
-	err = ioutil.WriteFile(caPrivKeyFileName, caPrivKeyPEM.Bytes(), 0777)
+	err = ioutil.WriteFile(caPrivKeyFileName, caPrivKeyPEM.Bytes(), 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to write key")
 	}

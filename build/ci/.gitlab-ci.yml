@@ -1,4 +1,3 @@
-
 stages:
   - test
   - build_docker
@@ -8,7 +7,6 @@ stages:
 # global variables
 # variables:
 
-  
 ################################################ build and test ################################################
 tests:
   stage: test
@@ -19,7 +17,6 @@ tests:
     paths:
       - coverage.out
 
-
 build docker image:
   stage: build_docker
   image: linuxserver/docker-compose:latest
@@ -27,9 +24,10 @@ build docker image:
     - mkdir -p ~/.docker
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
     - |
-      export VERSION=${CI_COMMIT_SHORT_SHA}
-      docker-compose -f deployments/docker-compose/docker-compose.yml build --pull
-      docker-compose -f deployments/docker-compose/docker-compose.yml push
+      eval $(cat ./.env | awk -F= '{ print "export " $1 }')
+      export DOCKERTAG=${CI_COMMIT_SHORT_SHA}
+      docker-compose -f deployments/docker-compose/docker-compose.yml build --pull mgtt
+      docker-compose -f deployments/docker-compose/docker-compose.yml push mgtt
 
 badges:
   stage: posttest
@@ -48,17 +46,12 @@ release (manual):
   script:
     - mkdir -p ~/.docker
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
-    
-    - |
-      export VERSION=${CI_COMMIT_SHORT_SHA}
-      docker-compose -f deployments/docker-compose/docker-compose.yml pull
-      source .env
-      docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:${VERSION}
-      docker push stackshadow/mgtt:${VERSION}
 
     - |
-      export VERSION=${CI_COMMIT_SHORT_SHA}
-      docker-compose -f deployments/docker-compose/docker-compose.yml pull
-      docker tag stackshadow/mgtt:${CI_COMMIT_SHORT_SHA} stackshadow/mgtt:latest
+      eval $(cat ./.env | awk -F= '{ print "export " $1 }')
+      export DOCKERTAG=${CI_COMMIT_SHORT_SHA}
+      docker-compose -f deployments/docker-compose/docker-compose.yml pull mgtt
+      docker tag stackshadow/mgtt:${DOCKERTAG} stackshadow/mgtt:latest
+      docker push stackshadow/mgtt:${DOCKERTAG}
       docker push stackshadow/mgtt:latest
   when: manual
