@@ -1,4 +1,4 @@
-= Normative Statement Number
+== Normative Statement Number
 Martin Langlotz <martin.langlotz@evilbrain.de>
 :source-highlighter: highlightjs
 :toc:

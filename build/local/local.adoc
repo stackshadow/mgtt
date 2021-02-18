@@ -1,0 +1,26 @@
+You can build mgtt with an local go-compiler
+
+=== Dependencies - Needed
+
+- go-compiler
+- make
+
+=== Dependencies - Optional
+
+- python-pip ( for anybadge )
+
+
+=== Build
+
+To build mgtt, just run make
+
+[source,bash]
+make -f build/local/Makefile mgtt
+
+
+=== Create badges
+
+You can create all badges with
+
+[source,bash]
+make -f build/local/Makefile badges

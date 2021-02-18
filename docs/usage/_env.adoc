@@ -1,0 +1,20 @@
+.Environment Parameter
+[width="100%",options="header"]
+|======================
+|DEBUG|Enable debug mode.|false
+|TERMINAL|Enable terminal mode ( log not printed as json)|false
+|CONFIGPATH|Path where config files are stored. This can be used by plugins|./
+|CONNECT_TIMEOUT|Timeout in seconds for CONNECT. If an client don't send a connect after this time, it will be disconnected|30
+|PLUGINS|Name of enabled plugins comma separated|auth,acl
+|CA|The ca to use for TLS|tls/ca.crt
+|CA|The ca to use for TLS|tls/ca.crt
+|CERT|The certificate to use for TLS|tls/server.crt
+|KEY|The private key to use for TLS|tls/server.key
+|URL|Set the url where the broker is listening|tcp://0.0.0.0:8883
+|TLS|Enable TLS|true
+|CA|The ca to use for TLS. Set it to an empty string if you would like to use an self-signed-certificate|tls/ca.crt
+|CERT|The certificate to use for TLS|tls/server.crt
+|KEY|The private key to use for TLS|tls/server.key
+|DBFILENAME|Filename for retained message-db|messages.db
+|SELFSIGNED|Use self-signed-certificate and ignore CAFile|false
+|======================

@@ -1,26 +1,20 @@
-= Plugin: ACL
-Martin Langlotz <martin.langlotz@evilbrain.de>
-:source-highlighter: highlightjs
-:toc:
-:icons: font
 
-This plugin
-
-- provide acl for users
-
-== Watch for file changes
+=== Watch for file changes
 
 Change to the config-file are detected during runtime.
 
 You can change the acl's. The plugin reread the config-file and activate the rules immediately.
 
-== How rules will be evaluated
+=== How rules will be evaluated
 
 - The plugin iterate rule by rule for an user.
-- The first rule that matched the topic get active.
-- THe mqtt-schema for wildcards ( # and + ) are supported
+- The first rule that matched decide if the message will be accepted or not
+- The mqtt-schema for wildcards ( # and + ) are supported
 
+=== Anonymouse-User
 
+- If the broker is setuped to allow anonymouse login ( no username/password ) 
+the username in the acl is "_anonym"
 
 === Example
 
@@ -66,7 +60,9 @@ rules:
       direction: r
       allow: false
 
-# This is if no user was provided
+# If no username is provided, this user is used
+# This is the case when the broker is setuped to allow anonymouse login
+# ( without username+password )
   _anonym:
     - route: "#"
       direction: w
