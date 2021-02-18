@@ -10,22 +10,14 @@ help: currentversion
 	@echo "make tests: Run all tests"
 	@echo "make clean: clean all files which are created during build"
 
-docker:
-	docker-compose build
-docker-run:
-	docker-compose run mgtt
-docker-down:
-	docker-compose down --volumes --remove-orphans
-
 currentversion:
 	@echo "package cli" > internal/mgtt/cli/currentversion.go
 	@echo "" >> internal/mgtt/cli/currentversion.go
 	@echo "var Version string = \"$${VERSION}\"" >> internal/mgtt/cli/currentversion.go
 
-mgtt: mgtt/mgtt
-mgtt/mgtt:
-	cd mgtt && \
-	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt .
+mgtt: ./mgtt
+./mgtt:
+	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt ./cmd/mgtt
 
 # command line mmdc
 mmdc: docs/assets/node_modules/.bin/mmdc
@@ -61,7 +53,7 @@ ${HOME}/go/bin/gosec:
 ###################### Badge: Coverage ######################
 ./coverage.txt: ./coverage.out
 	go tool cover -func coverage.out | grep total: | awk '{print $$3}' | sed 's/%//g' > $@
-./coverage.svg: ./coverage.txt
+./coverage.svg: ./coverage.txt ${HOME}/.local/bin/anybadge
 	${HOME}/.local/bin/anybadge -l "Coverage" -v $$(cat ./coverage.txt) -f $@ 70=green 50=yellow 30=orange 0=red
 
 ###################### Badge: Cyclomatic complexity ######################
@@ -99,6 +91,8 @@ callgraph: gocyto
 clean:
 	@rm -fv coverage.*
 	@rm -fv *.pem
-	@rm -fv mgtt/mgtt
-	@rm -fv gocyclo.txt gocyclo.svg lastbuild.svg
+	@rm -fv mgtt
+	@rm -fv gocyclo.txt gocyclo.svg 
+	@rm -fv gosec.txt gosec.svg
+	@rm -fv lastbuild.svg
 	@find . -name "*.db" -print -delete
