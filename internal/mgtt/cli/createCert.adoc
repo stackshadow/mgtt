@@ -1,0 +1,31 @@
+
+The `create-cert`-command
+- can create an certificate that is signed by an CA
+- can create a self signed certificate ( needed by most of the Android-Apps that not support mTLS )
+- if no `--ca-file` is provided ( or `--self-signed` is set ), an self signed certificate will be created
+
+[source,bash]
+----
+./mgtt create-cert -h
+Usage: mgtt create-cert
+
+Flags:
+  -h, --help                            Show context-sensitive help.
+  -v, --debug                           Enable debug mode ($DEBUG).
+      --terminal                        Enable terminal mode ( log not printed as json) ($TERMINAL)
+      --config-path="./"                Path where config files are stored. This can be used by plugins ($CONFIGPATH)
+      --connect-timeout=30              Timeout in seconds for CONNECT. If an client don't send a connect after this time, it will be disconnected ($CONNECT_TIMEOUT)
+      --retry-in-minutes=1              Retry delay of failed QoS1 QoS2 in Minutes ($RETRY)
+      --plugins="auth,acl"              Name of enabled plugins comma separated ($PLUGINS)
+
+      --ca-file="tls/ca.crt"            The ca to use for TLS, set this to ” or use self-signed to create an self-signed-certificate ($CAFILE)
+      --cert-file="tls/server.crt"      The certificate-file that will be created ( if not exist ) ($CERTFILE)
+      --key-file="tls/server.key"       The private-key-file that will be created ( if not exist ) ($KEYFILE)
+      --organization="FeelGood Inc."    Organisation of the ca ($ORGANIZATION)
+      --country="DE"                    Country-Code ($COUNTRY)
+      --province="Local"                Province ($PROVINCE)
+      --locality="Berlin"               Locality (City) ($LOCALITY)
+      --street-address="Corner 42"      Adress ($STREETADDRESS)
+      --postal-code="030423"            PostalCode ($POSTALCODE)
+      --self-signed                     Create self signed certificate ($SELFSIGNED)
+----

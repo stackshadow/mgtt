@@ -1,0 +1,43 @@
+= Usage
+Martin Langlotz <martin.langlotz@evilbrain.de>
+:source-highlighter: highlightjs
+:toc:
+:icons: font
+
+== Commandline
+
+include::usage/_commandline.adoc[]
+
+=== Environment-Variables
+
+include::usage/_environmentvars.adoc[]
+
+== TLS
+
+include::usage/_mtls.adoc[]
+
+=== Create CA
+
+include::../internal/mgtt/cli/createCA.adoc[]
+
+=== Create Self-Signed- or Signed Certificate
+
+include::../internal/mgtt/cli/createCert.adoc[]
+
+=== Serve - Start the server
+
+include::../internal/mgtt/cli/serve.adoc[]
+
+== Docker
+
+include::usage/_docker.adoc[]
+
+= Plugins
+
+== Plugin: Auth
+
+include::../internal/mgtt-plugins/auth/auth.adoc[]
+
+== Plugin: ACL
+
+include::../internal/mgtt-plugins/acl/acl.adoc[]

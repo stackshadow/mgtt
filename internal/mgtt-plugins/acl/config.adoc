@@ -1,0 +1,75 @@
+
+=== Watch for file changes
+
+Change to the config-file are detected during runtime.
+
+You can change the acl's. The plugin reread the config-file and activate the rules immediately.
+
+=== How rules will be evaluated
+
+- The plugin iterate rule by rule for an user.
+- The first rule that matched decide if the message will be accepted or not
+- The mqtt-schema for wildcards ( # and + ) are supported
+
+=== Anonymouse-User
+
+- If the broker is setuped to allow anonymouse login ( no username/password ) 
+the username in the acl is "_anonym"
+
+=== Example
+
+```yaml
+# This is an example for an acl
+rules:
+
+# The username
+  admin:
+
+# here we define an route, according to the mqtt-schema with # and + can be used
+	- route: "#"
+	
+# w means the publisher write to the broker
+# r means the broker send the message to the receiver
+	  direction: w
+
+# and here we decide what to do if the route matches
+	  allow: true
+
+# for example, this rule allow that every topic will be sended to 
+# an subscriber logged in as admin
+    - route: "#"
+      direction: r
+      allow: true
+
+# This is an example for an external sensor
+# the sensor can only publish and not receive any message
+  sensor:
+
+# we allow write to all sub-topics /sensor
+    - route: /sensor/#
+      direction: w
+      allow: true
+
+# if the sensor try something else, we block it
+    - route: "#"
+      direction: w
+      allow: false
+
+# The sensor don't get any data from somebody else
+    - route: "#"
+      direction: r
+      allow: false
+
+# If no username is provided, this user is used
+# This is the case when the broker is setuped to allow anonymouse login
+# ( without username+password )
+  _anonym:
+    - route: "#"
+      direction: w
+      allow: true
+
+	  - route: "#"
+      direction: r
+      allow: true
+```
+

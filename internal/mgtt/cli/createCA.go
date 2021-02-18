@@ -20,14 +20,14 @@ import (
 
 // CmdCreateCA reflect the create-ca command
 type CmdCreateCA struct {
-	CAFile string `help:"The ca to use for TLS"  env:"CA" default:"tls/ca.crt"`
+	CAFile string `help:"The ca to use for TLS"  env:"CAFILE" default:"tls/ca.crt"`
 
-	Organization  string `help:"Organisation of the ca" default:"FeelGood Inc."`
-	Country       string `help:"Country-Code" default:"DE"`
-	Province      string `help:"Province" default:"Local"`
-	Locality      string `help:"Locality (City)" default:"Berlin"`
-	StreetAddress string `help:"Adress" default:"Corner 42"`
-	PostalCode    string `help:"PostalCode" default:"030423"`
+	Organization  string `help:"Organisation of the ca" env:"ORGANIZATION" default:"FeelGood Inc."`
+	Country       string `help:"Country-Code" env:"COUNTRY" default:"DE"`
+	Province      string `help:"Province" env:"PROVINCE" default:"Local"`
+	Locality      string `help:"Locality (City)" env:"LOCALITY" default:"Berlin"`
+	StreetAddress string `help:"Adress" env:"STREETADDRESS" default:"Corner 42"`
+	PostalCode    string `help:"PostalCode" env:"POSTALCODE" default:"030423"`
 }
 
 // Run will create a new CA

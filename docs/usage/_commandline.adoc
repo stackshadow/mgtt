@@ -1,0 +1,18 @@
+This are the common command line parameter
+
+[source,bash]
+----
+./mgtt --help
+Usage: mgtt <command>
+
+Message Go Telemetry Transport
+
+Flags:
+  -h, --help                  Show context-sensitive help.
+  -v, --debug                 Enable debug mode ($DEBUG).
+      --terminal              Enable terminal mode ( log not printed as json) ($TERMINAL)
+      --config-path="./"      Path where config files are stored. This can be used by plugins ($CONFIGPATH)
+      --connect-timeout=30    Timeout in seconds for CONNECT. If an client don't send a connect after this time, it will be disconnected ($CONNECT_TIMEOUT)
+      --retry-in-minutes=1    Retry delay of failed QoS1 QoS2 in Minutes ($RETRY)
+      --plugins="auth,acl"    Name of enabled plugins comma separated ($PLUGINS)
+----

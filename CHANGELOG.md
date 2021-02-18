@@ -1,3 +1,8 @@
+## v0.31.0 - Read the manual
+
+- [doc] Update the whole documentation
+- Update to go 1.16
+
 ## v0.30.0 - Session affinity
 
 ### New

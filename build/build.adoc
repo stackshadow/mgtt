@@ -1,0 +1,10 @@
+
+There are several methods to build mgtt
+
+== Local
+
+include::./local/local.adoc[]
+
+== Docker
+
+include::./docker/docker.adoc[]

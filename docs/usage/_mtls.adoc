@@ -1,0 +1,17 @@
+
+
+MGTT support mTLS by default. If no CA is provided, an self signed certificate will be used.
+
+If no CA-file and Certificate-file is present, mgtt will create both for you.
+
+The server-certificate will be signed with the CA-Certificate.
+
+Existing certificates will not be overwritten !
+
+
+
+- You can check if tls is working with
+
+[source,bash]
+openssl s_client -servername <servername> -connect <server:port> 2>/dev/null | openssl x509 -text
+

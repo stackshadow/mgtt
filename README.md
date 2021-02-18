@@ -8,14 +8,7 @@ THIS PROJECT IS MAINTAINED ON GITLAB.COM ( https://gitlab.com/stackshadow/mgtt )
 
 Read the docs in the ./docs folder
 
-## Why
-
-All the other broker, that i checked, are complicated to read/understand.
-This broker should be easy and understandable with some extra sugar
-
-![Flow Diagram for QoS2](docs/assets/QoS2.png)
-
-## Features
+## Capabilitys
 
 - [x] Connect ( CONNECT / CONACK )
 - [x] Ping ( PINGREQ/PINGRESP )
@@ -33,36 +26,18 @@ This broker should be easy and understandable with some extra sugar
 - [x] Disconnect
 - [x] Sessions
 
+## Features
+
 - [x] Zerolog with terminal-output and json-output-support
 - [x] Kong command-line-parser with environment-support
 - [x] Dockerfile
 - [ ] Healthcheck
 - [x] Docker-Compose
 - [ ] Build with buildah
+- [x] $SYS-Support
 
 ## Plugins
 
 - [x] Username/Password auth
 - [x] ACL
 - [ ] Metrics
-- [x] $SYS-Support
-
-# Build
-
-Of course, you need `Go` and `git`
-
-- Clone this repository
-
-```
-git clone https://gitlab.com/stackshadow/mgtt.git --depth 1
-```
-
-- build mgtt
-
-```
-CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt .
-```
-
-# Usage
-
-For a small help use `mgtt -h`

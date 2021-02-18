@@ -1,0 +1,27 @@
+
+The serve command is the main function of mgtt.
+
+This will start the broker and handle mqtt-clients
+
+[source,bash]
+----
+./mgtt serve -h 
+Usage: mgtt serve
+
+Flags:
+  -h, --help                          Show context-sensitive help.
+  -v, --debug                         Enable debug mode ($DEBUG).
+      --terminal                      Enable terminal mode ( log not printed as json) ($TERMINAL)
+      --config-path="./"              Path where config files are stored. This can be used by plugins ($CONFIGPATH)
+      --connect-timeout=30            Timeout in seconds for CONNECT. If an client don't send a connect after this time, it will be disconnected ($CONNECT_TIMEOUT)
+      --retry-in-minutes=1            Retry delay of failed QoS1 QoS2 in Minutes ($RETRY)
+      --plugins="auth,acl"            Name of enabled plugins comma separated ($PLUGINS)
+
+      --url="tcp://0.0.0.0:8883"      Set the url where the broker is listening ($URL)
+      --tls                           Enable TLS ($TLS)
+      --ca-file="tls/ca.crt"          The ca to use for TLS. Set it to an empty string if you would like to use an self-signed-certificate ($CAFILE)
+      --cert-file="tls/server.crt"    The certificate to use for TLS ($CERTFILE)
+      --key-file="tls/server.key"     The private key to use for TLS ($KEYFILE)
+      --db-filename="messages.db"     Filename for retained message-db ($DBFILENAME)
+      --self-signed                   Use self-signed-certificate and ignore CAFile ($SELFSIGNED)
+----

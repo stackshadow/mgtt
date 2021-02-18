@@ -23,28 +23,28 @@ func TestPublish(t *testing.T) {
 	// we add some acls
 	config.Rules["testuser"] = []aclEntry{
 		// we not allow write to clients
-		aclEntry{
+		{
 			Direction: "w",
 			Route:     "$SYS/broker/clients",
 			Allow:     false,
 		},
 
 		// and not to the rest
-		aclEntry{
+		{
 			Direction: "w",
 			Route:     "$SYS/#",
 			Allow:     false,
 		},
 
 		// but we allow write to sensors
-		aclEntry{
+		{
 			Direction: "w",
 			Route:     "sensors/#",
 			Allow:     true,
 		},
 
 		// and not to the rest
-		aclEntry{
+		{
 			Direction: "w",
 			Route:     "#",
 			Allow:     false,
@@ -70,12 +70,12 @@ func TestPublish(t *testing.T) {
 	// we add some acls
 	config.Rules["_anonym"] = []aclEntry{
 		// we not allow write to clients
-		aclEntry{
+		{
 			Direction: "r",
 			Route:     "system/users",
 			Allow:     true,
 		},
-		aclEntry{
+		{
 			Direction: "w",
 			Route:     "system/config",
 			Allow:     true,

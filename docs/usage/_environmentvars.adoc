@@ -1,0 +1,9 @@
+For every parameter in MGTT there exist an environment-variable ( for example to use it in docker )
+
+The name schema for the environment-variable are:
+
+- all characters are in CAPS, special chars like "-" or "_" are omitted
+
+- for example: the parameter `--config-path` will be `CONFIGPATH`
+
+- you can also use the help `--help` or `<command> --help`

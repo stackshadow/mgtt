@@ -1,0 +1,27 @@
+
+The simple way to use mgtt is to use it with docker.
+
+[source,bash]
+----
+docker pull stackshadow/mgtt:latest
+docker run -p 8883:8883 stackshadow/mgtt:latest
+----
+
+=== Persistance
+
+The following data should be persistant:
+
+- Certificates
+- configs
+- plugin-configs
+- bold-db-data
+
+by default this is stored to /data
+
+[source,bash]
+----
+docker run -v data:/data -p 8883:8883 stackshadow/mgtt:latest
+----
+
+
+
