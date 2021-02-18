@@ -22,18 +22,18 @@ import (
 
 // CmdCreateCert represents the flag which create certs
 type CmdCreateCert struct {
-	CAFile   string `help:"The ca to use for TLS"  env:"CA" default:"tls/ca.crt"`
-	CertFile string `help:"The certificate to use for TLS"  env:"CERT" default:"tls/server.crt"`
-	KeyFile  string `help:"The private key to use for TLS"  env:"KEY" default:"tls/server.key"`
+	CAFile   string `help:"The ca to use for TLS, set this to '' or use self-signed to create an self-signed-certificate"  env:"CAFILE" default:"tls/ca.crt"`
+	CertFile string `help:"The certificate-file that will be created ( if not exist )"  env:"CERTFILE" default:"tls/server.crt"`
+	KeyFile  string `help:"The private-key-file that will be created ( if not exist )"  env:"KEYFILE" default:"tls/server.key"`
 
-	Organization  string `help:"Organisation of the ca" default:"FeelGood Inc."`
-	Country       string `help:"Country-Code" default:"DE"`
-	Province      string `help:"Province" default:"Local"`
-	Locality      string `help:"Locality (City)" default:"Berlin"`
-	StreetAddress string `help:"Adress" default:"Corner 42"`
-	PostalCode    string `help:"PostalCode" default:"030423"`
+	Organization  string `help:"Organisation of the ca" env:"ORGANIZATION" default:"FeelGood Inc."`
+	Country       string `help:"Country-Code" env:"COUNTRY" default:"DE"`
+	Province      string `help:"Province" env:"PROVINCE" default:"Local"`
+	Locality      string `help:"Locality (City)" env:"LOCALITY" default:"Berlin"`
+	StreetAddress string `help:"Adress" env:"STREETADDRESS" default:"Corner 42"`
+	PostalCode    string `help:"PostalCode" env:"POSTALCODE" default:"030423"`
 
-	SelfSigned bool `help:"Create self signed certificate" default:"false"`
+	SelfSigned bool `help:"Create self signed certificate" env:"SELFSIGNED" default:"false"`
 }
 
 // Run will run the command
