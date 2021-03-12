@@ -29,8 +29,8 @@ func TestPubSubQoS1(t *testing.T) {
 		URL:        "tcp://127.0.0.1:1235",
 		DBFilename: "TestPubSubQoS1_test.db",
 	}
-	go server.Serve(serverConfig)
-	time.Sleep(time.Second * 1)
+	  server.Serve(serverConfig)
+ 
 
 	// ###############################################  The client with will-message
 	var pahoClientConnected bool = false

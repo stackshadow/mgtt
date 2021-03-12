@@ -10,15 +10,15 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/persistance"
 )
 
-// Serve will create a new broker and wait for clients
+// Serve will create a new broker and wait for clients in a goroutine
 //
-// - this create also an retained message with topic "$SYS/broker/version" that contains the version
-func (b *Broker) Serve(config Config) (err error) {
+// - this create also an retained message with topic "$METRIC/broker/version" that contains the version
+func (b *Broker) Serve(config Config) (done chan bool, err error) {
 
 	err = persistance.Open(config.DBFilename)
 
 	// Delete Broker-version if exist
-	brokerVersionTopic := "$SYS/broker/version"
+	brokerVersionTopic := "$METRIC/broker/version"
 	persistance.PacketDelete("retained",
 		persistance.PacketFindOpts{
 			Topic: &brokerVersionTopic,
@@ -78,22 +78,26 @@ func (b *Broker) Serve(config Config) (err error) {
 	// retry
 	go b.loopHandleResendPackets()
 
-	for {
+	go func() {
+		for {
 
-		// wait for a new client
-		log.Info().Msg("Wait for new client")
-		var newConnection net.Conn
-		newConnection, err = b.serverListener.Accept()
-		if err != nil {
-			log.Error().Err(err).Msg("Accept()")
-			break
+			// wait for a new client
+			log.Info().Msg("Wait for new client")
+			var newConnection net.Conn
+			newConnection, err = b.serverListener.Accept()
+			if err != nil {
+				log.Error().Err(err).Msg("Accept()")
+				break
+			}
+
+			// handle a new client
+			if err == nil {
+				go handleNewClient(newConnection)
+			}
 		}
 
-		// handle a new client
-		if err == nil {
-			go handleNewClient(newConnection)
-		}
-	}
+		done <- true
+	}()
 
 	return
 }

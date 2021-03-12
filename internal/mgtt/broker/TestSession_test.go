@@ -57,7 +57,7 @@ func testConnectClient(url string, clientID string, cleanSession bool, connected
 		var onBrokerVersionLock sync.Mutex
 		onBrokerVersionLock.Lock()
 
-		if token := pahoClient.Subscribe("$SYS/broker/version", 0, func(client paho.Client, msg paho.Message) {
+		if token := pahoClient.Subscribe("$METRIC/broker/version", 0, func(client paho.Client, msg paho.Message) {
 			onBrokerVersionLock.Unlock()
 		}); token.Wait() && token.Error() != nil {
 			err = token.Error()
@@ -98,8 +98,8 @@ func TestSession(t *testing.T) {
 		URL:        "tcp://127.0.0.1:1237",
 		DBFilename: "TestSession_test.db",
 	}
-	go server.Serve(serverConfig)
-	time.Sleep(time.Second * 1)
+	  server.Serve(serverConfig)
+ 
 
 	// ###############################################  Write an retained value
 	var pahoClientConnected bool = false

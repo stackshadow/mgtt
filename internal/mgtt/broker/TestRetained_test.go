@@ -4,7 +4,6 @@ import (
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -27,13 +26,12 @@ func TestRetained(t *testing.T) {
 	os.Remove("TestRetained_test.db")
 	defer os.Remove("TestRetained_test.db")
 	server, _ := New()
-	go server.Serve(
+	server.Serve(
 		Config{
 			URL:        "tcp://127.0.0.1:1236",
 			DBFilename: "TestRetained_test.db",
 		},
 	)
-	time.Sleep(time.Second * 1)
 
 	// ###############################################  Write an retained value
 	clientIDUUID, _ := uuid.NewRandom()
@@ -58,7 +56,7 @@ func TestRetained(t *testing.T) {
 	// subscribe to check that we are connected
 	var connected sync.Mutex
 	connected.Lock()
-	if token := pahoClient.Subscribe("$SYS/broker/version", 0, func(client paho.Client, msg paho.Message) {
+	if token := pahoClient.Subscribe("$METRIC/broker/version", 0, func(client paho.Client, msg paho.Message) {
 		connected.Unlock()
 	}); token.Wait() && token.Error() != nil {
 		t.Error(token.Error())

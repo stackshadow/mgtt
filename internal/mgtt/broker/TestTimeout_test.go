@@ -23,13 +23,13 @@ func TestTimeout(t *testing.T) {
 	os.Remove("TestTimeout_test.db")
 	defer os.Remove("TestTimeout_test.db")
 	server, _ := New()
-	go server.Serve(
+	  server.Serve(
 		Config{
 			URL:        "tcp://127.0.0.1:1240",
 			DBFilename: "TestTimeout_test.db",
 		},
 	)
-	time.Sleep(time.Second * 2)
+ 
 
 	connection, err := net.Dial("tcp", "127.0.0.1:1240")
 	if err != nil {

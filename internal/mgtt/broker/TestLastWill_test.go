@@ -4,7 +4,6 @@ import (
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -30,8 +29,7 @@ func TestLastWill(t *testing.T) {
 		URL:        "tcp://127.0.0.1:1234",
 		DBFilename: "TestLastWill_test.db",
 	}
-	go server.Serve(serverConfig)
-	time.Sleep(time.Second * 1)
+	server.Serve(serverConfig)
 
 	// ###############################################  The client with will-message
 	var pahoClientConnected bool = false

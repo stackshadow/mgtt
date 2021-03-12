@@ -72,9 +72,11 @@ func (c *CmdServe) Run(params Parameter) (err error) {
 		DBFilename: c.DBFilename,
 	}
 
-	err = newbroker.Serve(newBrokerConfig)
+	var done chan bool
+	done, err = newbroker.Serve(newBrokerConfig)
 	if err != nil {
 		log.Error().Err(err).Send()
 	}
+	<-done
 	return
 }

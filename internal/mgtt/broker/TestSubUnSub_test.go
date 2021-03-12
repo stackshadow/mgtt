@@ -26,13 +26,13 @@ func TestSubUnSub(t *testing.T) {
 	os.Remove("TestSubUnSub_test.db")
 	defer os.Remove("TestSubUnSub_test.db")
 	server, _ := New()
-	go server.Serve(
+	  server.Serve(
 		Config{
 			URL:        "tcp://127.0.0.1:1238",
 			DBFilename: "TestSubUnSub_test.db",
 		},
 	)
-	time.Sleep(time.Second * 1)
+ 
 
 	// vars
 	var subscriptionReceived1 sync.Mutex
