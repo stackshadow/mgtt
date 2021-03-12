@@ -1,6 +1,8 @@
 package broker
 
 import (
+	"strings"
+
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"gitlab.com/mgtt/internal/mgtt/client"
 	"gitlab.com/mgtt/internal/mgtt/persistance"
@@ -18,6 +20,11 @@ func (broker *Broker) onPacketPublish(client *client.MgttClient, packet *packets
 
 	// call plugin that possible handle the message
 	if plugin.CallOnHandleMessage(client.ID(), packet.TopicName, packet.Payload) == true {
+		return
+	}
+
+	// we not publish $SYS to others
+	if strings.Index(packet.TopicName, "$SYS/") == 0 {
 		return
 	}
 
