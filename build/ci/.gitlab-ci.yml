@@ -39,6 +39,8 @@ badges:
       - coverage.svg
       - gocyclo.svg
       - lastbuild.svg
+      - gosec.svg
+      - gosec.txt
 
 release (manual):
   stage: release
