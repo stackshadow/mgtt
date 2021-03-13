@@ -11,6 +11,7 @@ This plugin
 
 include::./config.adoc[]
 
+
 === MQTT-Topics
 
 You can interact with this plugin also over mqtt itselfe :)

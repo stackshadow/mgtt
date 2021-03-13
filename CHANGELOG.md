@@ -1,3 +1,14 @@
+## v0.32.0
+
+### New
+
+- [broker] $SYS-Topics will not be published to all clients ( only to sending-client )
+- [broker] Serve() will now return when server is listening
+
+### Breaking changes
+
+- [broker] $SYS/broker/version renamed to $METRIC/broker/version
+
 ## v0.31.0 - Read the manual
 
 - [doc] Update the whole documentation

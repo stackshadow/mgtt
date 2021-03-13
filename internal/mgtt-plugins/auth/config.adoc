@@ -1,12 +1,19 @@
 
-Change to the auth-file are detected during runtime.
+- change to the auth-file are detected during runtime.
 
-You can add a new user to the file and the password will be automatically crypted with bcrypt. The user will be immediately active
+==== New user
+- you can add a new user to the file and the password will be automatically crypted with bcrypt. The user will be immediately active
+- also the cleartext-password will be deleted
 
-Also the cleartext-password will be deleted
+- you can create a new user with environment variables
+
+Just set these two environment variables and a new user will be created
+
+- `AUTH_USERNAME` The name of the new user
+- `AUTH_PASSWOR` The password for the new user
 
 
-You can create a new user inside the config-file.
+- you can create a new user inside the config-file.
 
 Just add this to you config file
 
@@ -32,3 +39,10 @@ users:
     - debugging
 
 ```
+
+
+==== Anonymouse-Auth
+
+- you can enable anonymouse auth over the config-file
+
+- or just set the `AUTH_ANONYMOUS` environment-variable to an value ( the value doesn't matter, the variable just must be set )
