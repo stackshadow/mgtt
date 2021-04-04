@@ -23,6 +23,19 @@ func (broker *Broker) onPacketPublish(client *client.MgttClient, packet *packets
 		return
 	}
 
+	// handle ping request
+	if packet.TopicName == "$SYS/ping" {
+		// construct the package
+		pub := packets.NewControlPacket(packets.Publish).(*packets.PublishPacket)
+		pub.MessageID = 0
+		pub.Retain = false
+		pub.TopicName = "$SYS/pong"
+		pub.Qos = 0
+
+		client.Publish(pub)
+		return
+	}
+
 	// we not publish $SYS to others
 	if strings.Index(packet.TopicName, "$SYS/") == 0 {
 		return
