@@ -9,6 +9,8 @@ vendor
 *.crt
 coverage.*
 
+.nuxt
+
 integrationtest*.yml
 acl.yml
 auth.yml

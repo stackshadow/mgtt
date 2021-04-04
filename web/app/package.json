@@ -1,0 +1,39 @@
+{
+  "name": "bootup",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt-ts --hostname 0.0.0.0 --port 8080",
+    "build": "nuxt-ts build",
+    "start": "nuxt-ts start",
+    "generate": "nuxt-ts generate"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.2",
+    "@mdi/font": "^5.9.55",
+    "@nuxt/content": "^1.13.1",
+    "@nuxt/typescript-runtime": "^2.0.1",
+    "@nuxtjs/axios": "^5.12.5",
+    "@types/uuid": "^8.3.0",
+    "axios-cookiejar-support": "^1.0.1",
+    "core-js": "^3.8.3",
+    "nano": "^9.0.3",
+    "nuxt": "^2.14.12",
+    "ring-buffer-ts": "^1.0.3",
+    "uuid": "^8.3.2",
+    "vue-grid-layout": "^2.3.12",
+    "vue-snotify": "^3.2.1",
+    "@dyncomp/vuetify": "git+https://gitlab.com/dyncomp/vuetify"
+  },
+  "devDependencies": {
+    "@nuxt/types": "^2.14.12",
+    "@nuxt/typescript-build": "^2.0.4",
+    "@nuxtjs/vuetify": "^1.11.3",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "nuxt-class-component": "^1.3.0",
+    "nuxt-property-decorator": "^2.9.1",
+    "prettier": "^2.2.1",
+    "vue-property-decorator": "^9.1.2"
+  }
+}
