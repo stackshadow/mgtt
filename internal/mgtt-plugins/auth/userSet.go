@@ -14,6 +14,11 @@ func userSet(username string, password *string, groups *[]string) (user pluginCo
 	// get user
 	user, _ = configUserGet(username)
 
+	// you can not set the anonymouse-password
+	if username == "" {
+		return
+	}
+
 	// password
 	if password != nil {
 		var bcryptedData []byte
