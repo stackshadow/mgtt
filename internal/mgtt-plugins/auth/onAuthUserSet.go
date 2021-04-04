@@ -56,5 +56,9 @@ func onAuthUserSet(originClientID string, username string, payload []byte) {
 
 	if err != nil {
 		log.Error().Err(err).Send()
+		err = clientlist.PublishToClient(
+			originClientID,
+			"error",
+			[]byte(err.Error()))
 	}
 }
