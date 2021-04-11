@@ -6,6 +6,8 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/client"
 )
 
+var adminTopicsEnabled bool
+
 // OnHandleMessage gets called after OnPublishRequest
 //
 // If this function return true, the plugin handled the message and no other plugin will get it
@@ -13,12 +15,18 @@ import (
 // If a plugin handle the message, it will NOT sended to subscribers
 func OnHandleMessage(originClientID string, topic string, payload []byte) (handled bool) {
 
-	switch {
-
 	// who is currently logged in
-	case topic == "$SYS/self/user/get":
+	if topic == "$SYS/self/user/get" {
 		handled = true
 		go onSelfUserGet(originClientID)
+	}
+
+	// admin topics disabled ?
+	if adminTopicsEnabled == false {
+		return
+	}
+
+	switch {
 
 	// list all users
 	case topic == "$SYS/auth/users/list/get":

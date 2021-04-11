@@ -6,7 +6,7 @@ Martin Langlotz <martin.langlotz@evilbrain.de>
 
 == Commandline
 
-include::usage/_commandline.adoc[]
+include::../internal/mgtt/cli/cli.adoc[]
 
 === Environment-Variables
 

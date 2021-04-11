@@ -29,6 +29,15 @@ func OnInit(ConfigPath string) {
 	newUserPass := os.Getenv("AUTH_PASSWORD")
 	os.Unsetenv("AUTH_PASSWORD")
 
+	// get if admin-topics should be enabled
+	enableAdminTopics, _ := os.LookupEnv("ENABLE_ADMIN_TOPICS")
+	if enableAdminTopics == "true" || enableAdminTopics == "TRUE" || enableAdminTopics == "1" {
+		adminTopicsEnabled = true
+		log.Info().Msg("admin-topics enabled")
+	} else {
+		log.Info().Msg("admin-topics disabled")
+	}
+
 	// anonymouse is set via environment ?
 	_, anonymouse := os.LookupEnv("AUTH_ANONYMOUSE")
 	if anonymouse == true {

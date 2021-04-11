@@ -28,7 +28,9 @@ type Parameter struct {
 
 	RetryInMinutes int64 `help:"Retry delay of failed QoS1 QoS2 in Minutes" env:"RETRY" default:"1"`
 
-	Plugins string `help:"Name of enabled plugins comma separated"  env:"PLUGINS" default:"auth,acl"`
+	Plugins string `help:"Name of enabled plugins comma separated" env:"PLUGINS" default:"auth,acl"`
+
+	EnableAdminTopics AdminTopicsFlag `kong:"cmd,help='Enable admin topics',env='ENABLE_ADMIN_TOPICS',default='false'"`
 }
 
 // CLI is the overall cli-struct
