@@ -10,9 +10,13 @@ type DebugFlag bool
 
 // AfterApply setup the json logging
 func (v *DebugFlag) AfterApply() error {
+
+	// we add the caller by default
+	log.Logger = log.Logger.With().Caller().Logger()
+
 	if bool(*v) == true {
-		log.Logger = log.Logger.With().Caller().Logger()
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Info().Msg("Enable log-level: debug")
 		/*
 			log.Logger = log.Logger.Output(&lumberjack.Logger{
 				Filename:   "./foo.log",
@@ -24,6 +28,7 @@ func (v *DebugFlag) AfterApply() error {
 
 	} else {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		log.Info().Msg("Enable log-level: info")
 	}
 	return nil
 }
