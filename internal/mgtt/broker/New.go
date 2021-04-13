@@ -1,9 +1,5 @@
 package broker
 
-import (
-	"gitlab.com/mgtt/internal/mgtt/clientlist"
-)
-
 // Current is the last created broker
 var Current *Broker = nil
 
@@ -14,9 +10,6 @@ func New() (broker *Broker, err error) {
 		pubrecs:                     make(map[uint16]Qos2),
 		loopHandleResendPacketsExit: make(chan bool),
 	}
-
-	// Init the clientlist
-	clientlist.Init()
 
 	// remember the current broker
 	Current = broker

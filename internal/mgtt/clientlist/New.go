@@ -6,7 +6,7 @@ var listMutex sync.Mutex
 var list map[string]Client = make(map[string]Client)
 
 // Init will init the list of clients
-func Init() {
+func init() {
 	if list == nil {
 		list = make(map[string]Client)
 	}
