@@ -18,6 +18,7 @@ func TestOnAuthUsersListGet(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
+	os.Setenv("ENABLE_ADMIN_TOPICS", "true")
 	os.Remove("./TestOnAuthUsersListGet_auth.yml")
 	LocalInit("TestOnAuthUsersListGet_")
 

@@ -20,14 +20,15 @@ func TestOnAuthUserSet(t *testing.T) {
 
 	// ############################################### setup auth-password ###############################################
 
-	os.Remove("./TestOnSelfUsernameGet_auth.yml")
-	LocalInit("TestOnSelfUsernameGet_")
+	os.Setenv("ENABLE_ADMIN_TOPICS", "true")
+	os.Remove("./TestOnAuthUserSet_auth.yml")
+	LocalInit("TestOnAuthUserSet_")
 
 	// create a dummy client
 	var testClient *client.MgttClient = &client.MgttClient{}
 	var netserver mocked.Con = mocked.ConNew()
 	testClient.Init(netserver, 0)
-	testClient.IDSet("TestOnSelfUsernameGet")
+	testClient.IDSet("TestOnAuthUserSet")
 	testClient.UsernameSet("admin")
 	testClient.Connected = true
 	testClient.SubScriptionAdd("$SYS/auth/user/admin/set/success")
@@ -55,8 +56,8 @@ func TestOnAuthUserSet(t *testing.T) {
 	}()
 
 	requestLock.Unlock()
-	OnHandleMessage("TestOnSelfUsernameGet", "$SYS/auth/user//set", []byte("{ \"password\": \"admin\" }"))
+	OnHandleMessage("TestOnAuthUserSet", "$SYS/auth/user//set", []byte("{ \"password\": \"admin\" }"))
 	respondLock.Lock()
 
-	os.Remove("./TestOnSelfUsernameGet_auth.yml")
+	os.Remove("./TestOnAuthUserSet_auth.yml")
 }

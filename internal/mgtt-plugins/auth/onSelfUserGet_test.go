@@ -20,6 +20,7 @@ func TestOnSelfUsernameGet(t *testing.T) {
 
 	// ############################################### setup auth-password ###############################################
 
+	os.Setenv("ENABLE_ADMIN_TOPICS", "true")
 	os.Remove("./TestOnSelfUsernameGet_auth.yml")
 	LocalInit("TestOnSelfUsernameGet_")
 

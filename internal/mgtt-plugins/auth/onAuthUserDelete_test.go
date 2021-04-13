@@ -18,6 +18,7 @@ func TestOnAuthUserDelete(t *testing.T) {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
+	os.Setenv("ENABLE_ADMIN_TOPICS", "true")
 	os.Remove("./TestOnAuthUserDelete_auth.yml")
 	LocalInit("TestOnAuthUserDelete_")
 
