@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"os"
+	"strings"
+
 	"github.com/alecthomas/kong"
 	"github.com/rs/zerolog/log"
 )
@@ -35,11 +38,18 @@ type Parameter struct {
 
 // CLI is the overall cli-struct
 var cliData Parameter
+var ctxKong *kong.Context
 
 // ParseAndRun will parse command line arguments and run commands
-func ParseAndRun() {
+func init() {
+
+	// we not init on cmd-line-test
+	if isTest() == true {
+		return
+	}
+
 	// ########################## Command line parse ##########################
-	ctx := kong.Parse(&cliData,
+	ctxKong = kong.Parse(&cliData, // this trigger AfterApply()
 		kong.Name("mgtt"),
 		kong.Description("Message Go Telemetry Transport"),
 		kong.UsageOnError(),
@@ -48,14 +58,28 @@ func ParseAndRun() {
 		}),
 		kong.Vars{
 			"version": Version,
-		})
-	cliData.Common.Debug.AfterApply() // ensure debugger is setuped
-	ctx.ApplyDefaults()
-	ctx.Bind(cliData)
+		},
+	)
+
+	ctxKong.ApplyDefaults()
+	ctxKong.Bind(cliData)
 
 	// print version
 	log.Info().Str("version", Version).Send()
+}
 
-	err := ctx.Run()
-	ctx.FatalIfErrorf(err)
+// Run will execute Commands
+func Run() {
+	err := ctxKong.Run()
+	ctxKong.FatalIfErrorf(err)
+}
+
+func isTest() bool {
+	for _, flag := range os.Args {
+		if strings.Contains(flag, "-test.run") || strings.Contains(flag, "-test.v") {
+			return true
+		}
+
+	}
+	return false
 }
