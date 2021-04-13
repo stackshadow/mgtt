@@ -1,3 +1,28 @@
+## v0.33.0
+
+### New
+
+- [broker] New flag `--enable-admin-topics` to enable admin-topics
+- [broker] Add `$SYS/ping`-Topic that just respond an `$SYS/pong`
+- [auth] Topic `$SYS/auth/user//get` ( no username given ) return now the infos for `_anonym`-User
+
+### Breaking changes
+
+- no breaking changes
+
+### Fixes
+
+- [auth] Prevent set of password for `_anonym`-User
+
+### Under the hood
+
+- [auth] Fix tests
+- [clientlist] Use auto-init of package
+- [cli] Use auto-init of package
+- [ci] Release-jop only created on tags
+- [logging] Print out debug-level
+- [logging] Show caller on every log-level
+
 ## v0.32.0
 
 ### New
