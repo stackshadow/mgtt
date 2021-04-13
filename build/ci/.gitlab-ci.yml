@@ -33,7 +33,7 @@ badges:
   stage: posttest
   image: stackshadow/anybadge:latest
   script:
-    - make -f ./build/local/Makefile badges
+    - make -f ./build/local/badges.mk badges
   artifacts:
     paths:
       - coverage.svg
@@ -56,4 +56,5 @@ release (manual):
       docker tag stackshadow/mgtt:${DOCKERTAG} stackshadow/mgtt:latest
       docker push stackshadow/mgtt:${DOCKERTAG}
       docker push stackshadow/mgtt:latest
-  when: manual
+  rules:
+    - if: $CI_COMMIT_TAG
