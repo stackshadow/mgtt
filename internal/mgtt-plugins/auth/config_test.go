@@ -24,6 +24,7 @@ func TestEnvironment(t *testing.T) {
 
 	os.Setenv("AUTH_USERNAME", "envuser")
 	os.Setenv("AUTH_PASSWORD", "envpw")
+	os.Setenv("ENABLE_ADMIN_TOPICS", "true")
 
 	OnInit("integrationtest.yml")
 
