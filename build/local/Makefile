@@ -36,8 +36,11 @@ assets: docs/assets/QoS2.png
 docs: assets
 
 HELPTEXT+="\nmake tests\n Run all tests\n"
-tests: ./coverage.html
-	go tool cover -func coverage.out | grep total: | awk '{print $$3}' | sed 's/%//g' 
+tests: coverage.out
+	go tool cover -func coverage.out | grep total: | awk '{print $$3}' | sed 's/%//g'
+
+coverage.out:
+	go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./...
 
 gocyto: ~/go/bin/gocyto
 ~/go/bin/gocyto:
