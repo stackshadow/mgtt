@@ -1,5 +1,6 @@
 stages:
   - test
+  - binary
   - build_docker
   - posttest
   - release
@@ -17,17 +18,32 @@ tests:
     paths:
       - coverage.out
 
+build mgtt:
+  stage: binary
+  image: golang:1.16.3
+  variables:
+    ARCH: amd64
+    DOCKERTAG: ${CI_COMMIT_SHORT_SHA}
+  script:
+    - make -f ./build/local/Makefile mgtt healthcheck
+  artifacts:
+    paths:
+      - ./mgtt
+      - ./healthcheck
+    expire_in: 1 day
+
 build docker image:
   stage: build_docker
   image: linuxserver/docker-compose:latest
+  variables:
+    ARCH: amd64
+    DOCKERTAG: ${CI_COMMIT_SHORT_SHA}
   script:
     - mkdir -p ~/.docker
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
     - |
-      eval $(cat ./.env | awk -F= '{ print "export " $1 }')
-      export DOCKERTAG=${CI_COMMIT_SHORT_SHA}
-      docker-compose -f deployments/docker-compose/docker-compose.yml build --pull mgtt
-      docker-compose -f deployments/docker-compose/docker-compose.yml push mgtt
+      make -f ./build/local/Makefile docker
+      make -f ./build/local/Makefile docker-push
 
 badges:
   stage: posttest

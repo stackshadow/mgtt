@@ -4,6 +4,7 @@ include .env
 export
 
 HELPTEXT="Targets:\n"
+ARCH ?= amd64
 
 .PHONY: help 
 help: currentversion
@@ -15,10 +16,31 @@ currentversion:
 	@echo "" >> internal/mgtt/cli/currentversion.go
 	@echo "var Version string = \"$${VERSION}\"" >> internal/mgtt/cli/currentversion.go
 
+################################ mgtt ################################
 HELPTEXT+="\nmake mgtt\n Create mgtt binary. Need a go-compiler\n"
 mgtt: ./mgtt
-./mgtt:
-	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mgtt ./cmd/mgtt
+./mgtt: currentversion
+	@echo "Building for $(ARCH)"
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o mgtt ./cmd/mgtt
+CLEANFILES+=mgtt
+
+################################ healthcheck ################################
+HELPTEXT+="\nmake healthcheck\n Create healthcheck binary. Need a go-compiler\n"
+healthcheck: ./healthcheck
+./healthcheck:
+	cd cmd/healthcheck && CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o ../../healthcheck .
+CLEANFILES+=healthcheck
+
+
+################################ Docker ################################
+HELPTEXT+="\nmake docker\n Build docker image\n"
+docker: mgtt healthcheck
+	docker build \
+	--pull \
+	-t stackshadow/mgtt:$${DOCKERTAG:-local} \
+	-f build/docker/Dockerfile .
+docker-push:
+	docker push stackshadow/mgtt:$${DOCKERTAG:-local}
 
 # command line mmdc
 mmdc: docs/assets/node_modules/.bin/mmdc
@@ -61,4 +83,5 @@ clean:
 	@rm -fv gocyclo.txt gocyclo.svg 
 	@rm -fv gosec.txt gosec.svg
 	@rm -fv lastbuild.svg
+	@rm -fv $(CLEANFILES)
 	@find . -name "*.db" -print -delete
