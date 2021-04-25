@@ -38,7 +38,7 @@ CLEANFILES+=./dist/healthcheck
 
 ################################ Docker ################################
 HELPTEXT+="\nmake docker\n Build docker image\n"
-docker: mgtt healthcheck
+docker:
 	docker build \
 	--pull \
 	-t stackshadow/mgtt:$${DOCKERTAG:-local} \
