@@ -34,7 +34,7 @@ build mgtt:
 
 build docker image:
   stage: build_docker
-  image: linuxserver/docker-compose:latest
+  image: docker:latest
   variables:
     ARCH: amd64
     DOCKERTAG: ${CI_COMMIT_SHORT_SHA}
@@ -42,6 +42,7 @@ build docker image:
     - mkdir -p ~/.docker
     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
     - |
+      apk add make
       make -f ./build/local/Makefile docker
       make -f ./build/local/Makefile docker-push
 
