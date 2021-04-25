@@ -34,49 +34,59 @@ func (c *CmdServe) Run(params Parameter) (err error) {
 		// create ca
 		if c.CAFile != "" {
 			params.CreateCA.CAFile = c.CAFile
-			params.CreateCA.Run()
+			err = params.CreateCA.Run()
 		}
 
-		// create certificate if not exist
-		params.CreateCert.CAFile = c.CAFile
-		params.CreateCert.CertFile = c.CertFile
-		params.CreateCert.KeyFile = c.KeyFile
-		params.CreateCert.SelfSigned = c.SelfSigned
-		params.CreateCert.Run()
+		if err == nil {
+			// create certificate if not exist
+			params.CreateCert.CAFile = c.CAFile
+			params.CreateCert.CertFile = c.CertFile
+			params.CreateCert.KeyFile = c.KeyFile
+			params.CreateCert.SelfSigned = c.SelfSigned
+			err = params.CreateCert.Run()
+		}
 	}
 
-	// set the broker-connection-timeout
-	broker.ConnectTimeout = params.ConnectTimeout
+	// Broker
+	var newbroker *broker.Broker
+	if err == nil {
+		// set the broker-connection-timeout
+		broker.ConnectTimeout = params.ConnectTimeout
 
-	// create the broker
-	newbroker, err := broker.New()
-	if err != nil {
-		log.Error().Err(err).Send()
-	}
-
-	// register plugins
-	if strings.Contains(params.Plugins, "auth") == true {
-		auth.LocalInit(params.ConfigPath)
-	}
-	if strings.Contains(params.Plugins, "acl") == true {
-		acl.LocalInit(params.ConfigPath)
+		// create the broker
+		newbroker, err = broker.New()
 	}
 
-	newBrokerConfig := broker.Config{
-		Version:    Version,
-		URL:        c.URL,
-		TLS:        c.TLS,
-		CAFile:     c.CAFile,
-		CertFile:   c.CertFile,
-		KeyFile:    c.KeyFile,
-		DBFilename: c.DBFilename,
+	if err == nil {
+		// register plugins
+		if strings.Contains(params.Plugins, "auth") == true {
+			auth.LocalInit(params.ConfigPath)
+		}
+		if strings.Contains(params.Plugins, "acl") == true {
+			acl.LocalInit(params.ConfigPath)
+		}
 	}
 
-	var done chan bool
-	done, err = newbroker.Serve(newBrokerConfig)
-	if err != nil {
-		log.Error().Err(err).Send()
+	if err == nil {
+		var done chan bool
+
+		newBrokerConfig := broker.Config{
+			Version:    Version,
+			URL:        c.URL,
+			TLS:        c.TLS,
+			CAFile:     c.CAFile,
+			CertFile:   c.CertFile,
+			KeyFile:    c.KeyFile,
+			DBFilename: c.DBFilename,
+		}
+
+		done, err = newbroker.Serve(newBrokerConfig)
+		if err != nil {
+			log.Error().Err(err).Send()
+		}
+
+		<-done
 	}
-	<-done
+
 	return
 }

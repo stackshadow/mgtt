@@ -39,7 +39,7 @@ type CmdCreateCert struct {
 // Run will run the command
 func (c *CmdCreateCert) Run() (err error) {
 
-	baseDirName := filepath.Dir(c.CAFile)
+	baseDirName := filepath.Dir(c.CertFile)
 	certificateFileName := c.CertFile
 	certificatePrivKeyFileName := c.KeyFile
 
@@ -149,18 +149,18 @@ func (c *CmdCreateCert) Run() (err error) {
 	*/
 
 	// create subdirectory
-	os.Mkdir(filepath.Dir(baseDirName), 0700)
-
-	// write file
-	err = ioutil.WriteFile(certificateFileName, certPEM.Bytes(), 0600)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to write certificate")
+	if err == nil {
+		err = os.Mkdir(baseDirName, 0700)
 	}
 
 	// write file
-	err = ioutil.WriteFile(certificatePrivKeyFileName, certPrivKeyPEM.Bytes(), 0600)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to write key")
+	if err == nil {
+		err = ioutil.WriteFile(certificateFileName, certPEM.Bytes(), 0600)
+	}
+
+	// write file
+	if err == nil {
+		err = ioutil.WriteFile(certificatePrivKeyFileName, certPrivKeyPEM.Bytes(), 0600)
 	}
 
 	return
