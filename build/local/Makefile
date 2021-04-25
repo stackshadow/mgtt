@@ -11,25 +11,29 @@ help: currentversion
 	@echo -e $(HELPTEXT)
 
 HELPTEXT+="\nmake currentversion\n Create the current currentversion.go\n"
-currentversion:
+currentversion: internal/mgtt/cli/currentversion.go
+internal/mgtt/cli/currentversion.go:
 	@echo "package cli" > internal/mgtt/cli/currentversion.go
 	@echo "" >> internal/mgtt/cli/currentversion.go
 	@echo "var Version string = \"$${VERSION}\"" >> internal/mgtt/cli/currentversion.go
 
 ################################ mgtt ################################
+./dist:
+	mkdir -p ./dist
+
 HELPTEXT+="\nmake mgtt\n Create mgtt binary. Need a go-compiler\n"
-mgtt: ./mgtt
-./mgtt: currentversion
+mgtt: ./dist/mgtt
+./dist/mgtt: dist
 	@echo "Building for $(ARCH)"
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o mgtt ./cmd/mgtt
-CLEANFILES+=mgtt
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o dist/mgtt ./cmd/mgtt
+CLEANFILES+=./dist/mgtt
 
 ################################ healthcheck ################################
 HELPTEXT+="\nmake healthcheck\n Create healthcheck binary. Need a go-compiler\n"
-healthcheck: ./healthcheck
-./healthcheck:
-	cd cmd/healthcheck && CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o ../../healthcheck .
-CLEANFILES+=healthcheck
+healthcheck: ./dist/healthcheck dist
+./dist/healthcheck:
+	cd cmd/healthcheck && CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o ../../dist/healthcheck .
+CLEANFILES+=./dist/healthcheck
 
 
 ################################ Docker ################################

@@ -85,10 +85,10 @@ COPY --from=base --chown=nobody:0 /newroot/data /data
 COPY --from=base --chown=nobody:0 /newroot/tmp /tmp
 
 # healthceck
-COPY --chown=nobody:0 /healthcheck /healthcheck
+COPY --chown=nobody:0 dist/healthcheck /healthcheck
 
 # mgtt
-COPY --chown=nobody:0 /mgtt /mgtt
+COPY --chown=nobody:0 dist/mgtt /mgtt
 
 
 # for debugging

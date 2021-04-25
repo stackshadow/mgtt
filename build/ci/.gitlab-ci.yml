@@ -28,8 +28,7 @@ build mgtt:
     - make -f ./build/local/Makefile mgtt healthcheck
   artifacts:
     paths:
-      - ./mgtt
-      - ./healthcheck
+      - ./dist/*
     expire_in: 1 day
 
 build docker image:
