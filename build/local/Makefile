@@ -23,7 +23,7 @@ internal/mgtt/cli/currentversion.go:
 
 HELPTEXT+="\nmake mgtt\n Create mgtt binary. Need a go-compiler\n"
 mgtt: ./dist/mgtt
-./dist/mgtt: dist
+./dist/mgtt: ./dist
 	@echo "Building for $(ARCH)"
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) go build -a -ldflags '-extldflags "-static"' -o dist/mgtt ./cmd/mgtt
 CLEANFILES+=./dist/mgtt

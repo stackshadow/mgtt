@@ -24,7 +24,7 @@ func getTLSConfig(config Config) (cfg *tls.Config, err error) {
 		}
 	}
 
-	// no caFile was set
+	// CA was set = mTLS
 	if config.CAFile != "" {
 		// Read in the cert file
 		if err == nil {
@@ -56,8 +56,10 @@ func getTLSConfig(config Config) (cfg *tls.Config, err error) {
 
 	if config.CAFile != "" {
 		cfg.ClientAuth = tls.RequireAndVerifyClientCert
+		log.Info().Msg("using mTLS")
 	} else {
 		cfg.ClientAuth = tls.NoClientCert
+		log.Info().Msg("using self-signed-certificate")
 	}
 
 	return

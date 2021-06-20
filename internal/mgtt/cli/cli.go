@@ -31,7 +31,7 @@ type Parameter struct {
 
 	RetryInMinutes int64 `help:"Retry delay of failed QoS1 QoS2 in Minutes" env:"RETRY" default:"1"`
 
-	Plugins string `help:"Name of enabled plugins comma separated" env:"PLUGINS" default:"auth,acl"`
+	Plugins string `help:"Name of enabled plugins comma separated. Can be set to 'no' to don't load an plugin" env:"PLUGINS" default:"auth,acl"`
 
 	EnableAdminTopics AdminTopicsFlag `kong:"cmd,help='Enable admin topics',env='ENABLE_ADMIN_TOPICS',default='false'"`
 }
@@ -65,7 +65,9 @@ func init() {
 	ctxKong.Bind(cliData)
 
 	// print version
-	log.Info().Str("version", Version).Send()
+	log.Info().
+		Str("version", Version).
+		Msg("Welcome to mgtt")
 }
 
 // Run will execute Commands

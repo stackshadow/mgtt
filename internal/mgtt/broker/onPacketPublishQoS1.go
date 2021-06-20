@@ -48,7 +48,7 @@ func (broker *Broker) onPacketPublishQoS1(client *client.MgttClient, packet *pac
 
 		// publish packet to all subscribers
 		var subscribed bool
-		_, subscribed, err = broker.PublishPacket(pubPacket, true)
+		_, subscribed, err = broker.PublishPacket(client.ID(), pubPacket, true)
 
 		// nobody subscribe to this
 		if subscribed == false {

@@ -18,6 +18,6 @@ func (broker *Broker) Publish(topic string, payload []byte, retain bool, QoS byt
 
 	broker.lastID++
 
-	_, _, err = clientlist.PublishToAllClients(pub, false)
+	_, _, err = clientlist.PublishToAllClients(pub, "", false)
 	return
 }

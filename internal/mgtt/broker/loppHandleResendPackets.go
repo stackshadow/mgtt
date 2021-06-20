@@ -65,9 +65,9 @@ loop:
 						// publish packet to all subscribers
 						switch info.Qos {
 						case 1:
-							_, _, err = broker.PublishPacket(pubPacket, false)
+							_, _, err = broker.PublishPacket("", pubPacket, false)
 						case 2:
-							_, _, err = broker.PublishPacket(pubPacket, true)
+							_, _, err = broker.PublishPacket("", pubPacket, true)
 						default:
 							err = errors.New("This QOS-Level is not supported")
 						}
