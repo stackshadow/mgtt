@@ -1,3 +1,9 @@
+## v0.34.0
+
+### Fixes
+
+- 🐛 [broker] Fix receive of own package
+
 ## v0.33.0
 
 ### New
