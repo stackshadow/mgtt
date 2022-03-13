@@ -7,6 +7,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt-plugins/acl"
 	"gitlab.com/mgtt/internal/mgtt-plugins/auth"
 	"gitlab.com/mgtt/internal/mgtt/broker"
+	"gitlab.com/stackshadow/qommunicator/v2/pkg/utils"
 )
 
 // CmdServe represents the flag which create certs
@@ -25,7 +26,7 @@ type CmdServe struct {
 func (c *CmdServe) Run(params Parameter) (err error) {
 
 	// did we use TLS ?
-	if params.Serve.TLS == true {
+	if c.TLS == true {
 
 		if c.SelfSigned == true {
 			c.CAFile = ""
@@ -35,58 +36,57 @@ func (c *CmdServe) Run(params Parameter) (err error) {
 		if c.CAFile != "" {
 			params.CreateCA.CAFile = c.CAFile
 			err = params.CreateCA.Run()
+			utils.PanicOnErr(err)
 		}
 
-		if err == nil {
-			// create certificate if not exist
-			params.CreateCert.CAFile = c.CAFile
-			params.CreateCert.CertFile = c.CertFile
-			params.CreateCert.KeyFile = c.KeyFile
-			params.CreateCert.SelfSigned = c.SelfSigned
-			err = params.CreateCert.Run()
-		}
+		// create certificate if not exist
+		params.CreateCert.CAFile = c.CAFile
+		params.CreateCert.CertFile = c.CertFile
+		params.CreateCert.KeyFile = c.KeyFile
+		params.CreateCert.SelfSigned = c.SelfSigned
+		err = params.CreateCert.Run()
+		utils.PanicOnErr(err)
+
+	} else {
+		log.Warn().Msg("TLS is disabled, this is not a good idea")
 	}
 
 	// Broker
 	var newbroker *broker.Broker
-	if err == nil {
-		// set the broker-connection-timeout
-		broker.ConnectTimeout = params.ConnectTimeout
 
-		// create the broker
-		newbroker, err = broker.New()
+	// set the broker-connection-timeout
+	broker.ConnectTimeout = params.ConnectTimeout
+
+	// create the broker
+	newbroker, err = broker.New()
+	utils.PanicOnErr(err)
+
+	// register plugins
+	if strings.Contains(params.Plugins, "auth") == true {
+		auth.LocalInit(params.ConfigPath)
+	}
+	if strings.Contains(params.Plugins, "acl") == true {
+		acl.LocalInit(params.ConfigPath)
 	}
 
-	if err == nil {
-		// register plugins
-		if strings.Contains(params.Plugins, "auth") == true {
-			auth.LocalInit(params.ConfigPath)
-		}
-		if strings.Contains(params.Plugins, "acl") == true {
-			acl.LocalInit(params.ConfigPath)
-		}
+	var done chan bool
+
+	newBrokerConfig := broker.Config{
+		Version:    Version,
+		URL:        c.URL,
+		TLS:        c.TLS,
+		CAFile:     c.CAFile,
+		CertFile:   c.CertFile,
+		KeyFile:    c.KeyFile,
+		DBFilename: c.DBFilename,
 	}
 
-	if err == nil {
-		var done chan bool
-
-		newBrokerConfig := broker.Config{
-			Version:    Version,
-			URL:        c.URL,
-			TLS:        c.TLS,
-			CAFile:     c.CAFile,
-			CertFile:   c.CertFile,
-			KeyFile:    c.KeyFile,
-			DBFilename: c.DBFilename,
-		}
-
-		done, err = newbroker.Serve(newBrokerConfig)
-		if err != nil {
-			log.Error().Err(err).Send()
-		}
-
-		<-done
+	done, err = newbroker.Serve(newBrokerConfig)
+	if err != nil {
+		log.Error().Err(err).Send()
 	}
+
+	<-done
 
 	return
 }
