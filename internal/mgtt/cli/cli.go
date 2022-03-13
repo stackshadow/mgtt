@@ -77,8 +77,9 @@ func Run() {
 }
 
 func isTest() bool {
+
 	for _, flag := range os.Args {
-		if strings.Contains(flag, "-test.run") || strings.Contains(flag, "-test.v") {
+		if strings.Contains(flag, "-test.") {
 			return true
 		}
 
