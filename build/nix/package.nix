@@ -1,11 +1,11 @@
 { system ? builtins.currentSystem
+, pkgs ? import <nixpkgs> { inherit system; }
 , sourceByRegex
 , version
 , vendorSha256 ? null
 , homepage ? "https://gitlab.actaport.de/actaport/infrastructure/watchcat/"
 }:
 let
-  pkgs = import <nixpkgs> { inherit system; };
   lib = pkgs.lib;
   inherit (pkgs) buildGoModule;
 

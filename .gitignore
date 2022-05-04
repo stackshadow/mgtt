@@ -2,7 +2,6 @@ messages.db
 __debug_bin
 integrtest.db
 node_modules/
-vendor
 *.db
 *.pem
 *.key

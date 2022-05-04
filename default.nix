@@ -14,9 +14,24 @@ let
     version = packageVersion;
   };
 
+  dockerImage = callPackage ./build/nix/docker.nix {
+    inherit binary;
+    version = "dev";
+  };
+
 in
 {
   # nix-build -A package --no-out-link
   package = binary;
-  #module = import ./build/module.nix;
+
+  packageAarch64 = callPackage ./build/nix/package.nix {
+    pkgs = pkgs.pkgsCross.aarch64-multiplatform;
+    version = packageVersion;
+  };
+
+  # nix-build -A docker --no-out-link
+
+  # $(nix-build -A docker) | docker load
+  docker = dockerImage;
+
 }
