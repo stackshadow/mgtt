@@ -1,6 +1,7 @@
 stages:
   - test
   - binary
+  - badges
   - build_docker
   - posttest
   - release
@@ -12,6 +13,8 @@ stages:
 tests:
   stage: test
   image: golang:1.16.0
+  dependencies: []
+  needs: []
   script:
     - go test -v -timeout 60s -parallel 1 -coverprofile=coverage.out  ./...
   artifacts:
@@ -20,57 +23,54 @@ tests:
 
 build mgtt:
   stage: binary
-  image: golang:1.16.3
-  variables:
-    ARCH: amd64
-    DOCKERTAG: ${CI_COMMIT_SHORT_SHA}
+  image: nixos/nix:latest
+  dependencies: []
+  needs: 
+    - tests
   script:
-    - make -f ./build/local/Makefile mgtt healthcheck
-  artifacts:
-    paths:
-      - ./dist/*
-    expire_in: 1 day
+    - nix-build -A package
 
 build docker image:
   stage: build_docker
-  image: docker:latest
-  variables:
-    ARCH: amd64
-    DOCKERTAG: ${CI_COMMIT_SHORT_SHA}
+  image: nixos/nix:latest
+  dependencies: []
+  needs: 
+    - build mgtt
   script:
-    - mkdir -p ~/.docker
-    - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
     - |
-      apk add make
-      make -f ./build/local/Makefile docker
-      make -f ./build/local/Makefile docker-push
-
-badges:
-  stage: posttest
-  image: stackshadow/anybadge:latest
-  script:
-    - make -f ./build/local/badges.mk badges
-  artifacts:
-    paths:
-      - coverage.svg
-      - gocyclo.svg
-      - lastbuild.svg
-      - gosec.svg
-      - gosec.txt
-
-release (manual):
-  stage: release
-  image: linuxserver/docker-compose:latest
-  script:
-    - mkdir -p ~/.docker
-    - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
-
+      nix-channel --update
+      nix-env -iA nixpkgs.docker
     - |
-      eval $(cat ./.env | awk -F= '{ print "export " $1 }')
-      export DOCKERTAG=${CI_COMMIT_SHORT_SHA}
-      docker-compose -f deployments/docker-compose/docker-compose.yml pull mgtt
-      docker tag stackshadow/mgtt:${DOCKERTAG} stackshadow/mgtt:latest
-      docker push stackshadow/mgtt:${DOCKERTAG}
-      docker push stackshadow/mgtt:latest
-  rules:
-    - if: $CI_COMMIT_TAG
+      $(nix-build -A docker) | docker load
+      docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+      docker tag mgtt:dev registry.gitlab.com/stackshadow/mgtt:latest
+      docker push registry.gitlab.com/stackshadow/mgtt:latest
+
+# cyclo:
+#   stage: badges
+#   image: nixos/nix:latest
+#   dependencies: []
+#   needs: 
+#     - build mgtt
+#   script:
+#     - nix-shell -A badges --command cyclo
+#   artifacts:
+#     paths:
+#       - ./*.svg
+
+# release (manual):
+#   stage: release
+#   image: linuxserver/docker-compose:latest
+#   script:
+#     - mkdir -p ~/.docker
+#     - cat ${DOCKER_AUTH_CONFIG} > ~/.docker/config.json
+
+#     - |
+#       eval $(cat ./.env | awk -F= '{ print "export " $1 }')
+#       export DOCKERTAG=${CI_COMMIT_SHORT_SHA}
+#       docker-compose -f deployments/docker-compose/docker-compose.yml pull mgtt
+#       docker tag stackshadow/mgtt:${DOCKERTAG} stackshadow/mgtt:latest
+#       docker push stackshadow/mgtt:${DOCKERTAG}
+#       docker push stackshadow/mgtt:latest
+#   rules:
+#     - if: $CI_COMMIT_TAG

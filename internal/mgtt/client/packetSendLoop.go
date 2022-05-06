@@ -46,5 +46,6 @@ loop:
 	}
 
 	c.packetSendLoopRunning = false
+	log.Debug().Str("client", c.ID()).Msg("send loop is closed")
 	return
 }

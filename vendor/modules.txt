@@ -1,0 +1,62 @@
+# github.com/alecthomas/kong v0.5.0
+## explicit
+github.com/alecthomas/kong
+# github.com/boltdb/bolt v1.3.1
+## explicit
+github.com/boltdb/bolt
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/eclipse/paho.mqtt.golang v1.3.5
+## explicit
+github.com/eclipse/paho.mqtt.golang
+github.com/eclipse/paho.mqtt.golang/packets
+# github.com/google/uuid v1.2.0
+## explicit
+github.com/google/uuid
+# github.com/gorilla/websocket v1.4.2
+github.com/gorilla/websocket
+# github.com/mcuadros/go-defaults v1.2.0
+## explicit
+github.com/mcuadros/go-defaults
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/radovskyb/watcher v1.0.7
+## explicit
+github.com/radovskyb/watcher
+# github.com/rs/xid v1.3.0
+## explicit
+github.com/rs/xid
+# github.com/rs/zerolog v1.26.1
+## explicit
+github.com/rs/zerolog
+github.com/rs/zerolog/internal/cbor
+github.com/rs/zerolog/internal/json
+github.com/rs/zerolog/log
+# github.com/sethvargo/go-retry v0.1.0
+github.com/sethvargo/go-retry
+# github.com/stretchr/testify v1.7.1
+## explicit
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
+github.com/stretchr/testify/suite
+# gitlab.com/stackshadow/qommunicator/v2 v2.5.1
+## explicit
+gitlab.com/stackshadow/qommunicator/v2/pkg/utils
+# golang.org/x/crypto v0.0.0-20220312131142-6068a2e6cfdc
+## explicit
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
+# golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
+golang.org/x/net/internal/socks
+golang.org/x/net/proxy
+# golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5
+## explicit
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+# gopkg.in/yaml.v2 v2.4.0
+## explicit
+gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+gopkg.in/yaml.v3
