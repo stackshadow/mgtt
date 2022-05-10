@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/mcuadros/go-defaults"
 	"github.com/rs/zerolog"
@@ -19,11 +20,15 @@ var Values struct {
 
 	URL string `yaml:"url" default:"tcp://0.0.0.0:8883"`
 
-	Timeout uint64 `yaml:"timeout" default:"15"`
+	Timeout time.Duration `yaml:"timeout" default:"15s"`
+	Retry   time.Duration `yaml:"retry" default:"30s"`
+	Plugin  string        `yaml:"retry" default:"auth,acl"`
+
+	AdminTopics bool `yaml:"adminTopics" default:"false"`
 
 	TLS struct {
 		CA struct {
-			File string `yaml:"file" default:"tls_ca.crt"`
+			File string `yaml:"file" default:""`
 
 			Organization  string `yaml:"org" default:"FeelGood Inc."`
 			Country       string `yaml:"country" default:"DE"`
@@ -31,17 +36,24 @@ var Values struct {
 			Locality      string `yaml:"city" default:"Berlin"`
 			StreetAddress string `yaml:"address" default:"Corner 42"`
 			PostalCode    string `yaml:"code" default:"030423"`
-		} `yaml:"ca" default:""`
+		} `yaml:"ca"`
 
-		Cert string `yaml:"cert" default:"./mgtt.cert"`
-		Key  string `yaml:"key" default:"./mgtt.key"`
+		Cert struct {
+			File string `yaml:"file" default:""`
+
+			Organization  string `yaml:"org" default:"FeelGood Inc."`
+			Country       string `yaml:"country" default:"DE"`
+			Province      string `yaml:"province" default:"Local"`
+			Locality      string `yaml:"city" default:"Berlin"`
+			StreetAddress string `yaml:"address" default:"Corner 42"`
+			PostalCode    string `yaml:"code" default:"030423"`
+		} `yaml:"cert"`
 	} `yaml:"tls"`
 
 	DB string `yaml:"db" default:"./messages.db"`
 }
 
 var defaultConfig string = `
-
 # The serve-url in the scheme tcp://<ip>:<port>
 # as <ip> you usual will use 127.0.0.1 or 0.0.0.0
 # as <port> you usual will use 8883
@@ -58,10 +70,8 @@ tls:
     file: ""
 
   # this is needed if you would like to use tls
-  cert: "./mgtt.cert"
-
-  # the private key, needed for tls
-  key: "./mgtt.key"
+  cert:
+    file: "./tls_cert.crt"
 
 # the db where to store persistant data
 # this is needed for mqtt-persistand messages
@@ -72,7 +82,7 @@ db: "./messages.db"
 // Load will load a file to Values
 //
 // if the file not exist, we save a defaultConfig with comments to <file>
-func Load(file string) {
+func MustLoad(file string) {
 
 	var err error
 
@@ -97,19 +107,20 @@ func Load(file string) {
 		err = yaml.Unmarshal(data, &Values)
 		utils.PanicOnErr(err)
 
-		// apply defaults
-		defaults.SetDefaults(&Values)
-
 	} else {
 		log.Info().Msg("No filename provided, not loading config")
 	}
 
 }
 
+// Apply log-level and log-output
 func Apply() {
 
 	var err error
 	var newLogLevel zerolog.Level
+
+	// apply defaults
+	defaults.SetDefaults(&Values)
 
 	// loglevel
 	newLogLevel, err = zerolog.ParseLevel(Values.Level)
@@ -121,6 +132,7 @@ func Apply() {
 
 	// jsonlog
 	if !Values.JSON {
+		log.Logger = log.With().Caller().Logger()
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 

@@ -11,28 +11,26 @@ import (
 )
 
 // MustInit init the listener or panics
-func (l *Listener) MustInit(CA, Cert, Key string) {
+func (l *Listener) MustInit(CA, Cert string) {
 	var err error
 
-	if Cert == "" || Key == "" {
+	if Cert == "" {
 		l.listener, err = net.Listen("tcp", l.address)
 		utils.PanicOnErr(err)
 
 		log.Info().Str("create", l.address).
 			Str("ca", CA).
 			Str("cert", Cert).
-			Str("key", Key).
 			Msg("Listening non-tls")
 	}
-	if Cert != "" && Key != "" {
-		TLSConfig := mustTLSConfig(CA, Cert, Key)
+	if Cert != "" {
+		TLSConfig := mustTLSConfig(CA, Cert, Cert+".key")
 		l.listener, err = tls.Listen("tcp", l.address, TLSConfig)
 		utils.PanicOnErr(err)
 
 		log.Info().Str("create", l.address).
 			Str("ca", CA).
 			Str("cert", Cert).
-			Str("key", Key).
 			Msg("Listening")
 	}
 

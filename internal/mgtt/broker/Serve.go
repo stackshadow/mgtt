@@ -1,21 +1,23 @@
 package broker
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net"
 	"net/url"
 
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/internal/mgtt/clientlist"
+	"gitlab.com/mgtt/internal/mgtt/config"
 	"gitlab.com/mgtt/internal/mgtt/persistance"
+	"gitlab.com/mgtt/internal/mgtt/server"
+	"gitlab.com/stackshadow/qommunicator/v2/pkg/utils"
 )
 
 // Serve will create a new broker and wait for clients in a goroutine
 //
 // - this create also an retained message with topic "$METRIC/broker/version" that contains the version
-func (b *Broker) Serve(config Config) (done chan bool, err error) {
+func (b *Broker) Serve() (done chan bool, err error) {
 
-	err = persistance.Open(config.DBFilename)
+	err = persistance.Open(config.Values.DB)
 
 	// Delete Broker-version if exist
 	brokerVersionTopic := "$METRIC/broker/version"
@@ -33,11 +35,13 @@ func (b *Broker) Serve(config Config) (done chan bool, err error) {
 	)
 
 	var serverURL *url.URL
-	serverURL, err = url.Parse(config.URL)
+	serverURL, err = url.Parse(config.Values.URL)
+	utils.PanicOnErr(err)
 
 	// check schema
 	if serverURL.Scheme != "tcp" {
 		err = fmt.Errorf("Unsupported scheme '%s'", serverURL.Scheme)
+		utils.PanicOnErr(err)
 	}
 
 	// check if an error occurred

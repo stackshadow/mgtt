@@ -6,11 +6,12 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/config"
 )
 
-func TestCreateOfCA(t *testing.T) {
+func TestCreateOfCert(t *testing.T) {
 
-	config.Load("inttest.yaml")
+	config.MustLoad("inttest.yaml")
 	config.Values.Level = "debug"
+	config.Values.TLS.CA.File = "tls_ca.crt"
 	config.Apply()
 
-	MustCreateCA()
+	MustCreateCert()
 }
