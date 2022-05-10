@@ -17,7 +17,7 @@ func (broker *Broker) onPacketPublishQoS0(client *client.MgttClient, packet *pac
 		// because it matches an established subscription
 		packet.Retain = false
 
-		// publish packet to all subscribers
+		// publish packet to all subscribers, except us !
 		var subscribed bool
 		_, subscribed, err = broker.PublishPacket(client.ID(), packet, false)
 
