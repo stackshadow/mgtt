@@ -44,40 +44,9 @@ func (b *Broker) Serve() (done chan bool, err error) {
 		utils.PanicOnErr(err)
 	}
 
-	// check if an error occurred
-	if err != nil {
-		log.Fatal().Err(err).Send()
-	}
-
-	// non-tls
-	if config.TLS == true {
-		var TLSConfig *tls.Config
-		TLSConfig, err = getTLSConfig(config)
-		if err == nil {
-			b.serverListener, err = tls.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port(), TLSConfig)
-		}
-	} else {
-		b.serverListener, err = net.Listen("tcp", serverURL.Hostname()+":"+serverURL.Port())
-	}
-
-	// check if an error occured
-	if err != nil {
-		log.Fatal().Err(err).Send()
-	}
-
-	// logging
-	if config.CertFile == "" {
-		log.Info().Str("listen", serverURL.Host).
-			Bool("tls", false).
-			Msg("Listening")
-	} else {
-		log.Info().Str("listen", serverURL.Host).
-			Bool("tls", true).
-			Str("ca", config.CAFile).
-			Str("cert", config.CertFile).
-			Str("key", config.KeyFile).
-			Msg("Listening")
-	}
+	// create a server
+	serverListener := server.Create(serverURL.Hostname(), serverURL.Port())
+	serverListener.MustInit(config.Values.TLS.CA.File, config.Values.TLS.Cert.File)
 
 	// retry
 	go b.loopHandleResendPackets()
@@ -87,16 +56,12 @@ func (b *Broker) Serve() (done chan bool, err error) {
 
 			// wait for a new client
 			log.Info().Msg("Wait for new client")
-			var newConnection net.Conn
-			newConnection, err = b.serverListener.Accept()
-			if err != nil {
-				log.Error().Err(err).Msg("Accept()")
-				break
-			}
+			newClient := serverListener.Accept()
+			err = clientlist.Add(newClient)
 
 			// handle a new client
 			if err == nil {
-				go handleNewClient(newConnection)
+				go handleNewClient(b, newClient)
 			}
 		}
 
