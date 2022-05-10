@@ -22,7 +22,7 @@ var Values struct {
 
 	Timeout time.Duration `yaml:"timeout" default:"15s"`
 	Retry   time.Duration `yaml:"retry" default:"30s"`
-	Plugin  string        `yaml:"retry" default:"auth,acl"`
+	Plugins string        `yaml:"plugins" default:"auth,acl"`
 
 	AdminTopics bool `yaml:"adminTopics" default:"false"`
 
