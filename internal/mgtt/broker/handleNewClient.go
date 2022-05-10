@@ -1,8 +1,6 @@
 package broker
 
 import (
-	"net"
-
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/rs/zerolog/log"
 	"gitlab.com/mgtt/internal/mgtt/client"
@@ -10,14 +8,10 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 )
 
-func handleNewClient(newConnection net.Conn) {
+func handleNewClient(broker *Broker, newClient *client.MgttClient) {
 
 	var err error
 	var recvdPacket packets.ControlPacket
-	var newClient *client.MgttClient = &client.MgttClient{}
-
-	newClient.Init(newConnection, ConnectTimeout)
-	err = clientlist.Add(newClient)
 
 	if err == nil {
 
@@ -37,7 +31,7 @@ func handleNewClient(newConnection net.Conn) {
 			}
 
 			// handle the packet was broker
-			normalClose, err = Current.handlePacketsForBroker(newClient, recvdPacket)
+			normalClose, err = broker.handlePacketsForBroker(newClient, recvdPacket)
 			if err != nil || normalClose == true {
 				break
 			}
@@ -51,7 +45,10 @@ func handleNewClient(newConnection net.Conn) {
 
 		// last-Will-message
 		if lastWillPacket := newClient.LastWillGet(); lastWillPacket != nil {
-			Current.onPacketPublish(newClient, lastWillPacket)
+			log.Info().EmbedObject(newClient).
+				Str("topic", lastWillPacket.TopicName).
+				Msg("client has a last will, publish it")
+			broker.onPacketPublish(newClient, lastWillPacket)
 		}
 
 		// Remove the client from the list
