@@ -3,7 +3,6 @@ This plugin
 
 - provide access control on topics for specific users 
 
-The config-file is located at `./acl.yml` ( the path, where the config-file is located, is defined by the command
-line parameter `--config-path` or the environment variable `CONFIGPATH` which is by default `./` )
+=== Config
 
 include::./config.adoc[]

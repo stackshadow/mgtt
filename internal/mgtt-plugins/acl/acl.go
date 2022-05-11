@@ -13,20 +13,18 @@ type aclEntry struct {
 }
 
 // LocalInit will init the auth-plugin and register it
-func LocalInit(ConfigPath string) {
+func Init() {
 
-	// OnInit open the config file and watch for changes
-	OnInit(ConfigPath)
+	// init the map
+	config.Plugins.ACL.Rules = make(map[string][]aclEntry)
 
+	// create the plugin
 	newPlugin := plugin.V1{
+		OnConfig:                  OnConfig,
 		OnPublishRequest:          OnPublishRequest,
 		OnSendToSubscriberRequest: OnSendToSubscriberRequest,
 	}
-	plugin.Register("acl", &newPlugin)
-}
 
-// OnInit open the config file and watch for changes
-func OnInit(ConfigPath string) {
-	loadConfig(ConfigPath + "acl.yml")
-	go watchConfig()
+	// register it
+	plugin.Register("acl", &newPlugin)
 }
