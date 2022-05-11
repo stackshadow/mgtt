@@ -6,15 +6,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// passwordCheck
-func passwordCheck(username string, password string) (isOkay bool) {
+// configCheckPassword
+func configCheckPassword(username string, password string) (isOkay bool) {
 
-	if config.Anonym == true && username == "" {
+	if config.Plugins.ACL.Anonym == true && username == "" {
 		return true
 	}
 
 	// get user
-	var user = config.Users[username]
+	var user = config.Plugins.ACL.Users[username]
 
 	basswordBytes, err := base64.StdEncoding.DecodeString(user.Password)
 	if err == nil {

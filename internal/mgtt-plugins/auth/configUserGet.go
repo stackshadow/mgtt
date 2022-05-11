@@ -11,7 +11,7 @@ func configUserGet(username string) (user pluginConfigUser, exist bool) {
 		return
 	}
 
-	if user, exist = config.Users[username]; exist {
+	if user, exist = config.Plugins.ACL.Users[username]; exist {
 		user.Username = username
 		user.Password = ""
 	}

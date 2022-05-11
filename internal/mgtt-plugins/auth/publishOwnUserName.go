@@ -7,7 +7,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/clientlist"
 )
 
-func onSelfUserGet(originClientID string) {
+func publishOwnUserName(originClientID string) {
 	var err error
 	var username = clientlist.Get(originClientID).Username()
 

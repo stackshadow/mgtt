@@ -9,7 +9,7 @@ import (
 // userSet will set passwords/group for an user and return the new user-Object
 //
 // if the user already exist, we override the password
-func userSet(username string, password *string, groups *[]string) (user pluginConfigUser, err error) {
+func configSetUser(username string, password *string, groups *[]string) (user pluginConfigUser, err error) {
 
 	// get user
 	user, _ = configUserGet(username)
@@ -33,7 +33,7 @@ func userSet(username string, password *string, groups *[]string) (user pluginCo
 	}
 
 	// save it to the config
-	config.Users[username] = user
+	config.Plugins.ACL.Users[username] = user
 
 	// get user
 	user, _ = configUserGet(username)
