@@ -9,5 +9,4 @@ func CallOnConnack(clientID string) {
 		}
 	}
 
-	return
 }

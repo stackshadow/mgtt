@@ -50,7 +50,6 @@ func init() {
 
 	// load the config
 	config.MustLoad(cliData.Config)
-	config.Apply()
 
 }
 

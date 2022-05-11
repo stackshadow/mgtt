@@ -28,7 +28,7 @@ func (suite *TestSuite) SetupSuite() {
 	config.Values.Level = "debug"
 	config.Values.URL = "tcp://127.0.0.1:1235"
 	config.Values.DB = "./integrationtest.db"
-	config.Apply()
+	config.ApplyLog()
 
 	// Broker
 	var newbroker *Broker

@@ -7,6 +7,9 @@ import (
 // V1 represents an plugin in version 1
 type V1 struct {
 
+	// OnConfig gets called when the app loads or the configfile was changed
+	OnConfig func(yamlConfigData []byte)
+
 	// OnNewClient gets called when a new client is incoming
 	OnNewClient func(remoteAddr string)
 
