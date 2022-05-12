@@ -39,7 +39,7 @@ buildGoModule {
   buildFlagsArray = ''
     -ldflags=
     -w -s
-    -X gitlab.com/mgtt/internal/mgtt/cli.Version=${version}
+    -X gitlab.com/mgtt/internal/mgtt/config.Version=${version}
     -extldflags=-static
   '';
 
