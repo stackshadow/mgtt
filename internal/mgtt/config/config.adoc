@@ -1,0 +1,59 @@
+
+Here is an example file with default values for the config.
+
+Please also see the config of the plugins on how to configure the plugins.
+
+[source,yaml]
+----
+
+# the debug level
+level: info
+
+# print log-messages as json
+json: false
+
+# The serve-url in the scheme tcp://<ip>:<port>
+# as <ip> you usual will use 127.0.0.1 or 0.0.0.0
+# as <port> you usual will use 8883
+url: "tcp://0.0.0.0:8883"
+
+# Connection timeout for clients
+timeout: 15s
+
+plugins: "auth,acl"
+
+tls:
+  
+  # if provided, mgtt use mTLS
+  # if file not exist an CA will be created
+  ca:
+    file: ""
+    org: "FeelGood Inc."
+    country: "DE"
+    province: "Local"
+    city: "Berlin"
+    address: "Corner 42"
+    code: "030423"
+  
+  cert:
+    file: ""
+    org: "FeelGood Inc."
+    country: "DE"
+    province: "Local"
+    city: "Berlin"
+    address: "Corner 42"
+    code: "030423"
+
+# the db where to store persistant data
+# this is needed for mqtt-persistand messages
+db: "./messages.db"
+
+
+----
+
+=== Watch for file changes
+
+Change to the config-file are detected during runtime.
+
+You can change the acl's. The plugin reread the config-file and activate the rules immediately.
+

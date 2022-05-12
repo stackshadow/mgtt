@@ -12,16 +12,6 @@ This plugin
 include::./config.adoc[]
 
 
-=== MQTT-Topics
 
-You can interact with this plugin also over mqtt itselfe :)
-
-Here are the topics this plugin will handle
-
-include::./onAuthUserSet.adoc[]
-include::./onAuthUserGet.adoc[]
-include::./onAuthUserDelete.adoc[]
-include::./onAuthUsersListGet.adoc[]
-include::./onSelfUserGet.adoc[]
 
 

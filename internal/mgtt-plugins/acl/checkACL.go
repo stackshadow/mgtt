@@ -16,7 +16,7 @@ func checkACL(clientID string, username string, topic string, direction string) 
 	}
 
 	defer func() {
-		if allowed == false {
+		if !allowed {
 			log.Warn().Str("topic", topic).Msg("Not allowed")
 		}
 	}()
@@ -27,13 +27,13 @@ func checkACL(clientID string, username string, topic string, direction string) 
 	}
 
 	// try to get the acl
-	entryArray := config.Rules[username]
+	entryArray := config.Plugins.ACL.Rules[username]
 
 	// iterate
 	topicArray := strings.Split(topic, "/")
 
 	// we accept the $SYS/self
-	if client.Match([]string{"$SYS", "self", "#"}, topicArray) == true {
+	if client.Match([]string{"$SYS", "self", "#"}, topicArray) {
 		return true
 	}
 
@@ -42,7 +42,7 @@ func checkACL(clientID string, username string, topic string, direction string) 
 		if entry.Direction == direction {
 
 			routeArray := strings.Split(entry.Route, "/")
-			if client.Match(routeArray, topicArray) == true {
+			if client.Match(routeArray, topicArray) {
 				allowed = entry.Allow
 				break
 			}

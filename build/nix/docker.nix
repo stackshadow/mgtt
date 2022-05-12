@@ -7,7 +7,7 @@ let
 
 in
 #buildLayeredImage
-pkgs.dockerTools.streamLayeredImage {
+dockerTools.streamLayeredImage {
   name = "mgtt";
   tag = version;
   maxLayers = 10;
@@ -23,7 +23,7 @@ pkgs.dockerTools.streamLayeredImage {
   created = "now";
 
   fakeRootCommands = ''
-    ${pkgs.dockerTools.shadowSetup}
+    ${dockerTools.shadowSetup}
     groupadd mgtt
     useradd --gid 5005 mgtt
 

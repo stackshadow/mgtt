@@ -17,6 +17,19 @@ import (
 //
 // - err is returned if something is wrong with the connection
 func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool, subscribed bool, err error) {
+	return client.PublishIfRoutesMatch(packet, client.subscriptionTopics)
+}
+
+// Publish an publish-packet
+//
+// this function check if the topic in the `packet` matches a route in routes
+//
+// - return published=true if the message could be send
+//
+// - return subscribed=true if an sibscription match
+//
+// - err is returned if something is wrong with the connection
+func (client *MgttClient) PublishIfRoutesMatch(packet *packets.PublishPacket, routes []string) (published bool, subscribed bool, err error) {
 
 	topic := packet.TopicName
 	topicArray := strings.Split(topic, "/")
@@ -24,7 +37,7 @@ func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool
 
 	// check if one of our subscription matched
 	// this prevents multiple sending of packet to a single client
-	for _, subscriptionTopic := range client.subscriptionTopics {
+	for _, subscriptionTopic := range routes {
 		subscriptionTopicArray := strings.Split(subscriptionTopic, "/")
 
 		// [MQTT-3.3.2-3]
@@ -40,7 +53,7 @@ func (client *MgttClient) Publish(packet *packets.PublishPacket) (published bool
 
 	if topicMatched == true {
 		log.Info().
-			Str("clientid", client.ID()).
+			EmbedObject(client).
 			Uint16("mid", packet.MessageID).
 			Str("topic", packet.TopicName).
 			Msg("Publish message to client")

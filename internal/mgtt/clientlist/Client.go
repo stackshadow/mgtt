@@ -2,13 +2,14 @@ package clientlist
 
 import (
 	"net"
+	"time"
 
 	"github.com/eclipse/paho.mqtt.golang/packets"
 )
 
 // Client  represents a client
 type Client interface {
-	Init(connection net.Conn, secondsTimeout int64)
+	Init(connection net.Conn, timeout time.Duration)
 	ResetTimeout()
 	Close() (err error)
 	RemoteAddr() (remoteAddr string) // return the remoteAddr as string

@@ -30,7 +30,7 @@ type MgttClient struct {
 }
 
 // Init create a new MgttClient with id of "unknown"
-func (c *MgttClient) Init(connection net.Conn, secondsTimeout int64) {
+func (c *MgttClient) Init(connection net.Conn, timeout time.Duration) {
 
 	// create a new client with an new random-id
 	guid := xid.New()
@@ -41,9 +41,9 @@ func (c *MgttClient) Init(connection net.Conn, secondsTimeout int64) {
 	c.packetSendLoopExit = make(chan bool)
 
 	// setup timeout
-	if secondsTimeout > 0 {
-		log.Debug().Int64("timeout", secondsTimeout).Msg("Set deadline for client")
-		connection.SetDeadline(time.Now().Add(time.Second * time.Duration(secondsTimeout)))
+	if timeout > 0 {
+		log.Debug().Dur("timeout", timeout).Msg("Set deadline for client")
+		connection.SetDeadline(time.Now().Add(timeout))
 	}
 
 	// start the write-loop

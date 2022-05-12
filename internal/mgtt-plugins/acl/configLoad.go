@@ -1,4 +1,4 @@
-package auth
+package acl
 
 import (
 	"github.com/rs/zerolog/log"
@@ -14,15 +14,6 @@ func configLoad(fileData []byte) {
 
 	err := yaml.Unmarshal(fileData, config)
 	utils.PanicOnErr(err)
-
-	// add new users
-	for _, newUser := range config.Plugins.ACL.New {
-		if newUser.Username != "" && newUser.Password != "" {
-			newUsername := newUser.Username
-			_, err = configSetUser(newUsername, &newUser.Password, &newUser.Groups)
-		}
-	}
-	config.Plugins.ACL.New = []pluginConfigUser{}
 
 	log.Info().Msg("Loaded config")
 }

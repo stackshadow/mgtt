@@ -33,7 +33,6 @@ Read the docs in the ./docs folder
 - [x] Dockerfile
 - [ ] Healthcheck
 - [x] Docker-Compose
-- [ ] Build with buildah
 - [x] $SYS-Support
 
 ## Plugins

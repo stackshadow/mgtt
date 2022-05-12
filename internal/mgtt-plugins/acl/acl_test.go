@@ -17,11 +17,10 @@ func TestPublish(t *testing.T) {
 		Caller().
 		Logger()
 
-	os.Remove("./integrationtest_auth.yml")
-	LocalInit("integrationtest_")
+	Init()
 
 	// we add some acls
-	config.Rules["testuser"] = []aclEntry{
+	config.Plugins.ACL.Rules["testuser"] = []aclEntry{
 		// we not allow write to clients
 		{
 			Direction: "w",
@@ -68,7 +67,7 @@ func TestPublish(t *testing.T) {
 	}
 
 	// we add some acls
-	config.Rules["_anonym"] = []aclEntry{
+	config.Plugins.ACL.Rules["_anonym"] = []aclEntry{
 		// we not allow write to clients
 		{
 			Direction: "r",
@@ -96,5 +95,4 @@ func TestPublish(t *testing.T) {
 		t.FailNow()
 	}
 
-	os.Remove("./integrationtest_auth.yml")
 }
