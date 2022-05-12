@@ -1,7 +1,7 @@
-# run it with nix-shell build/shell.nix
+# run it with nix-shell build/nix/badge.nix
 
 { pkgs ? import <nixpkgs> { }
-, version
+, version ? "development"
 }:
 let
   lib = pkgs.lib;
