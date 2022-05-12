@@ -8,7 +8,6 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/google/uuid v1.2.0
 	github.com/mcuadros/go-defaults v1.2.0
-	github.com/radovskyb/watcher v1.0.7
 	github.com/rs/xid v1.3.0
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/testify v1.7.1

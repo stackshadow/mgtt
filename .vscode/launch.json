@@ -13,13 +13,7 @@
       "env": {
         "CERT_DNS": "localhost"
       },
-      "args": [
-        "--terminal",
-        "-v",
-        "serve",
-        "--url",
-        "tcp://0.0.0.0:8883"
-      ]
+      "args": []
     },
     {
       "name": "Create Self Signed Certificate",
