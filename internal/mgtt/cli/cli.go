@@ -43,14 +43,13 @@ func init() {
 		},
 	)
 
+	// load the config
+	config.MustLoad(cliData.Config)
+
 	// print version
 	log.Info().
 		Str("version", config.Version).
 		Msg("Welcome to mgtt")
-
-	// load the config
-	config.MustLoad(cliData.Config)
-
 }
 
 // Run will execute Commands
