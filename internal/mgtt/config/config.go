@@ -73,7 +73,7 @@ func MustLoad(file string) {
 
 		// read the file
 		if fileExist {
-			data, err = ioutil.ReadFile(file)
+			data, err = ioutil.ReadFile(file) //#nosec
 			utils.PanicOnErr(err)
 		}
 

@@ -51,6 +51,8 @@ pkgs.mkShell {
     }
     cyclo() {
       nix-shell ${gobadgeSource}/shell.nix --command cyclo
+      value=$(cat cyclo.out.gobadge | grep Average | cut -d':' -f2 | sed -e 's/\s*//')
+      gobadge-cli --value-min=18.0 --value-max=0.01 --label=gocylco --value=$value --file-name=./gocyclo.svg
     }
     sec() {
       gosec -color=false -no-fail -severity medium ./... > gosec.out.gobadge
