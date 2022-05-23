@@ -34,4 +34,5 @@ in
   # $(nix-build -A docker) | docker load
   docker = dockerImage;
 
+  module = import ./build/nix/module.nix;
 }
