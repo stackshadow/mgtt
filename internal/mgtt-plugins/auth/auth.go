@@ -8,11 +8,11 @@ import (
 func Init() {
 
 	// init the map
-	config.Plugins.ACL.Users = make(map[string]pluginConfigUser)
+	pluginConfig.Users = make(map[string]pluginConfigUser)
 
 	// create the plugin
 	newPlugin := plugin.V1{
-		OnConfig:          OnConfig,
+		OnPluginConfig:    OnPluginConfig,
 		OnAcceptNewClient: OnAcceptNewClient,
 		OnHandleMessage:   OnHandleMessage,
 	}

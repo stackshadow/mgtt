@@ -6,6 +6,8 @@ import (
 
 	"github.com/alecthomas/kong"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/internal/mgtt-plugins/acl"
+	"gitlab.com/mgtt/internal/mgtt-plugins/auth"
 	"gitlab.com/mgtt/internal/mgtt/broker"
 	"gitlab.com/mgtt/internal/mgtt/config"
 	"gitlab.com/mgtt/internal/mgtt/server"
@@ -15,7 +17,7 @@ import (
 // Common holds common stuff
 type Common struct {
 	// Debug will enable debug mode
-	Config string `help:"Enable debug mode." short:"c"   default:"./mgtt.conf"`
+	Config string `help:"Enable debug mode." short:"c" default:"./mgtt.yml"`
 }
 
 // CLI is the overall cli-struct
@@ -43,7 +45,11 @@ func init() {
 		},
 	)
 
-	// load the config
+	// plugins
+	acl.Init()
+	auth.Init()
+
+	// load the config and inform the plugins
 	config.MustLoad(cliData.Config)
 
 	// print version

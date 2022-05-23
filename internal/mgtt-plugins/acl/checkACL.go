@@ -27,7 +27,7 @@ func checkACL(clientID string, username string, topic string, direction string) 
 	}
 
 	// try to get the acl
-	entryArray := config.Plugins.ACL.Rules[username]
+	entryArray := pluginConfig.Rules[username]
 
 	// iterate
 	topicArray := strings.Split(topic, "/")

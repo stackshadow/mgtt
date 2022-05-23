@@ -20,7 +20,7 @@ func TestPublish(t *testing.T) {
 	Init()
 
 	// we add some acls
-	config.Plugins.ACL.Rules["testuser"] = []aclEntry{
+	pluginConfig.Rules["testuser"] = []aclEntry{
 		// we not allow write to clients
 		{
 			Direction: "w",
@@ -67,7 +67,7 @@ func TestPublish(t *testing.T) {
 	}
 
 	// we add some acls
-	config.Plugins.ACL.Rules["_anonym"] = []aclEntry{
+	pluginConfig.Rules["_anonym"] = []aclEntry{
 		// we not allow write to clients
 		{
 			Direction: "r",

@@ -33,7 +33,7 @@ func configSetUser(username string, password *string, groups *[]string) (user pl
 	}
 
 	// save it to the config
-	config.Plugins.ACL.Users[username] = user
+	pluginConfig.Users[username] = user
 
 	// get user
 	user, _ = configUserGet(username)

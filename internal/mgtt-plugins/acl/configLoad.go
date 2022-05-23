@@ -12,7 +12,7 @@ func configLoad(fileData []byte) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	err := yaml.Unmarshal(fileData, config)
+	err := yaml.Unmarshal(fileData, pluginConfig)
 	utils.PanicOnErr(err)
 
 	log.Info().Msg("Loaded config")

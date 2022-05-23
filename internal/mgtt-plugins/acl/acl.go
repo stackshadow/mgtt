@@ -16,11 +16,11 @@ type aclEntry struct {
 func Init() {
 
 	// init the map
-	config.Plugins.ACL.Rules = make(map[string][]aclEntry)
+	pluginConfig.Rules = make(map[string][]aclEntry)
 
 	// create the plugin
 	newPlugin := plugin.V1{
-		OnConfig:                  OnConfig,
+		OnPluginConfig:            OnPluginConfig,
 		OnPublishRequest:          OnPublishRequest,
 		OnSendToSubscriberRequest: OnSendToSubscriberRequest,
 	}
