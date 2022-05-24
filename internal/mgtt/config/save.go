@@ -30,6 +30,8 @@ func MustSave() {
 		err = ioutil.WriteFile(fileName, data, 0600)
 		utils.PanicOnErr(err)
 
-		log.Info().Msg("Config file changes, save it")
+		log.Info().
+			Str("filename", fileName).
+			Msg("Config file changes, save it")
 	}
 }
