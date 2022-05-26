@@ -12,7 +12,7 @@ func configLoad(fileData []byte) (changed bool) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	err := yaml.Unmarshal(fileData, pluginConfig)
+	err := yaml.Unmarshal(fileData, &pluginConfig)
 	utils.PanicOnErr(err)
 
 	// add new users

@@ -9,29 +9,22 @@ import (
 )
 
 func MustSave() {
-	if fileName != "" {
+
+	if Globals.fileName != "" {
 
 		var err error
 		var data []byte
 
-		// values to data
-		data, err = yaml.Marshal(Values)
-		utils.PanicOnErr(err)
-
-		// data to map
-		err = yaml.Unmarshal(data, &valuesRawMap)
-		utils.PanicOnErr(err)
-
 		// parse it
-		data, err = yaml.Marshal(&valuesRawMap)
+		data, err = yaml.Marshal(Globals)
 		utils.PanicOnErr(err)
 
 		// save it to file
-		err = ioutil.WriteFile(fileName, data, 0600)
+		err = ioutil.WriteFile(Globals.fileName, data, 0600)
 		utils.PanicOnErr(err)
 
 		log.Info().
-			Str("filename", fileName).
+			Str("filename", Globals.fileName).
 			Msg("Config file changes, save it")
 	}
 }

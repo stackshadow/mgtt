@@ -25,9 +25,9 @@ func TestSuiteTests(t *testing.T) {
 func (suite *TestSuite) SetupSuite() {
 
 	var err error
-	config.Values.Level = "debug"
-	config.Values.URL = "tcp://127.0.0.1:1235"
-	config.Values.DB = "./integrationtest.db"
+	config.Globals.Level = "debug"
+	config.Globals.URL = "tcp://127.0.0.1:1235"
+	config.Globals.DB = "./integrationtest.db"
 	config.ApplyLog()
 
 	// Broker
@@ -68,7 +68,7 @@ func createClient(clientID ...string) (pahoClient paho.Client, clientUUID string
 	pahoClientOpts.SetClientID(clientUUID)
 	pahoClientOpts.SetUsername("dummy")
 	pahoClientOpts.SetPassword("dummy")
-	pahoClientOpts.AddBroker(config.Values.URL)
+	pahoClientOpts.AddBroker(config.Globals.URL)
 	pahoClientOpts.SetAutoReconnect(true)
 	pahoClientOpts.SetOnConnectHandler(func(c paho.Client) { pahoClientConnected.Unlock() })
 	pahoClientOpts.SetWill("lastwill/client", pahoClientOpts.ClientID, 0, false)

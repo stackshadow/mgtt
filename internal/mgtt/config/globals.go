@@ -4,12 +4,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/mcuadros/go-defaults"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 // Config represents the config of your broker
-var Values struct {
+type Global struct {
+	fileName string
+
 	Level string `yaml:"level" default:"info"`
 	JSON  bool   `yaml:"json" default:"false"`
 
@@ -49,10 +52,12 @@ var Values struct {
 	Plugins map[string]interface{} `yaml:"plugins"`
 }
 
-// the raw configData
-var valuesRawMap map[interface{}]interface{}
+var Globals Global
 
-var fileName string
+func ApplyDefaults() {
+	// apply defaults
+	defaults.SetDefaults(&Globals)
+}
 
 // Apply log-level and log-output
 func ApplyLog() {
@@ -61,7 +66,7 @@ func ApplyLog() {
 	var newLogLevel zerolog.Level
 
 	// loglevel
-	newLogLevel, err = zerolog.ParseLevel(Values.Level)
+	newLogLevel, err = zerolog.ParseLevel(Globals.Level)
 	if err == nil {
 		zerolog.SetGlobalLevel(newLogLevel)
 	} else {
@@ -69,7 +74,7 @@ func ApplyLog() {
 	}
 
 	// jsonlog
-	if !Values.JSON {
+	if !Globals.JSON {
 		log.Logger = log.With().Caller().Logger()
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}

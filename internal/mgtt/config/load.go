@@ -5,17 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mcuadros/go-defaults"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/mgtt/internal/mgtt/plugin"
 	"gitlab.com/stackshadow/qommunicator/v2/pkg/utils"
 	"gopkg.in/yaml.v2"
 )
 
-// Load will load a file to Values
-//
-// if the file not exist, we save a defaultConfig with comments to <file>
-func MustLoad(file string) {
+// MustLoadFromFile will load from <file> if not set to "" and panics on an error
+func MustLoadFromFile(file string) {
 
 	var err error
 
@@ -31,36 +27,22 @@ func MustLoad(file string) {
 			data, err = ioutil.ReadFile(file) //#nosec
 			utils.PanicOnErr(err)
 		}
-		fileName = file
 
-		// load from readed bytes
-		LoadFromByte(data)
-
+		MustLoadFromString(string(data)) // load from readed bytes
+		Globals.fileName = file
 	} else {
-		log.Info().Msg("No filename provided, not loading config")
+		log.Info().Msg("No filename provided, not loading config from a file")
 	}
 
 }
 
-func LoadFromByte(data []byte) {
-	var err error
+// MustLoadFromString will load the config from a json-string and panics if an error occurred
+func MustLoadFromString(data string) {
+	if data == "" {
+		return
+	}
 
-	// parse it to raw values
-	err = yaml.Unmarshal(data, &valuesRawMap)
+	// parse it to
+	err := yaml.Unmarshal([]byte(data), &Globals)
 	utils.PanicOnErr(err)
-
-	// parse to Values
-	err = yaml.Unmarshal(data, &Values)
-	utils.PanicOnErr(err)
-
-	// apply defaults
-	defaults.SetDefaults(&Values)
-
-	// setup logs
-	ApplyLog()
-
-	// call plugins
-	plugin.CallOnPluginConfig(Values.Plugins)
-	MustSave() // if config was changed
-
 }

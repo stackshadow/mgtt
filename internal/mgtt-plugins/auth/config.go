@@ -29,4 +29,4 @@ func (user *pluginConfigUser) PasswordSet(newPassword string) (err error) {
 }
 
 var mutex sync.Mutex
-var pluginConfig *pluginConfigStruct = &pluginConfigStruct{}
+var pluginConfig pluginConfigStruct = pluginConfigStruct{}

@@ -10,6 +10,7 @@ import (
 	"gitlab.com/mgtt/internal/mgtt-plugins/auth"
 	"gitlab.com/mgtt/internal/mgtt/broker"
 	"gitlab.com/mgtt/internal/mgtt/config"
+	"gitlab.com/mgtt/internal/mgtt/plugin"
 	"gitlab.com/mgtt/internal/mgtt/server"
 	"gitlab.com/stackshadow/qommunicator/v2/pkg/utils"
 )
@@ -49,8 +50,16 @@ func init() {
 	acl.Init()
 	auth.Init()
 
-	// load the config and inform the plugins
-	config.MustLoad(cliData.Config)
+	// config
+	configAsJSON, _ := os.LookupEnv("CONFIG_JSON")
+	config.MustLoadFromFile(cliData.Config)
+	config.MustLoadFromString(configAsJSON)
+	configChanged := plugin.CallOnPluginConfig(config.Globals.Plugins) // inform all plugins about the config change
+	config.ApplyDefaults()
+	config.ApplyLog()
+	if configChanged {
+		config.MustSave()
+	}
 
 	// print version
 	log.Info().
@@ -64,12 +73,12 @@ func Run() {
 	var err error
 
 	// TLS
-	if config.Values.TLS.CA.File != "" {
+	if config.Globals.TLS.CA.File != "" {
 		server.MustCreateCA()
 	}
 
 	// Cert
-	if config.Values.TLS.Cert.File != "" {
+	if config.Globals.TLS.Cert.File != "" {
 		server.MustCreateCert()
 	}
 

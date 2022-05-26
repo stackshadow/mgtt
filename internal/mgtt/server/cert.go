@@ -25,7 +25,7 @@ func MustCreateCert() {
 	var err error
 
 	var CertFileAbsolute string
-	CertFileAbsolute, err = filepath.Abs(config.Values.TLS.Cert.File)
+	CertFileAbsolute, err = filepath.Abs(config.Globals.TLS.Cert.File)
 	utils.PanicOnErr(err)
 
 	// check if the files already exist
@@ -43,12 +43,12 @@ func MustCreateCert() {
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
 			CommonName:    "MGTT Cert",
-			Organization:  []string{config.Values.TLS.Cert.Organization},
-			Country:       []string{config.Values.TLS.Cert.Country},
-			Province:      []string{config.Values.TLS.Cert.Province},
-			Locality:      []string{config.Values.TLS.Cert.Locality},
-			StreetAddress: []string{config.Values.TLS.Cert.StreetAddress},
-			PostalCode:    []string{config.Values.TLS.Cert.PostalCode},
+			Organization:  []string{config.Globals.TLS.Cert.Organization},
+			Country:       []string{config.Globals.TLS.Cert.Country},
+			Province:      []string{config.Globals.TLS.Cert.Province},
+			Locality:      []string{config.Globals.TLS.Cert.Locality},
+			StreetAddress: []string{config.Globals.TLS.Cert.StreetAddress},
+			PostalCode:    []string{config.Globals.TLS.Cert.PostalCode},
 		},
 		IPAddresses:  []net.IP{net.IPv4(127, 0, 0, 1), net.IPv6loopback},
 		NotBefore:    time.Now(),
@@ -56,7 +56,7 @@ func MustCreateCert() {
 		SubjectKeyId: []byte{1, 2, 3, 4, 6},
 	}
 
-	if config.Values.TLS.CA.File != "" {
+	if config.Globals.TLS.CA.File != "" {
 		cert.KeyUsage = x509.KeyUsageDigitalSignature
 		cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}
 	} else {
@@ -70,11 +70,11 @@ func MustCreateCert() {
 
 	var certBytes []byte
 
-	if config.Values.TLS.CA.File != "" {
+	if config.Globals.TLS.CA.File != "" {
 
 		// Load CA
 		var catls tls.Certificate
-		catls, err = tls.LoadX509KeyPair(config.Values.TLS.CA.File, config.Values.TLS.CA.File+".key")
+		catls, err = tls.LoadX509KeyPair(config.Globals.TLS.CA.File, config.Globals.TLS.CA.File+".key")
 		if err != nil {
 			panic(err)
 		}

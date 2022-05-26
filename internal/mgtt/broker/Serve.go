@@ -17,7 +17,7 @@ import (
 // - this create also an retained message with topic "$METRIC/broker/version" that contains the version
 func (b *Broker) Serve() (done chan bool, err error) {
 
-	err = persistance.Open(config.Values.DB)
+	err = persistance.Open(config.Globals.DB)
 
 	// Delete Broker-version if exist
 	brokerVersionTopic := "$METRIC/broker/version"
@@ -35,7 +35,7 @@ func (b *Broker) Serve() (done chan bool, err error) {
 	)
 
 	var serverURL *url.URL
-	serverURL, err = url.Parse(config.Values.URL)
+	serverURL, err = url.Parse(config.Globals.URL)
 	utils.PanicOnErr(err)
 
 	// check schema
@@ -46,7 +46,7 @@ func (b *Broker) Serve() (done chan bool, err error) {
 
 	// create a server
 	serverListener := server.Create(serverURL.Hostname(), serverURL.Port())
-	serverListener.MustInit(config.Values.TLS.CA.File, config.Values.TLS.Cert.File)
+	serverListener.MustInit(config.Globals.TLS.CA.File, config.Globals.TLS.Cert.File)
 
 	// retry
 	go b.loopHandleResendPackets()

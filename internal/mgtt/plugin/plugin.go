@@ -8,7 +8,7 @@ import (
 type V1 struct {
 
 	// OnConfig gets called when the app loads or the configfile was changed
-	OnPluginConfig func(pluginData []byte) (configChanged bool)
+	OnPluginConfig func(*interface{}) (configChanged bool)
 
 	// OnNewClient gets called when a new client is incoming
 	OnNewClient func(remoteAddr string)
