@@ -22,9 +22,7 @@ func TestClientSession(t *testing.T) {
 	defer os.Remove("integrtest.db")
 
 	// open DB
-	if err := Open("integrtest.db"); err != nil {
-		t.FailNow()
-	}
+	MustOpen("integrtest.db")
 
 	// set subscriptions
 	SubscriptionsSet("id1", []string{"/a", "/b"})

@@ -17,7 +17,7 @@ import (
 // - this create also an retained message with topic "$METRIC/broker/version" that contains the version
 func (b *Broker) Serve() (done chan bool, err error) {
 
-	err = persistance.Open(config.Globals.DB)
+	persistance.MustOpen(config.Globals.DB)
 
 	// Delete Broker-version if exist
 	brokerVersionTopic := "$METRIC/broker/version"

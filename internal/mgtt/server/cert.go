@@ -32,6 +32,8 @@ func MustCreateCert() {
 	if _, statErr := os.Stat(CertFileAbsolute); !os.IsNotExist(statErr) {
 		log.Info().Str("Certificate", CertFileAbsolute).Msg("Already exist, no need to create it")
 		return
+	} else {
+		log.Info().Str("Certificate", CertFileAbsolute).Msg("Create a new certificate")
 	}
 
 	// caCert, err = tls.LoadX509KeyPair(c.OutputDirectory+"/ca.crt.pem", c.OutputDirectory+"/ca.key.pem")

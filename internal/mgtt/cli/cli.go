@@ -18,7 +18,7 @@ import (
 // Common holds common stuff
 type Common struct {
 	// Debug will enable debug mode
-	Config string `help:"Enable debug mode." short:"c" default:"./mgtt.yml"`
+	Config string `help:"Enable debug mode." short:"c" default:""`
 }
 
 // CLI is the overall cli-struct

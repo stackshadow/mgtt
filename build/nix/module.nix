@@ -11,6 +11,8 @@ let
   defaultGroup = defaultUser;
   defaultPackage = pkgs.callPackage ../../default.nix { };
 
+  StateDirectory = builtins.baseNameOf cfg.dataDir;
+  RuntimeDirectory = StateDirectory;
 
 
 in
@@ -56,7 +58,7 @@ in
         default = {
           level = "info";
           json = false;
-          
+
           url = "tcp://0.0.0.0:8883";
 
           plugins = "auth,acl";
@@ -80,6 +82,9 @@ in
 
   config =
     let
+
+
+
       configFile = pkgs.writeTextFile
         {
           name = "mgtt-config";
@@ -106,40 +111,33 @@ in
         };
       };
 
-      # system.activationScripts = {
-      #   dyndbsession = ''
-      #     if [ ! -d ${dirOf cfg.config.session.storage.bolt} ]; then
-      #       mkdir -vp ${dirOf cfg.config.session.storage.bolt}
-      #     fi
-      #     chown -R ${cfg.user} ${dirOf cfg.config.session.storage.bolt}
-      #     chmod -R u=rwX ${dirOf cfg.config.session.storage.bolt}
-      #   '';
-      # };
-
       systemd.services.mgtt = {
         description = "mgtt";
         wantedBy = [ "multi-user.target" ];
         after = [ "network-online.target" ];
         environment = { };
         serviceConfig = {
-          ExecStart = "${cfg.package}/bin/mgtt -c ${configFile}";
-          ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
           User = cfg.user;
           Restart = "on-failure";
 
-          # Used as root directory
-          RuntimeDirectory = "mgtt";
+          WorkingDirectory = "${cfg.dataDir}";
+          ExecStart = "${cfg.package}/bin/mgtt -c ${cfg.dataDir}/mgtt.yml";
+          ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
 
-          # This currently not work :(
-          #RootDirectory = "/run/dyndb";
-          #BindReadOnlyPaths = [
-          #  "/etc/ssl"
-          #  "/etc/static/ssl"
-          #  "/etc/resolv.conf"
-          #  "${configFile}"
-          #  "${cfg.package}/bin/dyndb"
-          #];
+          ExecStartPre = "${pkgs.writeShellScript " mgtt-prestart " ''
+            mkdir -m 0755 -p ${cfg.dataDir}
+
+            ${if (cfg.config != {}) then ''
+              # create config
+              cp -v ${configFile} ${cfg.dataDir}/mgtt.yml
+            '' else ''
+            ''}
+    
+          ''}";
+
+
           ReadWritePaths = [
+            cfg.dataDir
             (dirOf cfg.config.tls.cert.file)
             (dirOf cfg.config.db)
           ];
@@ -168,7 +166,7 @@ in
           RestrictSUIDSGID = true;
           SystemCallArchitectures = "native";
           SystemCallFilter = [ "@system-service" "~@resources" ];
-          UMask = "0077";
+          #UMask = "0077";
         };
 
       };
@@ -177,3 +175,8 @@ in
 
   meta.maintainers = with maintainers; [ stackshadow ];
 }
+
+
+
+
+
