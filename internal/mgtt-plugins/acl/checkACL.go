@@ -15,12 +15,6 @@ func checkACL(clientID string, username string, topic string, direction string) 
 		return true
 	}
 
-	defer func() {
-		if !allowed {
-			log.Warn().Str("topic", topic).Msg("Not allowed")
-		}
-	}()
-
 	// if username is empty,
 	if username == "" {
 		username = "_anonym"
