@@ -1,6 +1,9 @@
-{ system ? builtins.currentSystem, binary, version ? "dev" }:
+{ system ? builtins.currentSystem
+, pkgs ? import <nixpkgs> { inherit system; }
+, binary
+, version ? "dev"
+}:
 let
-  pkgs = import <nixpkgs> { inherit system; };
   lib = pkgs.lib;
   inherit (pkgs) dockerTools;
   inherit (lib) sourceByRegex;
