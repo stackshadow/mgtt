@@ -31,6 +31,7 @@ func (broker *Broker) onPacketPublish(client *client.MgttClient, packet *packets
 		pub.Retain = false
 		pub.TopicName = "$SYS/pong"
 		pub.Qos = 0
+		pub.Payload = packet.Payload
 
 		client.Publish(pub)
 		return
