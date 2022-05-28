@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"encoding/base64"
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,12 +15,15 @@ import (
 	"gitlab.com/mgtt/internal/mgtt/plugin"
 	"gitlab.com/mgtt/internal/mgtt/server"
 	"gitlab.com/stackshadow/qommunicator/v2/pkg/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Common holds common stuff
 type Common struct {
 	// Debug will enable debug mode
 	Config string `help:"Enable debug mode." short:"c" default:""`
+
+	Password string `help:"password to bcrypt" short:"p"`
 }
 
 // CLI is the overall cli-struct
@@ -71,6 +76,15 @@ func init() {
 func Run() {
 
 	var err error
+
+	// username / password
+	if cliData.Password != "" {
+		var bcryptedData []byte
+		bcryptedData, err = bcrypt.GenerateFromPassword([]byte(cliData.Password), bcrypt.DefaultCost)
+		base64String := base64.StdEncoding.EncodeToString(bcryptedData)
+		fmt.Print(base64String)
+		os.Exit(0)
+	}
 
 	// TLS
 	if config.Globals.TLS.CA.File != "" {

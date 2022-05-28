@@ -1,13 +1,14 @@
 { system ? builtins.currentSystem
 , pkgs ? import <nixpkgs> { inherit system; }
-, sourceByRegex
-, version
+, version ? "development"
 , vendorSha256 ? null
 , homepage ? "https://gitlab.actaport.de/actaport/infrastructure/watchcat/"
 }:
 let
   lib = pkgs.lib;
   inherit (pkgs) buildGoModule;
+  inherit (lib) sourceByRegex;
+
 
   localSource = sourceByRegex ../.. [
     "^go.mod"
