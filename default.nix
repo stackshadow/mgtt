@@ -9,7 +9,7 @@ let
   callPackage = lib.callPackageWith (pkgs // pkgs.lib);
   inherit (lib) sourceByRegex;
 
-  packageVersion = "0.35.0";
+  packageVersion = "0.36.0";
 
 
   # the binary

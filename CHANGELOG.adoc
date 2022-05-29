@@ -1,3 +1,16 @@
+== v0.36.0
+
+=== New
+- [acl] ✨ Add global rules
+- [core] ping now response to pong with payload of ping
+- [cli] ✨ Add creation of hashed password
+- 🔧 Add nix-module for easy usage under nixos
+
+=== Fixed
+
+- ♻️ Refactor config to simplify save/load of plugin-configs
+- [auth] Fix critical bug that prevent sending of messages
+
 == v0.35.0
 
 This change a lot under the hood and fixes some problems with doubled messages.
