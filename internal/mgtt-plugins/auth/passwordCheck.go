@@ -9,12 +9,12 @@ import (
 // configCheckPassword
 func configCheckPassword(username string, password string) (isOkay bool) {
 
-	if config.Plugins.ACL.Anonym == true && username == "" {
+	if pluginConfig.Anonym == true && username == "" {
 		return true
 	}
 
 	// get user
-	var user = config.Plugins.ACL.Users[username]
+	var user = pluginConfig.Users[username]
 
 	basswordBytes, err := base64.StdEncoding.DecodeString(user.Password)
 	if err == nil {

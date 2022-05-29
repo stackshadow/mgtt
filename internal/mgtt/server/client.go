@@ -21,7 +21,7 @@ func (l *Listener) Accept() (newClient *client.MgttClient) {
 	newClient = &client.MgttClient{}
 
 	// init it
-	newClient.Init(newConnection, config.Values.Timeout)
+	newClient.Init(newConnection, config.Globals.Timeout)
 
 	return
 }

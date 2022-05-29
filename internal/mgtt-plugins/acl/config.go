@@ -4,13 +4,10 @@ import (
 	"sync"
 )
 
-type pluginConfig struct {
-	Plugins struct {
-		ACL struct {
-			Rules map[string][]aclEntry `yaml:"rules"`
-		} `yaml:"acl"`
-	} `yaml:"plugins"`
+type pluginConfigStruct struct {
+	Enable bool                  `yaml:"enable"`
+	Rules  map[string][]aclEntry `yaml:"rules"`
 }
 
 var mutex sync.Mutex
-var config *pluginConfig = &pluginConfig{}
+var pluginConfig *pluginConfigStruct = &pluginConfigStruct{}

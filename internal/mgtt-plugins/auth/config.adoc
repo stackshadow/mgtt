@@ -8,7 +8,8 @@
 
 Just add this to you config file
 
-```yaml
+[source,yaml]
+----
 
 # set this to true to allow anonymouse login beside the username-password
 anonym: false
@@ -29,8 +30,16 @@ users:
     - auth
     - debugging
 
-```
+----
 
+=== Via nix-shell
+
+This will create a hashed password
+
+[source,bash]
+----
+nix-shell --command "mgtt -p 'test'"
+----
 
 ==== Anonymouse-Auth
 

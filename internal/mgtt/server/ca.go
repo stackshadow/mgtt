@@ -21,7 +21,7 @@ import (
 func MustCreateCA() {
 
 	// ca should not created
-	if config.Values.TLS.CA.File == "" {
+	if config.Globals.TLS.CA.File == "" {
 		log.Debug().Msg("not create ca")
 		return
 	}
@@ -30,7 +30,7 @@ func MustCreateCA() {
 
 	// ca already created
 	var CAFileAbsolute string
-	CAFileAbsolute, err = filepath.Abs(config.Values.TLS.CA.File)
+	CAFileAbsolute, err = filepath.Abs(config.Globals.TLS.CA.File)
 	utils.PanicOnErr(err)
 
 	// already exist
@@ -49,12 +49,12 @@ func MustCreateCA() {
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
 			CommonName:    "MGTT CA",
-			Organization:  []string{config.Values.TLS.CA.Organization},
-			Country:       []string{config.Values.TLS.CA.Country},
-			Province:      []string{config.Values.TLS.CA.Province},
-			Locality:      []string{config.Values.TLS.CA.Locality},
-			StreetAddress: []string{config.Values.TLS.CA.StreetAddress},
-			PostalCode:    []string{config.Values.TLS.CA.PostalCode},
+			Organization:  []string{config.Globals.TLS.CA.Organization},
+			Country:       []string{config.Globals.TLS.CA.Country},
+			Province:      []string{config.Globals.TLS.CA.Province},
+			Locality:      []string{config.Globals.TLS.CA.Locality},
+			StreetAddress: []string{config.Globals.TLS.CA.StreetAddress},
+			PostalCode:    []string{config.Globals.TLS.CA.PostalCode},
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(10, 0, 0),

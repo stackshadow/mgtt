@@ -1,21 +1,29 @@
 package cli
 
 import (
+	"encoding/base64"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/alecthomas/kong"
 	"github.com/rs/zerolog/log"
+	"gitlab.com/mgtt/internal/mgtt-plugins/acl"
+	"gitlab.com/mgtt/internal/mgtt-plugins/auth"
 	"gitlab.com/mgtt/internal/mgtt/broker"
 	"gitlab.com/mgtt/internal/mgtt/config"
+	"gitlab.com/mgtt/internal/mgtt/plugin"
 	"gitlab.com/mgtt/internal/mgtt/server"
 	"gitlab.com/stackshadow/qommunicator/v2/pkg/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Common holds common stuff
 type Common struct {
 	// Debug will enable debug mode
-	Config string `help:"Enable debug mode." short:"c"   default:"./mgtt.conf"`
+	Config string `help:"Enable debug mode." short:"c" default:""`
+
+	Password string `help:"password to bcrypt" short:"p"`
 }
 
 // CLI is the overall cli-struct
@@ -43,8 +51,20 @@ func init() {
 		},
 	)
 
-	// load the config
-	config.MustLoad(cliData.Config)
+	// plugins
+	acl.Init()
+	auth.Init()
+
+	// config
+	configAsJSON, _ := os.LookupEnv("CONFIG_JSON")
+	config.MustLoadFromFile(cliData.Config)
+	config.MustLoadFromString(configAsJSON)
+	configChanged := plugin.CallOnPluginConfig(config.Globals.Plugins) // inform all plugins about the config change
+	config.ApplyDefaults()
+	config.ApplyLog()
+	if configChanged {
+		config.MustSave()
+	}
 
 	// print version
 	log.Info().
@@ -57,13 +77,22 @@ func Run() {
 
 	var err error
 
+	// username / password
+	if cliData.Password != "" {
+		var bcryptedData []byte
+		bcryptedData, err = bcrypt.GenerateFromPassword([]byte(cliData.Password), bcrypt.DefaultCost)
+		base64String := base64.StdEncoding.EncodeToString(bcryptedData)
+		fmt.Print(base64String)
+		os.Exit(0)
+	}
+
 	// TLS
-	if config.Values.TLS.CA.File != "" {
+	if config.Globals.TLS.CA.File != "" {
 		server.MustCreateCA()
 	}
 
 	// Cert
-	if config.Values.TLS.Cert.File != "" {
+	if config.Globals.TLS.Cert.File != "" {
 		server.MustCreateCert()
 	}
 

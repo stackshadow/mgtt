@@ -1,9 +1,12 @@
-# run it with nix-shell build/shell.nix
+# run it with nix-shell build/nix/badge.nix
 
-{ pkgs ? import <nixpkgs> { }
-, version
-}:
+{ version ? "development" }:
 let
+  # reproducable build
+  nixpkgs = fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/9344233ab1cea59c3461c5cedde6a08abb89e6ea.tar.gz";
+  };
+  pkgs = import nixpkgs { };
   lib = pkgs.lib;
   inherit (lib) sourceByRegex;
 
@@ -51,6 +54,8 @@ pkgs.mkShell {
     }
     cyclo() {
       nix-shell ${gobadgeSource}/shell.nix --command cyclo
+      value=$(cat cyclo.out.gobadge | grep Average | cut -d':' -f2 | sed -e 's/\s*//')
+      gobadge-cli --value-min=18.0 --value-max=0.01 --label=gocylco --value=$value --file-name=./gocyclo.svg
     }
     sec() {
       gosec -color=false -no-fail -severity medium ./... > gosec.out.gobadge

@@ -7,14 +7,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type pluginConfig struct {
-	Plugins struct {
-		ACL struct {
-			New    []pluginConfigUser          `yaml:"new,omitempty"`
-			Anonym bool                        `yaml:"anonym"`
-			Users  map[string]pluginConfigUser `yaml:"users"`
-		} `yaml:"acl"`
-	} `yaml:"plugins"`
+type pluginConfigStruct struct {
+	Enable bool                        `yaml:"enable"`
+	New    []pluginConfigUser          `yaml:"new,omitempty"`
+	Anonym bool                        `yaml:"anonym"`
+	Users  map[string]pluginConfigUser `yaml:"users,omitempty"`
 }
 
 type pluginConfigUser struct {
@@ -32,4 +29,4 @@ func (user *pluginConfigUser) PasswordSet(newPassword string) (err error) {
 }
 
 var mutex sync.Mutex
-var config *pluginConfig = &pluginConfig{}
+var pluginConfig pluginConfigStruct = pluginConfigStruct{}

@@ -1,7 +1,10 @@
-{ system ? builtins.currentSystem
-, pkgs ? import <nixpkgs> { inherit system; }
-}:
+{ system ? builtins.currentSystem }:
 let
+  # reproducable build
+  nixpkgs = fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/9344233ab1cea59c3461c5cedde6a08abb89e6ea.tar.gz";
+  };
+  pkgs = import nixpkgs { };
   lib = pkgs.lib;
   callPackage = lib.callPackageWith (pkgs // pkgs.lib);
   inherit (lib) sourceByRegex;
@@ -11,10 +14,12 @@ let
 
   # the binary
   binary = callPackage ./build/nix/package.nix {
+    inherit pkgs;
     version = packageVersion;
   };
 
   dockerImage = callPackage ./build/nix/docker.nix {
+    inherit pkgs;
     inherit binary;
     version = "dev";
   };
@@ -34,4 +39,5 @@ in
   # $(nix-build -A docker) | docker load
   docker = dockerImage;
 
+  module = import ./build/nix/module.nix;
 }

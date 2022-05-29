@@ -11,9 +11,15 @@ import (
 func OnPublishRequest(clientID string, username string, topic string) (accepted bool) {
 	var err error
 
-	allowed := checkACL(clientID, username, topic, "w")
+	// check global permission
+	allowedGlobally := checkACL(clientID, "_global", topic, "w")
+
+	// check for specific username
+	allowed := checkACL(clientID, username, topic, "w") || allowedGlobally
 
 	if allowed == false {
+		log.Warn().Str("topic", topic).Msg("Not allowed")
+
 		err = clientlist.PublishToClient(
 			clientID,
 			"$SYS/self/error",

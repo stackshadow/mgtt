@@ -57,7 +57,7 @@ func mustTLSConfig(CA, Cert, Key string) (cfg *tls.Config) {
 	if CA != "" {
 		// Read in the cert file
 
-		clientCABytes, err = ioutil.ReadFile(CA)
+		clientCABytes, err = ioutil.ReadFile(CA) //#nosec
 		utils.PanicOnErr(err)
 
 		// Append our cert to the system pool

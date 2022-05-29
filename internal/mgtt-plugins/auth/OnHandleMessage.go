@@ -15,6 +15,5 @@ func OnHandleMessage(originClientID string, topic string, payload []byte) (handl
 		go publishOwnUserName(originClientID)
 	}
 
-	handled = true
 	return
 }

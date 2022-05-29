@@ -26,7 +26,7 @@ func (suite *TestSuite) BeforeTest(suiteName, testName string) {
 	if err == nil {
 		os.Remove(testName + ".bolt")
 	}
-	Open(testName + ".bolt")
+	MustOpen(testName + ".bolt")
 }
 
 func (suite *TestSuite) AfterTest(suiteName, testName string) {

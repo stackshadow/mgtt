@@ -11,23 +11,20 @@ import (
 const (
 	testConfigFile = `# Auth-plugin config-file
 
-plugins:
-  acl:
+# uncomment this to enable anonym-login
+# anonym: true
 
-    # uncomment this to enable anonym-login
-    # anonym: true
-
-    # use this to create a new user
-    new:
-      - username: first
-        password: firstsecret
-        groups:
-          - auth
-          - debugging
-      - username: second
-        password: secondsecret
-        groups:
-          - debugging
+# use this to create a new user
+new:
+  - username: first
+    password: firstsecret
+    groups:
+      - auth
+      - debugging
+  - username: second
+    password: secondsecret
+    groups:
+      - debugging
 `
 )
 
